@@ -108,7 +108,7 @@
               </a>
               <ul class="menu-sub">
                 <li class="menu-item">
-                  <a href="?c=Pagos" class="menu-link">
+                  <a href="?c=ventas" class="menu-link">
                     <div data-i18n="Account">ventas</div>
                   </a>
                 </li>
@@ -123,7 +123,7 @@
 
 
               <li class="menu-item">
-                  <a href="?c=Eventos" class="menu-link" >
+                  <a href="?c=caja" class="menu-link" >
                     <div data-i18n="Basic">Caja</div>
                   </a>
                 </li>

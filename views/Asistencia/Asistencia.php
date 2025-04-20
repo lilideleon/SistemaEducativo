@@ -7,13 +7,9 @@ if ($_SESSION['TipoUsuario'] == '') {
     print "<script>
         window.location='?c=Login'; 
     </script>";
-} else if ($_SESSION['TipoUsuario'] == 2) {
+} else if ($_SESSION['TipoUsuario'] == 1) {
     require 'views/Content/sidebar.php'; 
-} else if ($_SESSION['TipoUsuario'] == 3) {
-    require 'views/Content/sidebar2.php'; 
-} else if ($_SESSION['TipoUsuario'] == 4) {
-    require 'views/Content/sidebar3.php'; 
-}
+} 
 ?>
 
 <style>

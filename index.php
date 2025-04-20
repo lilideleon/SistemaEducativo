@@ -7,13 +7,11 @@
 	require_once "controllers/Menu.php";
 	require_once "controllers/Usuarios.php";
 	require_once "controllers/Productos.php";
-	require_once "controllers/Pagos.php";
-	require_once "controllers/Servicios.php";
+	require_once "controllers/ventas.php";
 	require_once "controllers/Notificaciones.php";
 	require_once "controllers/Multas.php";
 	require_once "controllers/Asistencia.php";
-	require_once "controllers/Eventos.php";
-	require_once "controllers/Rptporservicio.php";
+	require_once "controllers/caja.php";
 	require_once "controllers/Categorias.php";
 	require_once "controllers/Despieces.php";
 	
