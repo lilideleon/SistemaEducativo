@@ -55,6 +55,22 @@ if ($_SESSION['TipoUsuario'] == '') {
                     </form>
                 </div>
             </div>
+
+            <!-- Card para mostrar el estado actual -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>📊 Estado Actual de la Caja</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Monto Inicial:</strong> Q<span id="estadoMontoInicial">0.00</span></p>
+                    <p><strong>Total Ingresos:</strong> Q<span id="estadoIngresos">0.00</span></p>
+                    <p><strong>Total Egresos:</strong> Q<span id="estadoEgresos">0.00</span></p>
+                    <p><strong>Saldo Actual:</strong> Q<span id="estadoSaldo">0.00</span></p>
+                </div>
+            </div>
+
+
+
         </div>
 
         <!-- Cierre de Caja -->

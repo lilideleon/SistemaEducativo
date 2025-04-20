@@ -30,7 +30,7 @@
 				$Ejecuta->setHora(date("H:i:s"));
 				$Ejecuta->setAuditXML(json_encode([
 					"fecha" => date("Y-m-d H:i:s"),
-					"usuario" => $_SESSION['Usuario']
+					"usuario" => $_SESSION['Codigo']
 				]));
 
 				$facturaId = $Ejecuta->insertarFactura();
@@ -58,7 +58,7 @@
 				$Ejecuta->setPrecioVenta($_POST['PrecioVenta']);
 				$Ejecuta->setAuditXML(json_encode([
 					"fecha" => date("Y-m-d H:i:s"),
-					"usuario" => $_SESSION['Usuario']
+					"usuario" => $_SESSION['Codigo']
 				]));
 
 				$Ejecuta->insertarDetalleFacturaYDescontar();
