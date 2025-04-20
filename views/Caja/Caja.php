@@ -123,33 +123,58 @@ if ($_SESSION['TipoUsuario'] == '') {
 
 <script>
     function aperturarCaja() {
-        const montoInicial = document.getElementById('montoInicial').value;
-        if (montoInicial === '' || montoInicial < 0) {
-            alert('Por favor, ingrese un monto inicial válido.');
+        var montoInicial = document.getElementById("montoInicial").value;
+
+        if (montoInicial <= 0) {
+            alertify.error("El monto inicial debe ser mayor que cero.");
             return;
         }
-        alert(`Caja aperturada con Q${montoInicial}.`);
-        // Aquí puedes agregar la lógica para guardar el monto inicial en el servidor
+
+        $.ajax({
+            url: "?c=Caja&a=aperturarCaja",
+            type: "POST",
+            data: { montoInicial: montoInicial },
+            success: function(response) {
+                var data = JSON.parse(response);
+                
+                alertify.success(data.message);
+                if (data.status === "success") {
+                    document.getElementById("aperturaCajaForm").reset();
+                }
+            },
+            error: function() {
+                alertify.error("Error al aperturar la caja.");
+  
+            }
+        });
     }
 
-    function cerrarCaja() {
-        const billetes200 = parseInt(document.getElementById('billetes200').value) || 0;
-        const billetes100 = parseInt(document.getElementById('billetes100').value) || 0;
-        const billetes50 = parseInt(document.getElementById('billetes50').value) || 0;
-        const billetes20 = parseInt(document.getElementById('billetes20').value) || 0;
-        const billetes10 = parseInt(document.getElementById('billetes10').value) || 0;
-        const billetes5 = parseInt(document.getElementById('billetes5').value) || 0;
-        const monedas1 = parseInt(document.getElementById('monedas1').value) || 0;
-        const monedas050 = parseFloat(document.getElementById('monedas050').value) || 0;
-        const monedas025 = parseFloat(document.getElementById('monedas025').value) || 0;
 
-        const total = (billetes200 * 200) + (billetes100 * 100) + (billetes50 * 50) +
-                      (billetes20 * 20) + (billetes10 * 10) + (billetes5 * 5) +
-                      (monedas1 * 1) + (monedas050 * 0.50) + (monedas025 * 0.25);
+    //metodo para insertar un detalle a la caja
 
-        alert(`El total en caja es Q${total.toFixed(2)}.`);
-        // Aquí puedes agregar la lógica para guardar el cierre de caja en el servidor
+    function insertarDetalleCaja() {
+        var cajaId = document.getElementById("cajaId").value;
+        var denominacion = document.getElementById("denominacion").value;
+        var cantidad = document.getElementById("cantidad").value;
+        var total = document.getElementById("total").value;
+
+        $.ajax({
+            url: "?c=Caja&a=insertarDetalleCaja",
+            type: "POST",
+            data: { cajaId: cajaId, denominacion: denominacion, cantidad: cantidad, total: total },
+            success: function(response) {
+                var data = JSON.parse(response);
+                alert(data.message);
+                if (data.status === "success") {
+                    document.getElementById("detalleCajaForm").reset();
+                }
+            },
+            error: function() {
+                alertify.error("Error al insertar el detalle de la caja.");
+            }
+        });
     }
+
 </script>
 
 <?php
