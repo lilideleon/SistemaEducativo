@@ -114,99 +114,136 @@
 		
 
 
-
 		
 
+	public function Tabla()
+	{
+		$Conexion = new ClaseConexion();
+		$ConexionSql = $Conexion->CrearConexion();
 
+		$sTabla = "factura";
+		$aColumnas = array("Id", "Fecha", "Hora", "ClienteId", "Total", "Estado");
+		$sIndexColumn = "Id";
 
-		public function Tabla()
-		{
-			$Conexion = new ClaseConexion();
-			$ConexionSql = $Conexion->CrearConexion();
-
-			$sTabla = "factura";
-			$aColumnas = array("Id", "Fecha", "Hora", "ClienteId", "Total", "Estado");
-			$sIndexColumn = "Id";
-
-			$sLimit = "";
-			if (isset($_GET['iDisplayStart']) && $_GET['iDisplayLength'] != '-1') {
-				$sLimit = "LIMIT " . $_GET['iDisplayStart'] . ", " . $_GET['iDisplayLength'];
-			}
-
-			$sOrder = "";
-			if (isset($_GET['iSortCol_0'])) {
-				$sOrder = "ORDER BY  ";
-				for ($i = 0; $i < intval($_GET['iSortingCols']); $i++) {
-					if ($_GET['bSortable_' . intval($_GET['iSortCol_' . $i])] == "true") {
-						$sOrder .= $aColumnas[intval($_GET['iSortCol_' . $i])] . " " . $_GET['sSortDir_' . $i] . ", ";
-					}
-				}
-				$sOrder = substr_replace($sOrder, "", -2);
-			}
-
-			$sWhere = "";
-			if ($_GET['sSearch'] != "") {
-				$sWhere = "WHERE (";
-				for ($i = 0; $i < count($aColumnas); $i++) {
-					$sWhere .= $aColumnas[$i] . " LIKE '%" . $_GET['sSearch'] . "%' OR ";
-				}
-				$sWhere = substr_replace($sWhere, "", -3);
-				$sWhere .= ')';
-			}
-
-			$sQuery = "
-				SELECT SQL_CALC_FOUND_ROWS " . implode(", ", $aColumnas) . "
-				FROM $sTabla
-				$sWhere
-				$sOrder
-				$sLimit
-			";
-
-			//echo $sQuery;
-
-			$rResult = $ConexionSql->prepare($sQuery);
-			$rResult->execute();
-
-			$output = array(
-				"sEcho" => intval($_GET['sEcho']),
-				"iTotalRecords" => $rResult->rowCount(),
-				"iTotalDisplayRecords" => $rResult->rowCount(),
-				"aaData" => array()
-			);
-
-			while ($aRow = $rResult->fetch(PDO::FETCH_ASSOC)) {
-				$row = array();
-				foreach ($aColumnas as $col) {
-					if ($col === "Estado") {
-						// Mostrar texto según el valor del Estado
-						$row[] = $aRow[$col] == 1
-							? '<span class="badge bg-success">Activo</span>'
-							: '<span class="badge bg-danger">Inactivo</span>';
-					} elseif ($col === "ClienteId" && $aRow[$col] == 1) {
-						// Mostrar texto "Cliente General" si el cliente es 1
-						$row[] = '<span class="badge bg-info">Cliente General</span>';
-					} else {
-						$row[] = $aRow[$col];
-					}
-				}
-
-				// Agregar botones de Editar y Eliminar
-				$row[] = '
-					<button class="btn btn-warning btn-sm" onclick="DatosFactura(' . $aRow['Id'] . ')">
-						<i class="fa fa-eye"></i> Ver
-					</button>
-					<button class="btn btn-danger btn-sm" onclick="EliminarFactura(' . $aRow['Id'] . ')">
-						<i class="fa fa-trash"></i> Eliminar
-					</button>
-				';
-
-				$output['aaData'][] = $row;
-			}
-
-			echo json_encode($output);
+		$sLimit = "";
+		if (isset($_GET['iDisplayStart']) && $_GET['iDisplayLength'] != '-1') {
+			$sLimit = "LIMIT " . intval($_GET['iDisplayStart']) . ", " . intval($_GET['iDisplayLength']);
 		}
 
+		$sOrder = "";
+		if (isset($_GET['iSortCol_0'])) {
+			$sOrder = "ORDER BY Id DESC, "; // Ordenamos por Id por defecto y luego por las columnas solicitadas
+			for ($i = 0; $i < intval($_GET['iSortingCols']); $i++) {
+				if ($_GET['bSortable_' . intval($_GET['iSortCol_' . $i])] == "true") {
+					$sOrder .= $aColumnas[intval($_GET['iSortCol_' . $i])] . " " . $_GET['sSortDir_' . $i] . ", ";
+				}
+			}
+			$sOrder = rtrim($sOrder, ", "); // Eliminar la coma final
+		} else {
+			$sOrder = "ORDER BY Id DESC"; // Orden por defecto si no se solicita otro
+		}
 
+		$sWhere = "";
+		if (!empty($_GET['sSearch'])) {
+			$sWhere = "WHERE (";
+			for ($i = 0; $i < count($aColumnas); $i++) {
+				$sWhere .= $aColumnas[$i] . " LIKE '%" . $_GET['sSearch'] . "%' OR ";
+			}
+			$sWhere = rtrim($sWhere, " OR ");
+			$sWhere .= ')';
+		}
+
+		// Consulta para obtener los datos paginados y filtrados
+		$sQuery = "
+			SELECT SQL_CALC_FOUND_ROWS " . implode(", ", $aColumnas) . "
+			FROM $sTabla
+			$sWhere
+			$sOrder
+			$sLimit
+		";
+
+		$rResult = $ConexionSql->prepare($sQuery);
+		$rResult->execute();
+		$aResult = $rResult->fetchAll(PDO::FETCH_ASSOC);
+
+		// Consulta para obtener el total de registros filtrados
+		$sQueryFiltrado = "SELECT FOUND_ROWS()";
+		$rResultFiltrado = $ConexionSql->prepare($sQueryFiltrado);
+		$rResultFiltrado->execute();
+		$iFilteredTotal = $rResultFiltrado->fetchColumn();
+
+		// Consulta para obtener el total de registros sin filtrar
+		$sQueryTotal = "SELECT COUNT(" . $sIndexColumn . ") FROM $sTabla";
+		$rResultTotal = $ConexionSql->prepare($sQueryTotal);
+		$rResultTotal->execute();
+		$iTotal = $rResultTotal->fetchColumn();
+
+		$output = array(
+			"sEcho" => intval($_GET['sEcho']),
+			"iTotalRecords" => $iTotal,
+			"iTotalDisplayRecords" => $iFilteredTotal,
+			"aaData" => array()
+		);
+
+		foreach ($aResult as $aRow) {
+			$row = array();
+			foreach ($aColumnas as $col) {
+				if ($col === "Estado") {
+					$row[] = $aRow[$col] == 1
+						? '<span class="badge bg-success">Activo</span>'
+						: '<span class="badge bg-danger">Inactivo</span>';
+				} elseif ($col === "ClienteId" && $aRow[$col] == 1) {
+					$row[] = '<span class="badge bg-info">Cliente General</span>';
+				} else {
+					$row[] = $aRow[$col];
+				}
+			}
+
+			// Agregar botones de Editar y Eliminar
+			$row[] = '
+				<button class="btn btn-warning btn-sm" onclick="DatosFactura(' . $aRow['Id'] . ')">
+					<i class="fa fa-eye"></i> Ver
+				</button>
+				<button class="btn btn-danger btn-sm" onclick="AnularFactura(' . $aRow['Id'] . ')">
+					<i class="fa fa-trash"></i> Anular
+				</button>
+			';
+
+			$output['aaData'][] = $row;
+		}
+
+		echo json_encode($output);
+	}
+
+	public function AnularFactura() {
+            $Ejecuta = new Ventas_model();
+
+            try {
+                // Obtener datos desde POST
+                $idFactura = $_POST['IdFactura'];
+                $auditXML = json_encode([
+                    "fecha" => date("Y-m-d H:i:s"),
+                    "usuario" => $_SESSION['Usuario']
+                ]);
+
+                // Llamar al método del modelo
+                $resultado = $Ejecuta->anularFactura($idFactura, $auditXML);
+
+                if ($resultado) {
+                    $response['success'] = true;
+                    $response['msj'] = 'Factura anulada exitosamente.';
+                } else {
+                    $response['success'] = false;
+                    $response['msj'] = 'Error al anular la factura.';
+                }
+            } catch (Exception $e) {
+                $response['success'] = false;
+                $response['msj'] = 'Error al anular la factura: ' . $e->getMessage();
+            }
+
+            header('Content-Type: application/json');
+            echo json_encode($response);
+        }
 	}
 
 

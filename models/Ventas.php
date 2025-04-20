@@ -205,6 +205,27 @@
             }
         }
 
+        // MÉTODO PARA ANULAR UNA FACTURA USANDO PROCEDIMIENTO ALMACENADO
+        public function anularFactura($idFactura, $auditXML) {
+            try {
+                $this->ConexionSql = $this->Conexion->CrearConexion();
+                $this->SentenciaSql = "CALL AnularFactura(?, ?)";
+                $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
+
+                $this->Procedure->bindParam(1, $idFactura, PDO::PARAM_INT);
+                $this->Procedure->bindParam(2, $auditXML, PDO::PARAM_STR);
+
+                $this->Procedure->execute();
+
+                return true; // Indicar que la operación fue exitosa
+            } catch (Exception $e) {
+                echo "ERROR AL ANULAR FACTURA: " . $e->getMessage();
+                return false; // Indicar que hubo un error
+            } finally {
+                $this->Conexion->CerrarConexion();
+            }
+        }
+
         //FIN DE LA LOGICA
 	}
 ?>

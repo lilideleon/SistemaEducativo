@@ -12,7 +12,7 @@
               <span class="app-brand-logo demo">
 
               </span>
-              <span class="app-brand-text demo menu-text fw-bolder ms-2">RAPICOMIDA.</span>
+              <h3>DON FRANCO</h3>
             </a>
 
             <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">

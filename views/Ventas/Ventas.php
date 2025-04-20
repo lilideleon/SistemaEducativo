@@ -243,6 +243,35 @@
             }
         });
     }
+
+    function AnularFactura(idFactura) {
+        alertify.confirm(
+            'Confirmación',
+            '¿Está seguro de que desea anular esta factura?',
+            function() {
+                $.ajax({
+                    url: '?c=ventas&a=AnularFactura',
+                    type: 'POST',
+                    data: { IdFactura: idFactura },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            alertify.success(response.msj); // Mostrar mensaje de éxito con Alertify
+                            $('#Tabla_Ventas').DataTable().ajax.reload(); // Recargar la tabla
+                        } else {
+                            alertify.error('Error: ' + response.msj); // Mostrar mensaje de error con Alertify
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alertify.error('Error al realizar la solicitud: ' + error); // Mostrar mensaje de error con Alertify
+                    }
+                });
+            },
+            function() {
+                alertify.error('Acción cancelada'); // Mostrar mensaje de cancelación con Alertify
+            }
+        );
+    }
 </script>
 
 <? 
