@@ -58,7 +58,7 @@ class Compras_model
         $this->SentenciaSql = "SELECT idProducto, Nombre FROM productos WHERE Nombre like ?";
         $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
         $this->Procedure->execute(['%' . $nombreProducto . '%']);
-        return $this->Procedure->fetch(PDO::FETCH_ASSOC);
+        return $this->Procedure->fetchAll(PDO::FETCH_ASSOC); // Cambiar a fetchAll
     }
 
 

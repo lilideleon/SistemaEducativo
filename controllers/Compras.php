@@ -52,13 +52,13 @@ class ComprasController {
     //se le pasa el nombre del producto y se obtiene el idProducto y el nombre
     
     
-    public function ObtenerProducto() {
-        $Ejecuta = new Compras_model();
-        $nombreProducto = $_POST['nombreProducto'];
-        $result = $Ejecuta->ObtenerProducto($nombreProducto);
-        header('Content-Type: application/json');
-        echo json_encode($result);
-    }
+   public function ObtenerProducto() {
+    $Ejecuta = new Compras_model();
+    $nombreProducto = $_POST['nombreProducto'];
+    $result = $Ejecuta->ObtenerProducto($nombreProducto);
+    header('Content-Type: application/json');
+    echo json_encode($result);
+}
 
 
     public function Tabla()
@@ -147,9 +147,7 @@ class ComprasController {
                 <button class="btn btn-info btn-sm" onclick="VerDetallesCompra(' . $aRow['Id'] . ')">
                     <i class="fa fa-eye"></i> Detalles
                 </button>
-                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#EditarCompraModal" onclick="DatosCompra(' . $aRow['Id'] . ')">
-                    <i class="fa fa-edit"></i> Editar
-                </button>
+   
                 <button class="btn btn-danger btn-sm" onclick="EliminarCompra(' . $aRow['Id'] . ')">
                     <i class="fa fa-trash"></i> Eliminar
                 </button>

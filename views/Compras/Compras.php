@@ -146,49 +146,7 @@ if ($_SESSION['TipoUsuario'] == '') {
     </div>
 </div>
 
-<!-- MODAL PARA EDITAR COMPRA -->
-<div class="modal fade" id="EditarCompraModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Editar Compra</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="EditarCompraForm">
-                    <input type="hidden" name="Id" id="EditarId">
-                    <div class="mb-3">
-                        <label for="EditarFecha" class="form-label">Fecha:</label>
-                        <input type="date" id="EditarFecha" name="Fecha" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="EditarHora" class="form-label">Hora:</label>
-                        <input type="time" id="EditarHora" name="Hora" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="EditarProveedor" class="form-label">Proveedor:</label>
-                        <select id="EditarProveedor" name="Proveedor" class="form-control" required>
-                            <!-- Opciones cargadas dinámicamente -->
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="EditarUsuarioId" class="form-label">Usuario:</label>
-                        <input type="text" id="EditarUsuarioId" name="UsuarioId" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="EditarTotal" class="form-label">Total:</label>
-                        <input type="number" id="EditarTotal" name="Total" class="form-control" step="0.01" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="EditarObservaciones" class="form-label">Observaciones:</label>
-                        <textarea id="EditarObservaciones" name="Observaciones" class="form-control"></textarea>
-                    </div>
-                    <button type="button" class="btn btn-primary" onclick="ActualizarCompra()">Actualizar</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <script type="text/javascript" src="js/Custom/Compras.js"></script>
 <script>
@@ -237,7 +195,11 @@ if ($_SESSION['TipoUsuario'] == '') {
         const row = document.createElement('tr');
 
         row.innerHTML = `
-            <td><input type="text" class="form-control" name="ProductoId[]" placeholder="Producto" required></td>
+            <td>
+                <select class="form-control chosen-select" name="ProductoId[]" required>
+                    <option value="">Seleccione un producto</option>
+                </select>
+            </td>
             <td><input type="number" class="form-control" name="Cantidad[]" placeholder="Cantidad" required onchange="ActualizarSubtotal(this)"></td>
             <td><input type="number" class="form-control" name="PrecioUnitario[]" placeholder="Precio Unitario" step="0.01" required onchange="ActualizarSubtotal(this)"></td>
             <td><input type="number" class="form-control" name="Subtotal[]" placeholder="Subtotal" step="0.01" readonly></td>
@@ -245,6 +207,30 @@ if ($_SESSION['TipoUsuario'] == '') {
         `;
 
         tableBody.appendChild(row);
+
+        // Initialize Chosen plugin for the new select element
+        $(row).find('.chosen-select').chosen();
+
+        // Fetch product options dynamically
+        fetch('?c=Compras&a=ObtenerProducto', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ nombreProducto: '' }) // Optionally, you can pass a search term here
+        })
+        .then(response => response.json())
+       .then(data => {
+    const select = row.querySelector('select[name="ProductoId[]"]');
+    data.forEach(producto => {
+        const option = document.createElement('option');
+        option.value = producto.idProducto; // Usar la clave correcta del objeto
+        option.textContent = producto.Nombre; // Usar la clave correcta del objeto
+        select.appendChild(option);
+    });
+    $(select).trigger('chosen:updated');
+})
+        .catch(error => console.error('Error fetching products:', error));
     }
 
     function EliminarFilaDetalle(button) {
