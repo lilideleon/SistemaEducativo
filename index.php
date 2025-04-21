@@ -14,6 +14,7 @@
 	require_once "controllers/caja.php";
 	require_once "controllers/Categorias.php";
 	require_once "controllers/Despieces.php";
+	require_once "controllers/Compras.php";
 	
 	
 	if(isset($_GET['c']))

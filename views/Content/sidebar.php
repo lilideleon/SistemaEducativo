@@ -93,8 +93,14 @@
                     <div data-i18n="Without menu">Inventario</div>
                   </a>
                 </li>
+              </ul>
 
-
+              <ul class="menu-sub">
+                <li class="menu-item">
+                  <a href="?c=Compras" class="menu-link">
+                    <div data-i18n="Without menu">Compras</div>
+                  </a>
+                </li>
               </ul>
 
 
