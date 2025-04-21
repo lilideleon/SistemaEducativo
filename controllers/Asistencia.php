@@ -122,10 +122,10 @@
 			$sTabla = "asistencia a inner join usuarios b on b.IdUsuario = a.Usuarioid";
 
 			/* Array que contiene los nombres de las columnas de la tabla (para DataTables) */
-			$aColumnas = array( "Nombre", "Fecha", "Hora", "Tipo");
+			$aColumnas = array( "Id", "Nombre", "Fecha", "Hora", "Tipo"); // Se agregó "Id" al inicio
 
-			/* columna indexada (no es estrictamente necesario para esta consulta, pero se mantiene por consistencia) */
-			$sIndexColumn = "a.Id"; // Asumo que 'IdAsistencia' es la llave primaria de la tabla 'asistencia'
+			/* columna indexada */
+			$sIndexColumn = "a.Id"; // Ahora la columna de índice es 'a.Id'
 
 			// Paginacion
 			$sLimit = "";
@@ -139,7 +139,7 @@
 			$sOrder = "ORDER BY a.Id DESC"; // Orden por defecto
 			if ( isset( $_GET['iSortCol_0'] ) )
 			{
-				$sOrder = "ORDER BY  ";
+				$sOrder = "ORDER BY  a.id DESC,"; // Orden por defecto
 				for ( $i=0 ; $i<intval( $_GET['iSortingCols'] ) ; $i++ )
 				{
 					if ( $_GET[ 'bSortable_'.intval($_GET['iSortCol_'.$i]) ] == "true" )
@@ -190,7 +190,7 @@
 			//Obtener datos para mostrar SQL queries
 			$sQuery = "
 				SELECT SQL_CALC_FOUND_ROWS
-					a.Id as IdAsistencia, -- Incluimos el ID de asistencia
+					a.Id,
 					CONCAT(b.PrimerNombre,' ',b.SegundoNombre,' ',b.PrimerApellido,' ',b.SegundoApellido) as Nombre,
 					a.Fecha,
 					a.Hora,
@@ -200,7 +200,6 @@
 				$sOrder
 				$sLimit
 			";
-
 
 			//echo $sQuery;
 			$rResult = $ConexionSql->prepare($sQuery);
@@ -245,8 +244,9 @@
 					$row[] = $aRow[ $aColumnas[$i] ];
 				}
 
-				$ProductId = $aRow['Id'];
+				$ProductId = $aRow['Id']; // Ahora obtenemos el ID de la columna 'Id'
 
+				$row[] = '<td><center><a href="#" data-toggle="modal" data-target="#CodeBar" onclick="PrintCode('.$ProductId.')"><i class="fa fa-print"></i></a></center></td>';
 
 				$output['aaData'][] = $row;
 			}

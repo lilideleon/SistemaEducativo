@@ -40,7 +40,7 @@ if ($_SESSION['TipoUsuario'] == '') {
 <div class="content-wrapper">
     <div class="row move-left move-down make-larger">
         <!-- Registro de Asistencia -->
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
                     <h5>🕒 Registro de Asistencia</h5>
@@ -65,7 +65,7 @@ if ($_SESSION['TipoUsuario'] == '') {
         </div>
 
         <!-- Historial de Asistencia -->
-        <div class="col-md-6">
+        <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
                     <h5>📋 Historial de Asistencia</h5>
@@ -74,6 +74,7 @@ if ($_SESSION['TipoUsuario'] == '') {
                     <table class="table" id="Tabla_Asistencia">
                         <thead>
                             <tr>
+                                <th>Id</th>
                                 <th>Nombre</th>
                                 <th>Fecha</th>
                                 <th>Hora</th>
@@ -140,7 +141,7 @@ if ($_SESSION['TipoUsuario'] == '') {
                 }
             },
             "lengthMenu": [[5, 10, 20, 25, 50, 100], [5, 10, 20, 25, 50, 100]],
-            "iDisplayLength": 15,
+            "iDisplayLength": 10,
             "bProcessing": true,
             "bServerSide": true,
             dom: 'Blfrtip',
