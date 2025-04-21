@@ -173,20 +173,29 @@ if ($_SESSION['TipoUsuario'] == '') {
     //metodo para insertar un detalle a la caja
 
     function insertarDetalleCaja() {
-        var cajaId = document.getElementById("cajaId").value;
-        var denominacion = document.getElementById("denominacion").value;
-        var cantidad = document.getElementById("cantidad").value;
-        var total = document.getElementById("total").value;
+        // Obtener los valores del formulario
+        var cajaId = $("#cajaId").val();
+        var denominacion = $("#denominacion").val();
+        var cantidad = parseInt($("#cantidad").val());
 
+        if (!cajaId || !denominacion || isNaN(cantidad) || cantidad <= 0) {
+            alertify.error("Todos los campos son obligatorios y la cantidad debe ser mayor a cero.");
+            return;
+        }
+
+        // Enviar los datos al servidor
         $.ajax({
             url: "?c=Caja&a=insertarDetalleCaja",
             type: "POST",
-            data: { cajaId: cajaId, denominacion: denominacion, cantidad: cantidad, total: total },
+            data: { cajaId: cajaId, denominacion: denominacion, cantidad: cantidad },
             success: function(response) {
                 var data = JSON.parse(response);
-                alert(data.message);
+
                 if (data.status === "success") {
-                    document.getElementById("detalleCajaForm").reset();
+                    alertify.success(data.message);
+                    $("#detalleCajaForm")[0].reset();
+                } else {
+                    alertify.error(data.message);
                 }
             },
             error: function() {
@@ -222,9 +231,78 @@ if ($_SESSION['TipoUsuario'] == '') {
         });
     }
 
+    function cerrarCaja() {
+        // Recopilar los datos de billetes y monedas
+        var detalles = [];
+
+        // Billetes
+        detalles.push({ denominacion: 200, cantidad: parseInt($("#billetes200").val()), total: 200 * parseInt($("#billetes200").val()) });
+        detalles.push({ denominacion: 100, cantidad: parseInt($("#billetes100").val()), total: 100 * parseInt($("#billetes100").val()) });
+        detalles.push({ denominacion: 50, cantidad: parseInt($("#billetes50").val()), total: 50 * parseInt($("#billetes50").val()) });
+        detalles.push({ denominacion: 20, cantidad: parseInt($("#billetes20").val()), total: 20 * parseInt($("#billetes20").val()) });
+        detalles.push({ denominacion: 10, cantidad: parseInt($("#billetes10").val()), total: 10 * parseInt($("#billetes10").val()) });
+        detalles.push({ denominacion: 5, cantidad: parseInt($("#billetes5").val()), total: 5 * parseInt($("#billetes5").val()) });
+
+        // Monedas
+        detalles.push({ denominacion: 1, cantidad: parseInt($("#monedas1").val()), total: 1 * parseInt($("#monedas1").val()) });
+        detalles.push({ denominacion: 0.5, cantidad: parseInt($("#monedas050").val()), total: 0.5 * parseInt($("#monedas050").val()) });
+        detalles.push({ denominacion: 0.25, cantidad: parseInt($("#monedas025").val()), total: 0.25 * parseInt($("#monedas025").val()) });
+
+        // Obtener monto final desde el saldo actual
+        var montoFinal = parseFloat($("#estadoSaldo").text());
+
+        if (isNaN(montoFinal) || montoFinal <= 0) {
+            alertify.error("El monto final debe ser un número mayor que cero.");
+            return;
+        }
+
+        // Validar si la caja está abierta
+        $.ajax({
+            url: "?c=Caja&a=obtenerIdCajaActual",
+            type: "GET",
+            success: function(response) {
+                var data = JSON.parse(response);
+
+                if (data.status === "error") {
+                    alertify.error(data.message);
+                    return;
+                }
+
+                if (data.idCaja.Estado !== "Abierta") {
+                    alertify.error("La caja ya está cerrada.");
+                    return;
+                }
+
+                // Enviar los datos al servidor
+                $.ajax({
+                    url: "?c=Caja&a=cerrarCaja",
+                    type: "POST",
+                    data: { detalles: detalles, montoFinal: montoFinal },
+                    success: function(response) {
+                        var data = JSON.parse(response);
+
+                        if (data.status === "success") {
+                            alertify.success(data.message);
+                            $("#cierreCajaForm")[0].reset();
+                            actualizarEstadoCaja();
+                        } else {
+                            alertify.error(data.message);
+                        }
+                    },
+                    error: function() {
+                        alertify.error("Error al cerrar la caja.");
+                    }
+                });
+            },
+            error: function() {
+                alertify.error("Error al validar el estado de la caja.");
+            }
+        });
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
         actualizarEstadoCaja();
-        setInterval(actualizarEstadoCaja, 2000); // refresca cada 2 segundos
+        setInterval(actualizarEstadoCaja, 3000); // refresca cada 2 segundos
     });
 </script>
 

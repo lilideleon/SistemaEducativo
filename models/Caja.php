@@ -56,19 +56,17 @@ class Caja_model
 
     // Métodos para CajaDetalle
 
-    // Método para insertar un detalle de caja
+    // Método para insertar un detalle de caja basado en el procedimiento almacenado
     public function InsertarCajaDetalle()
     {
         try {
             $this->ConexionSql = $this->Conexion->CrearConexion();
-            $this->SentenciaSql = "CALL InsertarCajaDetalle(?, ?, ?, ?, ?)";
+            $this->SentenciaSql = "CALL InsertarCajaDetalle(?, ?, ?)";
             $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
 
-            $this->Procedure->bindParam(1, $this->getCajaId());
-            $this->Procedure->bindParam(2, $this->getFacturaId());
-            $this->Procedure->bindParam(3, $this->getMonto());
-            $this->Procedure->bindParam(4, $this->getTipoMovimiento());
-            $this->Procedure->bindParam(5, $this->getDescripcion());
+            $this->Procedure->bindParam(1, $this->getCajaId(), PDO::PARAM_INT);
+            $this->Procedure->bindParam(2, $this->getDenominacion(), PDO::PARAM_STR);
+            $this->Procedure->bindParam(3, $this->getCantidad(), PDO::PARAM_INT);
 
             $this->Procedure->execute();
         } catch (Exception $e) {
@@ -78,6 +76,39 @@ class Caja_model
         }
     }
 
+        // Method to fetch the current state of the cash register
+    public function obtenerEstadoActualCaja()
+    {
+        try {
+            $this->ConexionSql = $this->Conexion->CrearConexion();
+            $this->SentenciaSql = "SELECT a.Fecha, MAX(a.MontoInicial) AS MontoInicial, SUM(b.Total) AS TotalIngresos, 0 AS TotalEgresos, MAX(a.MontoInicial) + SUM(b.Total) AS SaldoActual FROM Caja a INNER JOIN factura b ON b.Fecha = a.Fecha WHERE DATE(a.Fecha) = CURDATE() GROUP BY a.Fecha";
+            $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
+            $this->Procedure->execute();
+
+            return $this->Procedure->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            echo "ERROR AL OBTENER ESTADO ACTUAL DE LA CAJA: " . $e->getMessage();
+        } finally {
+            $this->Conexion->CerrarConexion();
+        }
+    }
+
+    // Method to get the current Caja ID
+    public function obtenerIdCajaActual()
+    {
+        try {
+            $this->ConexionSql = $this->Conexion->CrearConexion();
+            $this->SentenciaSql = "SELECT id, Estado FROM Caja WHERE DATE(Fecha) = CURDATE()";
+            $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
+            $this->Procedure->execute();
+
+            return $this->Procedure->fetch(PDO::FETCH_ASSOC); // Return the full associative array (id and Estado)
+        } catch (Exception $e) {
+            echo "ERROR AL OBTENER ID DE LA CAJA ACTUAL: " . $e->getMessage();
+        } finally {
+            $this->Conexion->CerrarConexion();
+        }
+    }
 
 
     // Getters y Setters para Caja
@@ -127,18 +158,20 @@ class Caja_model
     public function getTotal() { return $this->Total; }
     public function setTotal($Total) { $this->Total = $Total; return $this; }
 
-    // Method to fetch the current state of the cash register
-    public function obtenerEstadoActualCaja()
+    // Method to call the updated CerrarCaja stored procedure
+    public function cerrarCaja($cajaId, $montoFinal)
     {
         try {
             $this->ConexionSql = $this->Conexion->CrearConexion();
-            $this->SentenciaSql = "SELECT a.Fecha, MAX(a.MontoInicial) AS MontoInicial, SUM(b.Total) AS TotalIngresos, 0 AS TotalEgresos, MAX(a.MontoInicial) + SUM(b.Total) AS SaldoActual FROM Caja a INNER JOIN factura b ON b.Fecha = a.Fecha WHERE DATE(a.Fecha) = CURDATE() GROUP BY a.Fecha";
+            $this->SentenciaSql = "CALL CerrarCaja(?, ?)";
             $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
-            $this->Procedure->execute();
 
-            return $this->Procedure->fetch(PDO::FETCH_ASSOC);
+            $this->Procedure->bindParam(1, $cajaId, PDO::PARAM_INT);
+            $this->Procedure->bindParam(2, $montoFinal, PDO::PARAM_STR);
+
+            $this->Procedure->execute();
         } catch (Exception $e) {
-            echo "ERROR AL OBTENER ESTADO ACTUAL DE LA CAJA: " . $e->getMessage();
+            echo "ERROR AL CERRAR CAJA: " . $e->getMessage();
         } finally {
             $this->Conexion->CerrarConexion();
         }
