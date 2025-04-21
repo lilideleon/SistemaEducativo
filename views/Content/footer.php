@@ -1,6 +1,5 @@
-         <!-- MODAL PARA ELIMINAR -->
-
-         <div class="modal fade none-border" id="Cerrar">
+        <!-- MODAL PARA ELIMINAR -->
+        <div class="modal fade none-border" id="Cerrar">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -8,40 +7,33 @@
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                     </div>
                     <div>
-                    <br>
-                    <div class="col">
-                        <div class="col-8"><h5>Confirme si desea salir ?</h5></div> 
-                    </div>
-                    <hr>
-            
-                    <div class="modal-footer">
-                        <button type="button"  class="btn btn-secondary waves-effect" data-dismiss="modal">CANCELAR</button>
-                        <button type="button" onclick="CerrarSesion()" class="btn btn-danger save-event waves-effect waves-light">CERRAR</button>
+                        <br>
+                        <div class="col">
+                            <div class="col-8"><h5>Confirme si desea salir ?</h5></div>
+                        </div>
+                        <hr>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary waves-effect" data-dismiss="modal">CANCELAR</button>
+                            <button type="button" onclick="CerrarSesion()" class="btn btn-danger save-event waves-effect waves-light">CERRAR</button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div></div>
+        </div>
 
         <script type="text/javascript">
-            function CerrarSesion ()
-            {   
+            function CerrarSesion() {   
                 $.ajax({
                     url: '?c=Login&a=Destruir',
                     type: 'post',
-                    /*data: {
-                        'Cui': Cui
-                    },*/
                     dataType: 'json',
-                    success: function(data) 
-                    {
-                       window.location = '?c=Login';
+                    success: function(data) {
+                        window.location = '?c=Login';
                     },
-                    error: function(jqXHR, textStatus, error) 
-                    {
-                        alert('Error'+error);
+                    error: function(jqXHR, textStatus, error) {
+                        alert('Error' + error);
                     }
                 });
-                 
             }
         </script>
 
@@ -49,7 +41,7 @@
             var resizefunc = [];
         </script>
 
-       <!-- jQuery  -->
+        <!-- jQuery -->
         <script src="res/assets/js/jquery.min.js"></script>
         <script src="res/assets/js/bootstrap.bundle.min.js"></script>
         <script src="res/assets/js/detect.js"></script>
@@ -64,6 +56,7 @@
         <!-- Required datatable js -->
         <script src="res/plugins/datatables/jquery.dataTables.min.js"></script>
         <script src="res/plugins/datatables/dataTables.bootstrap4.min.js"></script>
+
         <!-- Buttons examples -->
         <script src="res/plugins/datatables/dataTables.buttons.min.js"></script>
         <script src="res/plugins/datatables/buttons.bootstrap4.min.js"></script>
@@ -83,65 +76,33 @@
         <!-- Selection table -->
         <script src="res/plugins/datatables/dataTables.select.min.js"></script>
 
-         <!-- App js -->
+        <!-- App js -->
         <script src="res/assets/js/jquery.core.js"></script>
         <script src="res/assets/js/jquery.app.js"></script>
 
+        <!-- Chosen plugin -->
         <script type="text/javascript" src="res/plugins/chosen/chosen.jquery.js"></script>
         <script type="text/javascript" src="res/plugins/gofrendi.chosen.ajaxify.js"></script>
 
-        <!-- include alertify script -->
-        
-       <!--  <link rel="stylesheet" href="res/plugins/Alertify/css/alertify.min.css" /> -->
-        <script src="res/plugins/Alertify/alertify.min.js"></script> 
+        <!-- Alertify -->
+        <script src="res/plugins/Alertify/alertify.min.js"></script>
 
-        <!-- JavaScript
-        <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
- -->
-        <!-- Chart JS -->
-        <!--<script src="res/plugins/chart.js/chart.min.js"></script>
-       <script src="res/assets/pages/chartjs.init.js"></script> -->
+        <!-- Core JS -->
+        <script src="assets/vendor/libs/popper/popper.js"></script>
+        <script src="assets/vendor/js/bootstrap.js"></script>
+        <script src="assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+        <script src="assets/vendor/js/menu.js"></script>
 
+        <!-- Vendors JS -->
+        <script src="assets/vendor/libs/apex-charts/apexcharts.js"></script>
 
+        <!-- Main JS -->
+        <script src="assets/js/main.js"></script>
 
+        <!-- Page JS -->
+        <script src="assets/js/dashboards-analytics.js"></script>
 
-<!-- autocomplete 
-
-    <script src="assets/autocomplete/jquery/jquery-3.3.1.min.js"></script>    
-    <script src="assets/autocomplete/popper/popper.min.js"></script>            
-    <script src="assets/autocomplete/bootstrap4/js/bootstrap.min.js"></script>   -->
-      
-    <!--    Plugin fuzzy autocomplete  -->
-    <script src="assets/autocomplete/plugins/fuzzyComplete/js/fuse.min.js"></script>  
-    <script src="assets/autocomplete/plugins/fuzzyComplete/js/fuzzycomplete.js"></script>
-
-
-     <!-- Core JS -->
-      <!-- build:js assets/vendor/js/core.js -->
-
-      <script src="assets/vendor/libs/popper/popper.js"></script>
-      <script src="assets/vendor/js/bootstrap.js"></script>
-      <script src="assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-  
-      <script src="assets/vendor/js/menu.js"></script>
-      <!-- endbuild -->
-  
-      <!-- Vendors JS -->
-      <script src="assets/vendor/libs/apex-charts/apexcharts.js"></script>
-  
-      <!-- Main JS -->
-      <script src="assets/js/main.js"></script>
-  
-      <!-- Page JS -->
-      <script src="assets/js/dashboards-analytics.js"></script>
-  
-      
-            <!-- FullCalendar JS -->
-
-            <link href='assets/calendar/css/fullcalendar.css' rel='stylesheet' />
-<link href='assets/calendar/css/fullcalendar.print.css' rel='stylesheet' media='print' />
-
-<script src='assets/calendar/js/fullcalendar.js' type="text/javascript"></script>
-
-    </body>
-</html>
+        <!-- FullCalendar JS -->
+        <link href="assets/calendar/css/fullcalendar.css" rel="stylesheet" />
+        <link href="assets/calendar/css/fullcalendar.print.css" rel="stylesheet" media="print" />
+        <script src="assets/calendar/js/fullcalendar.js" type="text/javascript"></script>
