@@ -46,7 +46,17 @@
 			}
 		}
 
+		// Method to fetch the current state of the cash register
+        public function obtenerEstadoActualCaja() {
+            try {
+                $caja = new Caja_model();
+                $estadoActual = $caja->obtenerEstadoActualCaja();
 
+                echo json_encode(array("status" => "success", "data" => $estadoActual));
+            } catch (Exception $e) {
+                echo json_encode(array("status" => "error", "message" => "Error al obtener el estado actual de la caja: " . $e->getMessage()));
+            }
+        }
 			
 	}
 		

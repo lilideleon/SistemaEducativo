@@ -62,6 +62,7 @@ if ($_SESSION['TipoUsuario'] == '') {
                     <h5>📊 Estado Actual de la Caja</h5>
                 </div>
                 <div class="card-body">
+                    <p><strong>Fecha:</strong> <span id="Fecha">0.00</span></p>
                     <p><strong>Monto Inicial:</strong> Q<span id="estadoMontoInicial">0.00</span></p>
                     <p><strong>Total Ingresos:</strong> Q<span id="estadoIngresos">0.00</span></p>
                     <p><strong>Total Egresos:</strong> Q<span id="estadoEgresos">0.00</span></p>
@@ -138,6 +139,8 @@ if ($_SESSION['TipoUsuario'] == '') {
 </div>
 
 <script>
+
+
     function aperturarCaja() {
         var montoInicial = document.getElementById("montoInicial").value;
 
@@ -156,6 +159,7 @@ if ($_SESSION['TipoUsuario'] == '') {
                 alertify.success(data.message);
                 if (data.status === "success") {
                     document.getElementById("aperturaCajaForm").reset();
+                    actualizarEstadoCaja();
                 }
             },
             error: function() {
@@ -191,6 +195,37 @@ if ($_SESSION['TipoUsuario'] == '') {
         });
     }
 
+    function actualizarEstadoCaja() {
+
+        $.ajax({
+            url: "?c=Caja&a=obtenerEstadoActualCaja",
+            type: "GET",
+            success: function(response) {
+
+                var data = JSON.parse(response);
+
+                if (data.status === "success") {
+                    var estado = data.data;
+                    document.getElementById("Fecha").textContent = estado.Fecha;
+                    document.getElementById("estadoMontoInicial").textContent = parseFloat(estado.MontoInicial).toFixed(2);
+                    document.getElementById("estadoIngresos").textContent = parseFloat(estado.TotalIngresos).toFixed(2);
+                    document.getElementById("estadoEgresos").textContent = parseFloat(estado.TotalEgresos).toFixed(2);
+                    document.getElementById("estadoSaldo").textContent = parseFloat(estado.SaldoActual).toFixed(2);
+
+                } else {
+                    alertify.error(data.message);
+                }
+            },
+            error: function() {
+                alertify.error("Error al actualizar el estado de la caja.");
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        actualizarEstadoCaja();
+        setInterval(actualizarEstadoCaja, 2000); // refresca cada 2 segundos
+    });
 </script>
 
 <?php

@@ -52,51 +52,7 @@ class Caja_model
         }
     }
 
-    // Método para actualizar una caja
-    public function ActualizarCaja()
-    {
-        try {
-            $this->ConexionSql = $this->Conexion->CrearConexion();
-            $this->SentenciaSql = "CALL ActualizarCaja(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
-
-            $this->Procedure->bindParam(1, $this->getId());
-            $this->Procedure->bindParam(2, $this->getUsuarioId());
-            $this->Procedure->bindParam(3, $this->getFecha());
-            $this->Procedure->bindParam(4, $this->getHoraApertura());
-            $this->Procedure->bindParam(5, $this->getHoraCierre());
-            $this->Procedure->bindParam(6, $this->getMontoInicial());
-            $this->Procedure->bindParam(7, $this->getMontoFinal());
-            $this->Procedure->bindParam(8, $this->getMontoSistema());
-            $this->Procedure->bindParam(9, $this->getDiferencia());
-            $this->Procedure->bindParam(10, $this->getAuditXML());
-
-            $this->Procedure->execute();
-        } catch (Exception $e) {
-            echo "ERROR AL ACTUALIZAR CAJA: " . $e->getMessage();
-        } finally {
-            $this->Conexion->CerrarConexion();
-        }
-    }
-
-    // Método para eliminar lógicamente una caja
-    public function EliminarCaja()
-    {
-        try {
-            $this->ConexionSql = $this->Conexion->CrearConexion();
-            $this->SentenciaSql = "CALL EliminarCaja(?, ?)";
-            $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
-
-            $this->Procedure->bindParam(1, $this->getId());
-            $this->Procedure->bindParam(2, $this->getAuditXML());
-
-            $this->Procedure->execute();
-        } catch (Exception $e) {
-            echo "ERROR AL ELIMINAR CAJA: " . $e->getMessage();
-        } finally {
-            $this->Conexion->CerrarConexion();
-        }
-    }
+  
 
     // Métodos para CajaDetalle
 
@@ -122,46 +78,7 @@ class Caja_model
         }
     }
 
-    // Método para actualizar un detalle de caja
-    public function ActualizarCajaDetalle()
-    {
-        try {
-            $this->ConexionSql = $this->Conexion->CrearConexion();
-            $this->SentenciaSql = "CALL ActualizarCajaDetalle(?, ?, ?, ?, ?)";
-            $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
 
-            $this->Procedure->bindParam(1, $this->getId());
-            $this->Procedure->bindParam(2, $this->getCajaId());
-            $this->Procedure->bindParam(3, $this->getDenominacion());
-            $this->Procedure->bindParam(4, $this->getCantidad());
-            $this->Procedure->bindParam(5, $this->getTotal());
-
-            $this->Procedure->execute();
-        } catch (Exception $e) {
-            echo "ERROR AL ACTUALIZAR DETALLE DE CAJA: " . $e->getMessage();
-        } finally {
-            $this->Conexion->CerrarConexion();
-        }
-    }
-
-    // Método para eliminar lógicamente un detalle de caja
-    public function EliminarCajaDetalle()
-    {
-        try {
-            $this->ConexionSql = $this->Conexion->CrearConexion();
-            $this->SentenciaSql = "CALL EliminarCajaDetalle(?, ?)";
-            $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
-
-            $this->Procedure->bindParam(1, $this->getId());
-            $this->Procedure->bindParam(2, $this->getAuditXML());
-
-            $this->Procedure->execute();
-        } catch (Exception $e) {
-            echo "ERROR AL ELIMINAR DETALLE DE CAJA: " . $e->getMessage();
-        } finally {
-            $this->Conexion->CerrarConexion();
-        }
-    }
 
     // Getters y Setters para Caja
     public function getId() { return $this->Id; }
@@ -209,5 +126,22 @@ class Caja_model
 
     public function getTotal() { return $this->Total; }
     public function setTotal($Total) { $this->Total = $Total; return $this; }
+
+    // Method to fetch the current state of the cash register
+    public function obtenerEstadoActualCaja()
+    {
+        try {
+            $this->ConexionSql = $this->Conexion->CrearConexion();
+            $this->SentenciaSql = "SELECT a.Fecha, MAX(a.MontoInicial) AS MontoInicial, SUM(b.Total) AS TotalIngresos, 0 AS TotalEgresos, MAX(a.MontoInicial) + SUM(b.Total) AS SaldoActual FROM Caja a INNER JOIN factura b ON b.Fecha = a.Fecha WHERE DATE(a.Fecha) = CURDATE() GROUP BY a.Fecha";
+            $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
+            $this->Procedure->execute();
+
+            return $this->Procedure->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            echo "ERROR AL OBTENER ESTADO ACTUAL DE LA CAJA: " . $e->getMessage();
+        } finally {
+            $this->Conexion->CerrarConexion();
+        }
+    }
 }
 
