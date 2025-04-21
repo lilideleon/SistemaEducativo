@@ -123,6 +123,9 @@ class Usuarios_model
         }
     }
 
+
+
+    
     // Método para validar un usuario
     public function ValidarUsuario($User)
     {
@@ -140,6 +143,26 @@ class Usuarios_model
         } catch (Exception $e) {
             echo "ERROR AL VALIDAR USUARIO: " . $e->getMessage();
             return null;
+        } finally {
+            $this->Conexion->CerrarConexion();
+        }
+    }
+
+    // Método para registrar la asistencia de un usuario
+    public function RegistrarAsistencia($Usuarioid, $Tipo, $AuditXML)
+    {
+        try {
+            $this->ConexionSql = $this->Conexion->CrearConexion();
+            $this->SentenciaSql = "CALL InsertarAsistenciaActual(?, ?, ?)";
+            $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
+
+            $this->Procedure->bindParam(1, $Usuarioid);
+            $this->Procedure->bindParam(2, $Tipo);
+            $this->Procedure->bindParam(3, $AuditXML);
+
+            $this->Procedure->execute();
+        } catch (Exception $e) {
+            echo "ERROR AL REGISTRAR ASISTENCIA: " . $e->getMessage();
         } finally {
             $this->Conexion->CerrarConexion();
         }

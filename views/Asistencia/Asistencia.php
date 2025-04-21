@@ -48,8 +48,8 @@ if ($_SESSION['TipoUsuario'] == '') {
                 <div class="card-body">
                     <form id="asistenciaForm">
                         <div class="mb-3">
-                            <label for="empleadoDpi" class="form-label">DPI del Empleado:</label>
-                            <input type="text" id="empleadoDpi" class="form-control" placeholder="Ingrese el DPI del empleado" required>
+                            <label for="Nombre" class="form-label">DPI del Empleado:</label>
+                            <input type="text" id="Nombre" class="form-control" placeholder="Nombre del empleado" disabled>
                         </div>
                         <div class="mb-3">
                             <label for="tipoAsistencia" class="form-label">Tipo de Registro:</label>
@@ -71,10 +71,9 @@ if ($_SESSION['TipoUsuario'] == '') {
                     <h5>📋 Historial de Asistencia</h5>
                 </div>
                 <div class="card-body">
-                    <table class="table">
+                    <table class="table" id="Tabla_Asistencia">
                         <thead>
                             <tr>
-                                <th>DPI</th>
                                 <th>Nombre</th>
                                 <th>Fecha</th>
                                 <th>Hora</th>
@@ -94,34 +93,83 @@ if ($_SESSION['TipoUsuario'] == '') {
 <script>
     // Función para registrar asistencia
     function registrarAsistencia() {
-        const dpi = document.getElementById('empleadoDpi').value;
-        const tipo = document.getElementById('tipoAsistencia').value;
+        const tipoAsistencia = document.getElementById('tipoAsistencia').value;
 
-        if (!dpi || !tipo) {
-            alert('Por favor, complete todos los campos.');
-            return;
-        }
+        // Cambiar el tipo de contenido a application/x-www-form-urlencoded para que PHP lo procese correctamente
+        $.ajax({
+            url: '?c=Asistencia&a=InsertarAsistencia',
+            type: 'POST',
+            data: {
+                Tipo: tipoAsistencia
+            },
+            success: function(data) {
+                if (data.success) {
+                    alertify.success(data.msj);
+                    // ajax reload a la tabla de asistencia
+                    $('#Tabla_Asistencia').DataTable().ajax.reload(); // false para no reiniciar la paginación
 
-        // Simulación de registro (puedes reemplazarlo con una llamada AJAX al servidor)
-        const fecha = new Date();
-        const fechaFormateada = fecha.toLocaleDateString();
-        const horaFormateada = fecha.toLocaleTimeString();
-
-        const nuevaFila = `
-            <tr>
-                <td>${dpi}</td>
-                <td>Nombre Ejemplo</td> <!-- Reemplazar con el nombre real del empleado -->
-                <td>${fechaFormateada}</td>
-                <td>${horaFormateada}</td>
-                <td>${tipo}</td>
-            </tr>
-        `;
-
-        document.getElementById('historialAsistencia').insertAdjacentHTML('beforeend', nuevaFila);
-
-        alert('Asistencia registrada con éxito.');
-        document.getElementById('asistenciaForm').reset();
+                } else {
+                    alertify.error(data.msj);
+                }
+            },
+            error: function(xhr, status, error) {
+                alertify.error('Error en la solicitud: ' + error);
+            }
+        });
     }
+
+    // Función opcional para recargar el historial de asistencia
+    function cargarHistorialAsistencia() {
+          var objetoDataTables_personal = $('#Tabla_Asistencia').DataTable({
+            "language": {
+                "emptyTable": "No hay datos disponibles en la tabla.",
+                "info": "Del _START_ al _END_ de _TOTAL_ ",
+                "infoEmpty": "Mostrando 0 registros de un total de 0.",
+                "infoFiltered": "(filtrados de un total de _MAX_ registros)",
+                "lengthMenu": "Mostrar _MENU_ registros",
+                "loadingRecords": "Cargando...",
+                "processing": "Procesando...",
+                "search": "Buscar:",
+                "searchPlaceholder": "Dato para buscar",
+                "zeroRecords": "No se han encontrado coincidencias.",
+                "paginate": {
+                    "first": "Primera",
+                    "last": "Última",
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                }
+            },
+            "lengthMenu": [[5, 10, 20, 25, 50, 100], [5, 10, 20, 25, 50, 100]],
+            "iDisplayLength": 15,
+            "bProcessing": true,
+            "bServerSide": true,
+            dom: 'Blfrtip',
+            buttons: ['copyHtml5', 'excelHtml5', 'csvHtml5', 'pdf'],
+            "sAjaxSource": "?c=Asistencia&a=Tabla"
+        });
+    }
+
+    // Función para obtener y mostrar el nombre del empleado
+    function obtenerNombreEmpleado() {
+        fetch('?c=Asistencia&a=ObtenerDatosUsuarioPorCodigo')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Colocar el nombre del empleado en el campo correspondiente
+                    const nombreEmpleado = `${data.data.PrimerNombre} ${data.data.SegundoNombre} ${data.data.PrimerApellido} ${data.data.SegundoApellido}`;
+                    document.getElementById('Nombre').value = nombreEmpleado;
+                } else {
+                    console.error('Error al obtener los datos del usuario:', data);
+                }
+            })
+            .catch(error => console.error('Error en la solicitud:', error));
+    }
+
+    // Llamar a la función cargarHistorialAsistencia al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        obtenerNombreEmpleado();
+        cargarHistorialAsistencia();
+    });
 </script>
 
 <?php

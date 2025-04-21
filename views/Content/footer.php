@@ -92,12 +92,12 @@
 
         <!-- include alertify script -->
         
-       <!--  <link rel="stylesheet" href="res/plugins/Alertify/css/alertify.min.css" />
-        <script src="res/plugins/alertify/alertify.min.js"></script> -->
+       <!--  <link rel="stylesheet" href="res/plugins/Alertify/css/alertify.min.css" /> -->
+        <script src="res/plugins/Alertify/alertify.min.js"></script> 
 
-        <!-- JavaScript -->
+        <!-- JavaScript
         <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
-
+ -->
         <!-- Chart JS -->
         <!--<script src="res/plugins/chart.js/chart.min.js"></script>
        <script src="res/assets/pages/chartjs.init.js"></script> -->
@@ -135,11 +135,7 @@
       <!-- Page JS -->
       <script src="assets/js/dashboards-analytics.js"></script>
   
-      <!-- Place this tag in your head or just before your close body tag. -->
-      <script async defer src="https://buttons.github.io/buttons.js"></script>
-
-      <script src="js/JsBarcode.all.min.js"></script>
-      <script src="js/jquery.PrintArea.js"></script>
+      
             <!-- FullCalendar JS -->
 
             <link href='assets/calendar/css/fullcalendar.css' rel='stylesheet' />

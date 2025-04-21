@@ -33,13 +33,7 @@
         <!-- Multi Item Selection examples -->
         <link href="res/plugins/datatables/select.bootstrap4.min.css" rel="stylesheet" type="text/css" />
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
-      rel="stylesheet"
-    />
+
 
     <!-- Icons. Uncomment required icon fonts -->
     <link rel="stylesheet" href="assets/vendor/fonts/boxicons.css" />
@@ -77,15 +71,22 @@
 
         <link rel="stylesheet" type="text/css" href="res/plugins/chosen/chosen.min.css">
 
-        
+       <!-- 
         <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.rtl.min.css"/>
-        <!-- Default theme -->
+       
         <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/default.rtl.min.css"/>
-        <!-- Semantic UI theme -->
-        <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/semantic.rtl.min.css"/>
-        <!-- Bootstrap theme -->
-        <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.rtl.min.css"/>
         
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/semantic.rtl.min.css"/>
+ -->
+
+
+        <!-- Bootstrap theme -->
+        
+        <link rel="stylesheet" href="res/plugins/Alertify/css/alertify.rtl.min.css" />
+        <!-- Default theme -->
+        <link rel="stylesheet" href="res/plugins/Alertify/css/themes/default.rtl.min.css" />
+        <!-- Semantic UI theme -->
+     
         
         <!-- autocomplete -->
         <link rel="stylesheet" href="assets/autocomplete/bootstrap4/css/bootstrap.min.css">       
