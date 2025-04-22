@@ -144,19 +144,32 @@ class ComprasController {
                 : '<span class="badge bg-danger">Inactivo</span>';
 
             $row[] = '
-                <button class="btn btn-info btn-sm" onclick="VerDetallesCompra(' . $aRow['Id'] . ')">
-                    <i class="fa fa-eye"></i> Detalles
-                </button>
-   
-                <button class="btn btn-danger btn-sm" onclick="EliminarCompra(' . $aRow['Id'] . ')">
-                    <i class="fa fa-trash"></i> Eliminar
-                </button>
-                
-            ';
+                    <button class="btn btn-info btn-sm" onclick="VerDetallesCompra(' . $aRow['Id'] . ')">
+                        <i class="fa fa-eye"></i> Detalles
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="EliminarCompra(' . $aRow['Id'] . ')">
+                        <i class="fa fa-trash"></i> Eliminar
+                    </button>
+                ';
+
+
+
 
             $output['aaData'][] = $row;
         }
 
         echo json_encode($output);
     }
+
+    public function DetalleCompra() {
+        $modelo = new Compras_model();
+        $id = $_POST['compraId'];
+        $datos = $modelo->ObtenerCompraPorId($id);
+
+        header('Content-Type: application/json');
+        echo json_encode($datos);
+    }
+
+
+
 }

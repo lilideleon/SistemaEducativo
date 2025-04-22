@@ -62,4 +62,43 @@ class Compras_model
     }
 
 
+
+
+    public function ObtenerCompraPorId($idCompra) {
+        try {
+            $this->ConexionSql = $this->Conexion->CrearConexion();
+
+            $this->SentenciaSql = "SELECT 
+                                        c.Id,
+                                        c.Fecha,
+                                        c.Hora,
+                                        c.Proveedor,
+                                        c.UsuarioId,
+                                        c.Observaciones,
+                                        c.Estado,
+                                        c.Total,
+                                        d.ProductoId,
+                                        p.Nombre,
+                                        d.Cantidad,
+                                        d.Subtotal
+                                    FROM Compras c
+                                    INNER JOIN CompraDetalle d ON d.CompraId = c.Id
+                                    INNER JOIN Productos p ON p.IdProducto = d.ProductoId
+                                    WHERE c.Id = ?";
+
+            $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
+            $this->Procedure->bindParam(1, $idCompra, PDO::PARAM_INT);
+            $this->Procedure->execute();
+
+            return $this->Procedure->fetchAll(PDO::FETCH_OBJ);
+        } catch (Exception $e) {
+            echo "ERROR AL OBTENER INFORMACIÓN DE LA COMPRA: " . $e->getMessage();
+        } finally {
+            $this->Conexion->CerrarConexion();
+        }
+    }
+
+
+
+
 }

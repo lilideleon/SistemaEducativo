@@ -58,133 +58,90 @@
 
 
 <div class="content-wrapper">
-  <div class="row move-left move-down make-larger">
-    <!-- Basic -->
-    <div class="col-12 col-md-6 col-lg-11">
-      <div class="card mb-4">
-        <center>
-          <h3 class="card-header">Dashboard</h3>
-        </center>
-        <div class="card-body demo-vertical-spacing demo-only-element">
-          <div class="row">
-            <div class="col-lg-3 col-md-12 col-6 mb-4">
-              <div class="card">
-                <div class="card-body">
-                  <div class="card-title d-flex align-items-start justify-content-between">
-                    <div class="avatar flex-shrink-0">
-                      <img
-                        src="assets/img/icons/unicons/chart-success.png"
-                        alt="chart success"
-                        class="rounded"
-                      />
-                    </div>
-                    <div class="dropdown">
-                      <button
-                        class="btn p-0"
-                        type="button"
-                        id="cardOpt3"
-                        data-bs-toggle="dropdown"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                      >
-                        <i class="bx bx-dots-vertical-rounded"></i>
-                      </button>
-                      <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt3">
-                        <a class="dropdown-item" href="?c=Usuarios">Ver todos</a>
-                      </div>
-                    </div>
-                  </div>
-                  <span class="fw-semibold d-block mb-1">Usuarios</span>
-                  <h3 class="card-title mb-2" id="totalUsuarios"> </h3>
-                  <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i>total de usuarios</small>
-                </div>
-              </div>
+  <div class="container-fluid py-4">
+    <div class="row g-4">
+      <!-- Total Ventas -->
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="card shadow-sm border-0">
+          <div class="card-body text-center">
+            <div class="mb-2">
+              <img src="assets/img/icons/unicons/wallet-info.png" alt="Ventas" style="width:48px;">
             </div>
-
-            <div class="col-lg-3 col-md-12 col-6 mb-4">
-              <div class="card">
-                <div class="card-body">
-                  <div class="card-title d-flex align-items-start justify-content-between">
-                    <div class="avatar flex-shrink-0">
-                      <img
-                        src="assets/img/icons/unicons/wallet-info.png"
-                        alt="Credit Card"
-                        class="rounded"
-                      />
-                    </div>
-                    <div class="dropdown">
-                      <button
-                        class="btn p-0"
-                        type="button"
-                        id="cardOpt6"
-                        data-bs-toggle="dropdown"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                      >
-                        <i class="bx bx-dots-vertical-rounded"></i>
-                      </button>
-                      <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt6">
-                        <a class="dropdown-item" href="?c=Pagos">Ver mas detalles</a>
-                      </div>
-                    </div>
-                  </div>
-                  <span class="fw-semibold d-block mb-1">Ventas</span>
-                  <h3 class="card-title text-nowrap mb-1" id="totalpagosmensual"></h3>
-                  <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> total de ventas </small>
-                </div>
-              </div>
+            <h6 class="text-uppercase text-muted">Total Ventas</h6>
+            <h3 class="fw-bold mb-0" id="totalVentas">-</h3>
+            <small class="text-success"><i class="bx bx-up-arrow-alt"></i> Este mes</small>
+          </div>
+        </div>
+      </div>
+      <!-- Total Compras -->
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="card shadow-sm border-0">
+          <div class="card-body text-center">
+            <div class="mb-2">
+              <img src="assets/img/icons/unicons/chart-success.png" alt="Compras" style="width:48px;">
             </div>
+            <h6 class="text-uppercase text-muted">Total Compras</h6>
+            <h3 class="fw-bold mb-0" id="totalCompras">-</h3>
+            <small class="text-primary"><i class="bx bx-down-arrow-alt"></i> Este mes</small>
+          </div>
+        </div>
+      </div>
+      <!-- Usuarios Registrados -->
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="card shadow-sm border-0">
+          <div class="card-body text-center">
+            <div class="mb-2">
+              <img src="assets/img/icons/unicons/user.png" alt="Usuarios" style="width:48px;">
+            </div>
+            <h6 class="text-uppercase text-muted">Usuarios Registrados</h6>
+            <h3 class="fw-bold mb-0" id="totalUsuarios">-</h3>
+            <small class="text-info"><i class="bx bx-user"></i> Activos</small>
+          </div>
+        </div>
+      </div>
+      <!-- Productos en Stock -->
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="card shadow-sm border-0">
+          <div class="card-body text-center">
+            <div class="mb-2">
+              <img src="assets/img/icons/unicons/box.png" alt="Stock" style="width:48px;">
+            </div>
+            <h6 class="text-uppercase text-muted">Productos en Stock</h6>
+            <h3 class="fw-bold mb-0" id="totalStock">-</h3>
+            <small class="text-warning"><i class="bx bx-cube"></i> Disponibles</small>
           </div>
         </div>
       </div>
     </div>
+    <!-- Aquí puedes agregar más widgets o gráficas -->
   </div>
 </div>
 
-
-
 <script>
-  window.onload = function () 
-  { 
-      TotalUsuarios();
-      TotalPagosMensual ();
-  }
+window.onload = function () {
+  cargarDashboard();
+};
 
+function cargarDashboard() {
+  obtenerTotal('Menu&a=TotalVentas', '#totalVentas', 'Q. ');
+  obtenerTotal('Menu&a=TotalCompras', '#totalCompras', 'Q. ');
+  obtenerTotal('Menu&a=TotalUsuarios', '#totalUsuarios', '');
+  obtenerTotal('Menu&a=TotalStock', '#totalStock', '');
+}
 
-  //PAGINACION DE LA TABLA DE DATOS
-
-  function TotalUsuarios ()
-  {
-    $.ajax({
-        url: '?c=Menu&a=TotalUsuarios',
-        type: 'POST',
-        dataType: 'json',
-        success: function(data) {
-            console.log(data); 
-            $('#totalUsuarios').text(data[0]);
-        },
-        error: function(error) {
-            console.log("Hubo un error:", error);
-        }
-    });
-  }
-
-
-  function TotalPagosMensual ()
-  {
-    $.ajax({
-        url: '?c=Menu&a=TotalPagosMensual',
-        type: 'POST',
-        dataType: 'json',
-        success: function(data) {
-            console.log(data); 
-            $('#totalpagosmensual').text('Q. ' + data[0]);
-        },
-        error: function(error) {
-            console.log("Hubo un error:", error);
-        }
-    });
-  }
+function obtenerTotal(action, selector, prefix) {
+  $.ajax({
+    url: '?c=' + action,
+    type: 'POST',
+    dataType: 'json',
+    success: function(data) {
+      $(selector).text(prefix + (data[0] ?? '-'));
+    },
+    error: function() {
+      $(selector).text('-');
+    }
+  });
+}
 </script>
 
 <?

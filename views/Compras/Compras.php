@@ -146,6 +146,38 @@ if ($_SESSION['TipoUsuario'] == '') {
     </div>
 </div>
 
+<!-- MODAL PARA DETALLE DE COMPRA -->
+<!-- Modal -->
+<div class="modal fade" id="DetalleCompraModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detalle de la Compra</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="infoCompraCabecera"></div>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody id="DetalleCompraBody">
+            <!-- Aquí se llenarán los detalles dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+       <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="ImprimirDetalleCompra()">Imprimir</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+    </div>
+  </div>
+</div>
+
 
 
 <script type="text/javascript" src="js/Custom/Compras.js"></script>
@@ -318,6 +350,77 @@ if ($_SESSION['TipoUsuario'] == '') {
         $('#DetallesCompraTable tbody').empty(); // Vaciar las filas de la tabla de detalles
         $('#Total').val(''); // Reiniciar el total
     }
+
+   
+    // Mostrar el detalle de la compra en un modal
+
+    function VerDetallesCompra(compraId) {
+        $.ajax({
+            url: '?c=Compras&a=DetalleCompra',
+            type: 'POST',
+            data: { compraId: compraId },
+            dataType: 'json',
+            success: function (datos) {
+                console.log("Datos:", datos);
+
+                $('#DetalleCompraModal').modal('show');
+                $('#DetalleCompraBody').empty();
+
+                if (datos.length === 0) {
+                    $('#infoCompraCabecera').html('No se encontraron datos.');
+                    return;
+                }
+
+                // Tomamos la primera fila para la cabecera
+                const cabecera = datos[0];
+                let info = `<strong>ID:</strong> ${cabecera.Id}<br>`;
+                info += `<strong>Fecha:</strong> ${cabecera.Fecha}<br>`;
+                info += `<strong>Hora:</strong> ${cabecera.Hora}<br>`;
+
+                // si elproveedor es uno mostrarlo como "General"
+                if (cabecera.Proveedor === "1") {
+                    info += `<strong>Proveedor:</strong> General<br>`;
+                } else {
+                    info += `<strong>Proveedor:</strong> ${cabecera.Proveedor}<br>`;
+                }
+               
+
+                
+                info += `<strong>Usuario:</strong> ${cabecera.UsuarioId}<br>`;
+                info += `<strong>Total:</strong> Q${parseFloat(cabecera.Total).toFixed(2)}<br>`;
+                if (cabecera.Observaciones)
+                    info += `<strong>Observaciones:</strong> ${cabecera.Observaciones}<br>`;
+
+                $('#infoCompraCabecera').html(info);
+
+                // Llenar tabla con cada producto
+                datos.forEach(function (item) {
+                    $('#DetalleCompraBody').append(`
+                        <tr>
+                            <td>${item.Nombre}</td>
+                            <td>${item.Cantidad}</td>
+                            <td>Q ${parseFloat(item.Subtotal).toFixed(2)}</td>
+                        </tr>
+                    `);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+                alert('Error al obtener los detalles de la compra.');
+            }
+        });
+    }
+
+    // Función para imprimir el contenido del modal DetalleCompraModal
+function ImprimirDetalleCompra() {
+    var printContents = document.querySelector('#DetalleCompraModal .modal-content').innerHTML;
+    var originalContents = document.body.innerHTML;
+    document.body.innerHTML = printContents;
+    window.print();
+    document.body.innerHTML = originalContents;
+    location.reload(); // Recargar para restaurar eventos y estado
+}
+
 </script>
 
 <?php
