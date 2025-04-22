@@ -73,7 +73,7 @@ class Compras_model
                                         c.Fecha,
                                         c.Hora,
                                         c.Proveedor,
-                                        c.UsuarioId,
+                                        concat(u.PrimerNombre,' ',u.SegundoNombre,' ',U.PrimerApellido,' ',u.SegundoApellido) UsuarioId,
                                         c.Observaciones,
                                         c.Estado,
                                         c.Total,
@@ -84,6 +84,7 @@ class Compras_model
                                     FROM Compras c
                                     INNER JOIN CompraDetalle d ON d.CompraId = c.Id
                                     INNER JOIN Productos p ON p.IdProducto = d.ProductoId
+                                    INNER JOIN Usuarios u on u.Idusuario = c.UsuarioId
                                     WHERE c.Id = ?";
 
             $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
@@ -100,5 +101,41 @@ class Compras_model
 
 
 
+    public function AnularCompra($CompraId, $AuditXml)
+    {
+        try {
+            $this->ConexionSql = $this->Conexion->CrearConexion();
+
+            $this->SentenciaSql = "CALL AnularCompra(?, ?)";
+            $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
+
+            $this->Procedure->execute([$CompraId, $AuditXml]);
+        } catch (Exception $e) {
+            throw new Exception("Error al anular la compra: " . $e->getMessage());
+        } finally {
+            $this->Conexion->CerrarConexion();
+        }
+    }
+
+
+    //procesar la compra para aumentar 
+
+    
+
+        public function ProcesarCompra($CompraId, $AuditXml)
+        {
+            try {
+                $this->ConexionSql = $this->Conexion->CrearConexion();
+
+                $this->SentenciaSql = "CALL ProcesarCompraInventario(?, ?)";
+                $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
+
+                $this->Procedure->execute([$CompraId, $AuditXml]);
+            } catch (Exception $e) {
+                throw new Exception("Error al procesar la compra: " . $e->getMessage());
+            } finally {
+                $this->Conexion->CerrarConexion();
+            }
+        }
 
 }

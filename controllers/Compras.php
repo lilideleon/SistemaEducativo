@@ -24,7 +24,7 @@ class ComprasController {
                 $_POST['Fecha'],
                 $_POST['Hora'],
                 $_POST['Proveedor'],
-                $_POST['UsuarioId'],
+                $_SESSION['Codigo'],
                 $_POST['Total'],
                 $_POST['Observaciones'],
                 json_encode([
@@ -139,16 +139,28 @@ class ComprasController {
                 $row[] = $aRow['Proveedor'];
             }
             $row[] = number_format($aRow['Total'], 2);
-            $row[] = $aRow['Estado'] == 1
-                ? '<span class="badge bg-success">Activo</span>'
-                : '<span class="badge bg-danger">Inactivo</span>';
+
+            // Validamos si el estado es igual a 1 (Activo) o 0 (Inactivo) si es estado 3 es compra procesada
+
+            if ($aRow['Estado'] == 3) {
+                $row[] = '<span class="badge bg-success">Procesada</span>';
+            } else if ($aRow['Estado'] == 0) {
+                $row[] = '<span class="badge bg-danger">Anulada</span>';
+            } else if ($aRow['Estado'] == 1) {
+                $row[] = '<span class="badge bg-info">Activa</span>';
+            }
+           
 
             $row[] = '
                     <button class="btn btn-info btn-sm" onclick="VerDetallesCompra(' . $aRow['Id'] . ')">
-                        <i class="fa fa-eye"></i> Detalles
+                        <i class="fa fa-eye"></i> Info
                     </button>
                     <button class="btn btn-danger btn-sm" onclick="EliminarCompra(' . $aRow['Id'] . ')">
                         <i class="fa fa-trash"></i> Eliminar
+                    </button>
+
+                    <button class="btn btn-success btn-sm" onclick="ProcesarCompra(' . $aRow['Id'] . ')">
+                        <i class="fa fa-ban"></i> Procesar
                     </button>
                 ';
 
@@ -171,5 +183,53 @@ class ComprasController {
     }
 
 
+    public function AnularCompra() {
+        $Ejecuta = new Compras_model();
+
+        try {
+            $CompraId = $_POST['CompraId'];
+            $AuditXml = json_encode([
+                "fecha" => date("Y-m-d H:i:s"),
+                "usuario" => $_SESSION['Codigo'],
+                "accion" => "anulacion"
+            ]);
+
+            $Ejecuta->AnularCompra($CompraId, $AuditXml);
+
+            $response['success'] = true;
+            $response['msj'] = 'Compra anulada correctamente.';
+        } catch (Exception $e) {
+            $response['success'] = false;
+            $response['msj'] = 'Error al anular la compra: ' . $e->getMessage();
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode($response);
+    }
+
+    //procesar la compra para aumentar el inventario
+
+    public function ProcesarCompra() {
+        $Ejecuta = new Compras_model();
+
+        try {
+            $CompraId = $_POST['CompraId'];
+            $AuditXml = json_encode([
+                "fecha" => date("Y-m-d H:i:s"),
+                "usuario" => $_SESSION['Codigo'],
+                "accion" => "procesar"
+            ]);
+
+            $Ejecuta->ProcesarCompra($CompraId, $AuditXml);
+            $response['success'] = true;
+            $response['msj'] = 'Compra procesada correctamente.';
+        } catch (Exception $e) {
+            $response['success'] = false;
+            $response['msj'] = 'Error al procesar la compra: ' . $e->getMessage();
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode($response);
+    }
 
 }

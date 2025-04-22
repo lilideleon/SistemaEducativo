@@ -106,10 +106,7 @@ if ($_SESSION['TipoUsuario'] == '') {
                             <option value="1">General</option> <!-- Proveedor por defecto -->
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label for="UsuarioId" class="form-label">Usuario:</label>
-                        <input type="text" id="UsuarioId" name="UsuarioId" class="form-control" required>
-                    </div>
+
 
                     <!-- Tabla para los detalles de la compra -->
                     <div class="mb-3">
@@ -321,8 +318,7 @@ if ($_SESSION['TipoUsuario'] == '') {
             data: {
                 Fecha: $('#Fecha').val(),
                 Hora: $('#Hora').val(),
-                Proveedor: 1, // Proveedor general con ID 1
-                UsuarioId: $('#UsuarioId').val(),
+                Proveedor: 1, 
                 Total: $('#Total').val(),
                 Observaciones: $('#Observaciones').val(),
                 Detalles: JSON.stringify(detalles)
@@ -412,14 +408,68 @@ if ($_SESSION['TipoUsuario'] == '') {
     }
 
     // Función para imprimir el contenido del modal DetalleCompraModal
-function ImprimirDetalleCompra() {
-    var printContents = document.querySelector('#DetalleCompraModal .modal-content').innerHTML;
-    var originalContents = document.body.innerHTML;
-    document.body.innerHTML = printContents;
-    window.print();
-    document.body.innerHTML = originalContents;
-    location.reload(); // Recargar para restaurar eventos y estado
-}
+    function ImprimirDetalleCompra() {
+        var printContents = document.querySelector('#DetalleCompraModal .modal-content').innerHTML;
+        var originalContents = document.body.innerHTML;
+        document.body.innerHTML = printContents;
+        window.print();
+        document.body.innerHTML = originalContents;
+        location.reload(); // Recargar para restaurar eventos y estado
+    }
+
+
+    // Función para eliminar una compraq
+
+    function EliminarCompra(compraId) {
+
+        alertify.confirm('Eliminar Compra', '¿Está seguro de que desea eliminar esta compra?', function() {
+            $.ajax({
+                url: '?c=Compras&a=AnularCompra',
+                type: 'POST',
+                data: { CompraId: compraId },
+                success: function(response) {
+                    if (response.success) {
+                        alertify.success(response.msj);
+                        $('#Tabla_Compras').DataTable().ajax.reload(); // Recargar la tabla
+                    } else {
+                        alertify.error('Error: ' + response.msj);
+                    }
+                },
+                error: function(error) {
+                    console.error('Error al eliminar la compra:', error);
+                    alertify.error('Error al eliminar la compra.');
+                }
+            });
+        }, function() {
+            alertify.error('Cancelado');
+        });
+    }
+
+    // funcion para procesar la compra
+
+    function ProcesarCompra(compraId) {
+        alertify.confirm('Procesar Compra', '¿Está seguro de que desea procesar esta compra?', function() {
+            $.ajax({
+                url: '?c=Compras&a=ProcesarCompra',
+                type: 'POST',
+                data: { CompraId: compraId },
+                success: function(response) {
+                    if (response.success) {
+                        alertify.success(response.msj);
+                        $('#Tabla_Compras').DataTable().ajax.reload(); // Recargar la tabla
+                    } else {
+                        alertify.error('Error: ' + response.msj);
+                    }
+                },
+                error: function(error) {
+                    console.error('Error al procesar la compra:', error);
+                    alertify.error('Error al procesar la compra.');
+                }
+            });
+        }, function() {
+            alertify.error('Cancelado');
+        });
+    }
 
 </script>
 
