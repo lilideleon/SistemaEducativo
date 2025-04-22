@@ -1,224 +1,440 @@
-<? 
-    require 'views/Content/header.php'
+<?php
+require 'views/Content/header.php';
 ?>
-<body class="fixed-left">
-<!-- Begin page -->
-<div id="wrapper">
 
-    <?
-        include 'views/Content/toopbar.php';
-    ?>
+<?php
+if ($_SESSION['TipoUsuario'] == '') {
+    print "<script>
+        window.location='?c=Login'; 
+    </script>";
+} else if ($_SESSION['TipoUsuario'] == 1) {
+    require 'views/Content/sidebar.php';
+} else if ($_SESSION['TipoUsuario'] == 2) {
+    require 'views/Content/sidebar2.php';
+}
+?>
 
-    <!-- ========== Left Sidebar Start ========== -->
-    <div class="left side-menu">
-        <div class="sidebar-inner slimscrollleft">
+<style>
+    .move-left {
+        position: relative; 
+        left: 0; 
+    }
 
-            <!--- Sidemenu aqui va el menu -->
-                <? 
-                    if($_SESSION['TipoUsuario'] == '')
-                   {
-                        print "<script>
-                            window.location='?c=Login'; 
-                            </script>";
-                   }
-                   else if($_SESSION['TipoUsuario'] == 1)
-                   {
-                   // @session_start();
-                        require 'views/Content/sidebar.php'; 
-                            print "<script>
-                             console.log($TipoUsuario);
-                          </script>";
-                   }
-                   else if($_SESSION['TipoUsuario'] == 2)
-                   {
-                       require 'views/Content/sidebar2.php'; 
-                            print "<script>
-                             console.log($TipoUsuario);
-                          </script>";
-                   }
-                ?>
-            <!-- Sidebar -->
-            <div class="clearfix"></div>
-        </div>
+    .move-down {
+        margin-top: 15px;
+    }
 
-    </div>
-    <!-- Left Sidebar End -->
+    .make-larger {
+        width: 100%; 
+        max-width: 1950px;
+        height: auto;
+        max-height: 800px;
+    }
 
-    <!-- ============================================================== -->
-    <!-- Start right Content here -->
-    <!-- ============================================================== -->
-    <div class="content-page">
-        <!-- Start content -->
-        <div class="content">
-            <div class="container-fluid">
+    @media (min-width: 1024px) {
+        .move-left {
+            left: 28px;
+        }
+    }
 
-                <div class="row">
-                    <div class="col-xl-12">
-                        <div class="page-title-box">
-                        <h4><center>Reporte de ventas por Año/Mes/Semana/Dia</center></h4>
-                            <div class="clearfix"></div>
-                        </div>
-                    </div>
-                </div>
-                <!-- end row -->
-                <p></p>
-                
-                <div class="row">
-                <div class="col-xl-12">
-                    <div class="page-title-box">
-                        <div class="row">
-                            <div class="col-xl-12">
-                                <div class="page-title-box">
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <div class="card-box table-responsive">
+    .report-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+    }
 
-                                                <div class="box-header with-border">
-                                                 
-                                                   <div class="row">
-                                                    FECHA INICIO:
-                                                    <div class="col-xl-4 col-md-3">
-                                                    <input class="form-control" type="date" name="FechaInicio" id="FechaInicio">
-                                                    </div>
-                                                     FECHA FIN:
-                                                    <div class="col-xl-4 col-md-3">
-                                                    <input type="date" name="FechaFin" id="FechaFin" class="form-control">
-                                                    </div>
-                                                    &nbsp;&nbsp;
-                                                    <button class="btn btn-success" onclick="listar()"><i class="fa fa-eye"></i> Mostrar</button>
-                                                    </div>
-                                                  <div class="box-tools pull-right">
-                                                    
-                                                  </div>
-                                                </div>
+    .report-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
 
-                                                <br>
-                                                    
-                                                <div class="panel-body table-responsive" id="listadoregistros">
-                                                  <table id="tbllistado2" class="table table-striped table-bordered table-condensed table-hover">
-                                                    <thead>
-                                                      <th>Factura</th>
-                                                      <th>Fecha</th>
-                                                      <th>Cant</th>
-                                                      <th>Nombre</th>
-                                                      <th>Costo</th>
-                                                      <th>Venta</th>
-                                                      <th width="200px">Ganancia</th>
-                                                    </thead>
-                                                    <tbody>
-                                                    </tbody> 
-                                                    <tfoot>
-                                                            <tr>
-                                                                <th colspan="6" style="text-align:right">Total:</th>
-                                                                <th></th>
-                                                            </tr>
-                                                        </tfoot>
-                                                  </table>
-                                                  </table>
-                                                </div>
+    .report-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #696cff;
+    }
 
+    .report-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
 
-                                            </div>
-                                        </div>
-                                    </div> <!-- end row -->
-                                    <div class="clearfix"></div>
+    .report-description {
+        color: #697a8d;
+        font-size: 0.875rem;
+    }
+
+    .modal-header {
+        background-color: #696cff;
+        color: white;
+    }
+
+    .modal-title {
+        color: white;
+    }
+
+    .btn-close {
+        background-color: white;
+    }
+</style>
+
+<div class="content-wrapper">
+    <div class="row move-left move-down make-larger">
+        <div class="col-12">
+            <div class="card mb-4">
+                <center>
+                    <h1 class="card-header">Generación de Reportes</h1>
+                </center>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <!-- Reporte de Ventas -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card report-card h-100" onclick="openModal('ventas')">
+                                <div class="card-body text-center">
+                                    <i class="bx bx-cart report-icon"></i>
+                                    <h5 class="report-title">Reporte de Ventas</h5>
+                                    <p class="report-description">Genera un informe detallado de todas las ventas realizadas, incluyendo totales, productos y fechas.</p>
                                 </div>
                             </div>
                         </div>
-                        <!-- end row -->    
+
+                        <!-- Reporte de Inventario -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card report-card h-100" onclick="openModal('inventario')">
+                                <div class="card-body text-center">
+                                    <i class="bx bx-box report-icon"></i>
+                                    <h5 class="report-title">Reporte de Inventario</h5>
+                                    <p class="report-description">Visualiza el estado actual del inventario, stock disponible y productos próximos a agotarse.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reporte de Compras -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card report-card h-100" onclick="openModal('compras')">
+                                <div class="card-body text-center">
+                                    <i class="bx bx-shopping-bag report-icon"></i>
+                                    <h5 class="report-title">Reporte de Compras</h5>
+                                    <p class="report-description">Resumen de todas las compras realizadas a proveedores y gastos asociados.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reporte de Productos -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card report-card h-100" onclick="openModal('productos')">
+                                <div class="card-body text-center">
+                                    <i class="bx bx-food-menu report-icon"></i>
+                                    <h5 class="report-title">Reporte de Productos</h5>
+                                    <p class="report-description">Catálogo completo de productos con detalles de precios y categorías.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reporte de Usuarios -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card report-card h-100" onclick="openModal('usuarios')">
+                                <div class="card-body text-center">
+                                    <i class="bx bx-user report-icon"></i>
+                                    <h5 class="report-title">Reporte de Usuarios</h5>
+                                    <p class="report-description">Lista de usuarios del sistema y sus roles asignados.</p>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- Reporte de asistencia de usuarios -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card report-card h-100" onclick="openModal('asistencia')">
+                                <div class="card-body text-center">
+                                    <i class="bx bx-user report-icon"></i>
+                                    <h5 class="report-title">Reporte de Asistencia</h5>
+                                    <p class="report-description">Lista de asistencias de los usuarios del sistema.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+
+                        <!-- Reporte de caja -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card report-card h-100" onclick="openModal('caja')">
+                                <div class="card-body text-center">
+                                    <i class="bx bx-credit-card report-icon"></i>
+                                    <h5 class="report-title">Reporte de Caja</h5>
+                                    <p class="report-description">Resumen de todas las transacciones de caja, incluyendo ingresos y egresos.</p>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
-            <!-- end row -->
-
-            </div> <!-- container -->
-
-        </div> <!-- content -->
+        </div>
     </div>
-    <!-- End content-page -->
-
-
-
 </div>
 
-<?
-    require 'views/Content/footer.php';
-?>
+<!-- Modales para cada reporte -->
+<!-- Modal Ventas -->
+<div class="modal fade" id="modalVentas" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reporte de Ventas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formVentas">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Fecha Inicio</label>
+                            <input type="date" class="form-control" name="fecha_inicio" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Fecha Fin</label>
+                            <input type="date" class="form-control" name="fecha_fin" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="generarReporte('ventas')">Generar Reporte</button>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- Modal Inventario -->
+<div class="modal fade" id="modalInventario" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reporte de Inventario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formInventario">
+                    <div class="mb-3">
+                        <label class="form-label">Categoría</label>
+                        <select class="form-select" name="categoria">
+                            <option value="todos">Todos</option>
+                            <option value="bajo_stock">Productos Bajo Stock</option>
+                            <option value="agotados">Productos Agotados</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="generarReporte('inventario')">Generar Reporte</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-<script type="text/javascript">
-    //funcion listar
-function listar(){
-    var FechaInicio;
-    var FechaFin;
-    FechaInicio = $('#FechaInicio').val();
-    FechaFin = $('#FechaFin').val();
+<!-- Modal Compras -->
+<div class="modal fade" id="modalCompras" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reporte de Compras</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCompras">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Fecha Inicio</label>
+                            <input type="date" class="form-control" name="fecha_inicio" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Fecha Fin</label>
+                            <input type="date" class="form-control" name="fecha_fin" required>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label">Proveedor</label>
+                            <select class="form-select" name="proveedor">
+                                <option value="todos">Todos los proveedores</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="generarReporte('compras')">Generar Reporte</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-   // alert (FechaInicio + " " + FechaFin);
+<!-- Modal Productos -->
+<div class="modal fade" id="modalProductos" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reporte de Productos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formProductos">
+                    <div class="mb-3">
+                        <label class="form-label">Categoría</label>
+                        <select class="form-select" name="categoria">
+                            <option value="todos">Todas las categorías</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ordenar por</label>
+                        <select class="form-select" name="ordenar">
+                            <option value="nombre">Nombre</option>
+                            <option value="precio">Precio</option>
+                            <option value="stock">Stock</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="generarReporte('productos')">Generar Reporte</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-    if (FechaInicio == '' || FechaFin =='')
-    {
-        alertify.set('notifier','position','top-right');
-        alertify.error('<font color="#fffff"><i class="fa fa-times"></i> ELIJA EL RANGO DE FECHAS </font> ');
-    }
-    else
-    {
-        //alert(FechaInicio + " " + FechaFin);
-        tabla=$('#tbllistado2').dataTable({
+<!-- Modal Usuarios -->
+<div class="modal fade" id="modalUsuarios" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reporte de Usuarios</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formUsuarios">
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Usuario</label>
+                        <select class="form-select" name="tipo_usuario">
+                            <option value="todos">Todos</option>
+                            <option value="1">Administradores</option>
+                            <option value="2">Empleados</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Estado</label>
+                        <select class="form-select" name="estado">
+                            <option value="todos">Todos</option>
+                            <option value="activo">Activos</option>
+                            <option value="inactivo">Inactivos</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="generarReporte('usuarios')">Generar Reporte</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-            footerCallback: function (row, data, start, end, display) {
-            var api = this.api();
- 
-            // Remove the formatting to get integer data for summation
-            var intVal = function (i) {
-                return typeof i === 'string' ? i.replace(/[\$,]/g, '') * 1 : typeof i === 'number' ? i : 0;
-            };
+<!-- Modal Asistencia de Usuarios -->
+<div class="modal fade" id="modalAsistencia" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reporte de Asistencia</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formAsistencia">
+                    <div class="mb-3">
+                        <label class="form-label">desde</label>
+                        <input type="date" class="form-control" name="fecha" required>
+                    </div>
 
- 
-            // Total over all pages
-            total = api
-                .column(6)
-                .data()
-                .reduce(function (a, b) {
-                    return intVal(a) + intVal(b);
-                }, 0);
- 
-            // Total over this page
-            pageTotal = api
-                .column(6, { page: 'current' })
-                .data()
-                .reduce(function (a, b) {
-                    return intVal(a) + intVal(b);
-                }, 0);
- 
-            // Update footer
-            $(api.column(6).footer()).html('Q.' + pageTotal.toFixed(2) + ' ( Q.' + total.toFixed(2) + ' total)');
-        },
+                    <div class="mb-3">
+                        <label class="form-label">hasta</label>
+                        <input type="date" class="form-control" name="fecha" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="generarReporte('asistencia')">Generar Reporte</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-            "aProcessing": true,//activamos el procedimiento del datatable
-            "aServerSide": true,//paginacion y filrado realizados por el server
-            dom: 'Bfrtip',//definimos los elementos del control de la tabla
-            buttons: [
-                      'copyHtml5',
-                      'excelHtml5',
-                      'csvHtml5',
-                      'pdf'
-            ],
-            "ajax":
-            {
-                url:'?c=Reportes&a=Consulta',
-                type: "post",
-                data: {'FechaInicio': FechaInicio,'FechaFin':FechaFin},
-                dataType : "json",
-                error:function(e){
-                    console.log(e.responseText);
-                }
-            },
-            "bDestroy":true,
-            "iDisplayLength":15,//paginacion
-            "order":[[0,"desc"]]//ordenar (columna, orden)
-        }).DataTable();
-    }
+<!-- Modal Caja -->
+<div class="modal fade" id="modalCaja" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reporte de Caja</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCaja">
+                    <div class="mb-3">
+                        <label class="form-label">desde</label>
+                        <input type="date" class="form-control" name="fecha" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">hasta</label>
+                        <input type="date" class="form-control" name="fecha" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="generarReporte('caja')">Generar Reporte</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openModal(tipo) {
+    // Cerrar cualquier modal abierto
+    $('.modal').modal('hide');
+    
+    // Abrir el modal correspondiente
+    $(`#modal${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`).modal('show');
 }
 
+function generarReporte(tipo) {
+    // Obtener los datos del formulario correspondiente
+    const formData = new FormData(document.getElementById(`form${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`));
+    const params = new URLSearchParams(formData).toString();
+    
+    // Redirigir a la URL del reporte con los parámetros
+    window.location.href = `?c=Reportes&a=Reporte${tipo.charAt(0).toUpperCase() + tipo.slice(1)}&${params}`;
+}
+
+// Establecer las fechas por defecto
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    
+    // Formato YYYY-MM-DD para inputs date
+    const formatDate = (date) => {
+        return date.toISOString().split('T')[0];
+    };
+    
+    // Establecer fechas por defecto en los formularios de ventas y compras
+    document.querySelectorAll('input[type="date"][name="fecha_inicio"]').forEach(input => {
+        input.value = formatDate(firstDayOfMonth);
+    });
+    
+    document.querySelectorAll('input[type="date"][name="fecha_fin"]').forEach(input => {
+        input.value = formatDate(today);
+    });
+});
 </script>
+
+<?php
+require 'views/Content/footer.php';
+?>

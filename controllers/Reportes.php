@@ -9,7 +9,7 @@
 		public function index(){
 			
 			@session_start();
-			require_once "views/Reportes/PagosPorFecha.php";	
+			require_once "views/Reportes/Reportes.php";	
 		}
 
 

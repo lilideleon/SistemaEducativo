@@ -159,9 +159,25 @@
 
 <script>
     
-    document.addEventListener('DOMContentLoaded', function() {
-        obtenerProductos();
-    });
+document.addEventListener('DOMContentLoaded', function () {
+    obtenerProductos(); // Carga inicial
+
+    let actualizando = false;
+
+    setInterval(function () {
+        if (!actualizando) {
+            actualizando = true;
+
+            obtenerProductos();
+
+            actualizando = false;
+        }
+    }, 15000);
+});
+
+
+ 
+
 </script>
 
 <script src="js/quagga.min.js"></script>

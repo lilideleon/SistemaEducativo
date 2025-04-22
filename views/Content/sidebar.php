@@ -158,32 +158,25 @@
             
            
             <!-- Components -->
-            <li class="menu-header small text-uppercase"><span class="menu-header-text">Reportes</span></li>
+            <li class="menu-header small text-uppercase"><span class="menu-header-text">Otros</span></li>
             <!-- Cards -->
             <li class="menu-item">
                 <a href="?c=Reportes" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-collection"></i>
-                    <div data-i18n="Basic">Rpt de ventas</div> &nbsp;
+                    <div data-i18n="Basic">Reportes</div> &nbsp;
                     
                 </a>
             </li>
 
+       
+            <!-- Cards -->
             <li class="menu-item">
-                <a href="?c=Rptpagosporservicio" class="menu-link">
+                <a href="?c=Ayuda" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-collection"></i>
-                    <div data-i18n="Basic">Reportes de costos</div> &nbsp;
+                    <div data-i18n="Basic">Ayuda</div> &nbsp;
                     
                 </a>
             </li>
-
-            <li class="menu-item">
-                <a href="" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-collection"></i>
-                    <div data-i18n="Basic">Reportes varios </div> &nbsp;
-                  
-                </a>
-            </li>
-
 
 
            

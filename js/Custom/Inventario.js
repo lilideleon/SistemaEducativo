@@ -1,10 +1,14 @@
 window.onload = function () {
-    Cargar();
+    Cargar(); // Primera carga al abrir la página
 
-    // Llamar a la función al abrir los modales
-$('#NuevoInventarioModal').on('show.bs.modal', CargarProductos);
-$('#EditarInventarioModal').on('show.bs.modal', CargarProductos);
+    // Ejecutar Cargar() cada 5 segundos
+    setInterval(Cargar, 15000);
+
+    // Cargar productos al abrir los modales
+    $('#NuevoInventarioModal').on('show.bs.modal', CargarProductos);
+    $('#EditarInventarioModal').on('show.bs.modal', CargarProductos);
 };
+
 
 // PAGINACIÓN DE LA TABLA DE DATOS
 function Cargar() {
