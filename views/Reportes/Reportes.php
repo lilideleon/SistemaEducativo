@@ -288,8 +288,7 @@ if ($_SESSION['TipoUsuario'] == '') {
                         <label class="form-label">Ordenar por</label>
                         <select class="form-select" name="ordenar">
                             <option value="nombre">Nombre</option>
-                            <option value="precio">Precio</option>
-                            <option value="stock">Stock</option>
+                            <option value="id">id</option>
                         </select>
                     </div>
                 </form>
@@ -316,8 +315,6 @@ if ($_SESSION['TipoUsuario'] == '') {
                         <label class="form-label">Tipo de Usuario</label>
                         <select class="form-select" name="tipo_usuario">
                             <option value="todos">Todos</option>
-                            <option value="1">Administradores</option>
-                            <option value="2">Empleados</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -350,12 +347,12 @@ if ($_SESSION['TipoUsuario'] == '') {
                 <form id="formAsistencia">
                     <div class="mb-3">
                         <label class="form-label">desde</label>
-                        <input type="date" class="form-control" name="fecha" required>
+                        <input type="date" class="form-control" name="fecha_inicio" required>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">hasta</label>
-                        <input type="date" class="form-control" name="fecha" required>
+                        <input type="date" class="form-control" name="fecha_fin" required>
                     </div>
                 </form>
             </div>
@@ -410,8 +407,8 @@ function generarReporte(tipo) {
     const formData = new FormData(document.getElementById(`form${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`));
     const params = new URLSearchParams(formData).toString();
     
-    // Redirigir a la URL del reporte con los parámetros
-    window.location.href = `?c=Reportes&a=Reporte${tipo.charAt(0).toUpperCase() + tipo.slice(1)}&${params}`;
+    // Redirigir a la URL del reporte con los parámetros en nueva pestaña
+    window.open(`?c=Reportes&a=Reporte${tipo.charAt(0).toUpperCase() + tipo.slice(1)}&${params}`, '_blank');
 }
 
 // Establecer las fechas por defecto
