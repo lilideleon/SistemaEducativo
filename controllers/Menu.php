@@ -20,26 +20,100 @@
 			echo json_encode('true');
 		}	
 
-		public function TotalUsuarios()
+		//metodo para mostrar el total de usuarios
+
+		public function TotalVentasPorDia()
 		{
 			$model = new Menu_model();
 
-			foreach ($model->getTotalUsuarios() as $r):
-				$datos[] = $r->Total;
+			$r = $model->getTotalVentasDia();
+			
+
+			echo json_encode($r);
+		}
+
+
+		//metodo para mostrar el total de usuarios activos
+
+		public function TotalUsuariosActivos()
+		{
+			$model = new Menu_model();
+
+			$r = $model->getTotalUsuariosActivos();
+			
+			echo json_encode($r);
+		}
+		//metodo para mostrar los productos activos
+
+		public function TotalProductosActivos()
+		{
+			$model = new Menu_model();
+
+			$r = $model->getTotalProductosActivos();
+			echo json_encode($r);
+		}
+
+		//metodo para mostrar el total de compras del mes
+
+		public function TotalComprasMes()
+		{
+			$model = new Menu_model();
+
+			$r = $model->getTotalComprasMes();
+			echo json_encode($r);
+		}
+		//metodo para mostrar el total de ventas
+
+		public function TotalVentas()
+		{
+			$model = new Menu_model();
+
+			foreach ($model->getTotalVentas() as $r):
+				$datos[] = $r->TotalVentas;
 			endforeach;
 
 			echo json_encode($datos);
 		}
 
-		public function TotalPagosMensual()
+		//metodo para mostrar el total de ventas por producto
+
+		public function TotalVentasPorProducto()
 		{
 			$model = new Menu_model();
 
-			foreach ($model->getTotalPagosMensual() as $r):
-				$datos[] = $r->Total;
+			foreach ($model->getTotalVentasPorProducto() as $r):
+				$datos[] = $r->VentasPorProducto;
 			endforeach;
 
 			echo json_encode($datos);
 		}
+
+		//metodo para mostrar las transacciones
+
+		public function getTransacciones()
+		{
+			$model = new Menu_model();
+
+			foreach ($model->getTransacciones() as $r):
+				$datos[] = $r;
+			endforeach;
+
+			echo json_encode($datos);
+		}
+
+		//metodo para mostrar los productos mas vendidos
+
+		public function ProductosMasVendidos()
+		{
+			$model = new Menu_model();
+
+			foreach ($model->ProductosMasVendidos() as $r):
+				$datos[] = $r;
+			endforeach;
+
+			echo json_encode($datos);
+		}
+
+
 	}
 ?>

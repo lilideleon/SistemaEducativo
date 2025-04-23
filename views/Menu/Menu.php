@@ -236,9 +236,9 @@ window.onload = function() {
 
 function cargarDashboard() {
     // Cargar estadísticas
-    obtenerEstadistica('TotalVentasHoy', '#ventasHoy', 'Q. ');
-    obtenerEstadistica('TotalProductos', '#productosActivos', '');
-    obtenerEstadistica('TotalUsuarios', '#usuariosActivos', '');
+    obtenerEstadistica('TotalVentasPorDia', '#ventasHoy', 'Q. ');
+    obtenerEstadistica('TotalProductosActivos', '#productosActivos', '');
+    obtenerEstadistica('TotalUsuariosActivos', '#usuariosActivos', '');
     obtenerEstadistica('TotalComprasMes', '#comprasMes', 'Q. ');
     
     // Cargar últimas transacciones
@@ -251,18 +251,23 @@ function obtenerEstadistica(accion, selector, prefijo) {
         type: 'GET',
         dataType: 'json',
         success: function(response) {
-            if (response && response.data !== undefined) {
-                $(selector).text(prefijo + formatearNumero(response.data));
-                
-                // Actualizar indicador de tendencia
-                if (response.tendencia > 0) {
+            if (response && response.length > 0) {
+                // Obtener dinámicamente el primer valor del primer objeto
+                let valor = Object.values(response[0])[0];
+
+                $(selector).text(prefijo + formatearNumero(valor));
+
+                // Si la tendencia es parte del objeto, intentamos obtenerla también
+                let tendencia = response[0].tendencia !== undefined ? response[0].tendencia : 0;
+
+                if (tendencia > 0) {
                     $(selector).siblings('.trend-indicator')
                         .removeClass('trend-down')
                         .addClass('trend-up')
                         .find('i')
                         .removeClass('bx-down-arrow-alt')
                         .addClass('bx-up-arrow-alt');
-                } else if (response.tendencia < 0) {
+                } else if (tendencia < 0) {
                     $(selector).siblings('.trend-indicator')
                         .removeClass('trend-up')
                         .addClass('trend-down')
@@ -277,6 +282,7 @@ function obtenerEstadistica(accion, selector, prefijo) {
         }
     });
 }
+
 
 function inicializarGraficas() {
     // Gráfica de Ventas
@@ -376,7 +382,7 @@ function actualizarGraficaProductos() {
 
 function cargarUltimasTransacciones() {
     $.ajax({
-        url: '?c=Menu&a=UltimasTransacciones',
+        url: '?c=Menu&a=getTransacciones',
         type: 'GET',
         dataType: 'json',
         success: function(response) {
@@ -387,12 +393,12 @@ function cargarUltimasTransacciones() {
                 response.forEach(trans => {
                     tbody.append(`
                         <tr>
-                            <td>${trans.id}</td>
-                            <td>${trans.fecha}</td>
-                            <td>${trans.tipo}</td>
-                            <td>${trans.nombre}</td>
-                            <td>Q. ${formatearNumero(trans.total)}</td>
-                            <td><span class="badge bg-${trans.estado === 'Activo' ? 'success' : 'danger'}">${trans.estado}</span></td>
+                            <td>${trans.Id}</td>
+                            <td>${trans.Fecha}</td>
+                            <td>${trans.Tipo}</td>
+                            <td>${trans.ClienteProveedor}</td>
+                            <td>Q. ${formatearNumero(trans.Total)}</td>
+                            <td><span class="badge bg-${trans.Estado === 'Activo' ? 'success' : 'danger'}">${trans.Estado}</span></td>
                         </tr>
                     `);
                 });
