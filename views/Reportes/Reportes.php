@@ -166,6 +166,18 @@ if ($_SESSION['TipoUsuario'] == '') {
                             </div>
                         </div>
 
+
+                        <!-- Reporte de costos -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card report-card h-100" onclick="openModal('costos')">
+                                <div class="card-body text-center">
+                                    <i class="bx bx-credit-card report-icon"></i>
+                                    <h5 class="report-title">Reporte de Costos</h5>
+                                    <p class="report-description">Resumen de todas las transacciones de caja, incluyendo ingresos y egresos.</p>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -218,8 +230,6 @@ if ($_SESSION['TipoUsuario'] == '') {
                         <label class="form-label">Categoría</label>
                         <select class="form-select" name="categoria">
                             <option value="todos">Todos</option>
-                            <option value="bajo_stock">Productos Bajo Stock</option>
-                            <option value="agotados">Productos Agotados</option>
                         </select>
                     </div>
                 </form>
@@ -250,12 +260,6 @@ if ($_SESSION['TipoUsuario'] == '') {
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Fecha Fin</label>
                             <input type="date" class="form-control" name="fecha_fin" required>
-                        </div>
-                        <div class="col-12 mb-3">
-                            <label class="form-label">Proveedor</label>
-                            <select class="form-select" name="proveedor">
-                                <option value="todos">Todos los proveedores</option>
-                            </select>
                         </div>
                     </div>
                 </form>
@@ -388,6 +392,36 @@ if ($_SESSION['TipoUsuario'] == '') {
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 <button type="button" class="btn btn-primary" onclick="generarReporte('caja')">Generar Reporte</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal reporte costos diferencia entre vendido - precio de costo -->
+
+<div class="modal fade" id="modalCostos" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reporte de Costos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCostos">
+                    <div class="mb-3">
+                        <label class="form-label">desde</label>
+                        <input type="date" class="form-control" name="fechaInicio" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">hasta</label>
+                        <input type="date" class="form-control" name="fechaFin" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="generarReporte('costos')">Generar Reporte</button>
             </div>
         </div>
     </div>
