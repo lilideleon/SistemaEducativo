@@ -89,7 +89,7 @@
                                 <h6 class="stats-title mb-2">Ventas del Día</h6>
                                 <h3 class="stats-value mb-2" id="ventasHoy">Q. 0.00</h3>
                                 <small class="trend-indicator trend-up" id="ventasTrend">
-                                    <i class="bx bx-up-arrow-alt"></i> vs ayer
+                                    <i class="bx bx-up-arrow-alt"></i> ventas diarias
                                 </small>
                             </div>
                             <div class="avatar bg-light-primary p-2">
@@ -146,7 +146,7 @@
                                 <h6 class="stats-title mb-2">Compras del Mes</h6>
                                 <h3 class="stats-value mb-2" id="comprasMes">Q. 0.00</h3>
                                 <small class="trend-indicator trend-down" id="comprasTrend">
-                                    <i class="bx bx-down-arrow-alt"></i> vs mes anterior
+                                    <i class="bx bx-down-arrow-alt"></i> procesadas
                                 </small>
                             </div>
                             <div class="avatar bg-light-warning p-2">

@@ -1,4 +1,9 @@
 <?php
+	require_once "res/plugins/printer/autoload.php";	
+
+	use Mike42\Escpos\Printer;
+	use Mike42\Escpos\EscposImage;
+	use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 	
 	class ventasController 
 	{
@@ -18,6 +23,82 @@
 		{
 			require_once "views/ventas/Nuevaventa.php";
 		}
+
+		//metodo para imprmimir el ticket
+
+		public function ImprimirTicket()
+{
+    try {
+        // Obtener el ID (de POST o GET según corresponda)
+        $idFactura = $_POST['id'];
+
+        // Nombre de la impresora - usa el que funcionaba antes
+        $nombre_impresora = "SAT15T2U"; // Cambia esto a "POS-80" si esa era tu impresora anterior
+
+        // Conexión a la impresora
+        $connector = new WindowsPrintConnector($nombre_impresora);
+        $printer = new Printer($connector);
+
+        // Cargar e imprimir el logo
+        $printer->setJustification(Printer::JUSTIFY_CENTER);
+     
+
+        // Obtener datos de factura
+        $Ejecuta = new Ventas_model();
+        $factura = $Ejecuta->obtenerFacturaPorId($idFactura);
+        if (!$factura || count($factura) == 0) {
+            throw new Exception("No se encontró la factura.");
+        }
+
+        // Encabezado
+        $printer->text("POLLO DON FRANCO\n");
+        $printer->text("TICKET #" . $factura[0]->Id . "\n");
+        $printer->text("Fecha: " . $factura[0]->Fecha . " " . $factura[0]->Hora . "\n");
+		$printer->text("Telefono: " . "53014702". "\n");
+		$printer->text("Direccion: HUITAN ZONA 1,QUETZA\n");
+        $printer->feed(1);
+
+        // Detalle
+        $printer->setJustification(Printer::JUSTIFY_LEFT);
+        $printer->text("Producto       Cant  Precio\n");
+        $printer->text("----------------------------\n");
+
+        foreach ($factura as $item) {
+            $nombre = substr($item->Nombre, 0, 13); // corta si es muy largo
+            $cantidad = str_pad($item->Cantidad, 4, ' ', STR_PAD_LEFT);
+            $precio = str_pad(number_format($item->PrecioVenta, 2), 7, ' ', STR_PAD_LEFT);
+            $printer->text("{$nombre} {$cantidad} {$precio}\n");
+        }
+
+        $printer->text("----------------------------\n");
+        $printer->setJustification(Printer::JUSTIFY_RIGHT);
+        $printer->text("Total: Q " . number_format($factura[0]->Total, 2) . "\n");
+
+        $printer->feed(2);
+        $printer->setJustification(Printer::JUSTIFY_CENTER);
+        $printer->text("¡Gracias por su compra!\n");
+        $printer->text("ESTE DOCUMENTO ES UN COMPROBANTE DE VENTA\n");
+        $printer->text("POR FAVOR PIDA SU FACTURA\n");
+
+        $printer->feed(3);
+        $printer->cut();
+        $printer->pulse(); // Agregado de tu código anterior
+        $printer->close();
+
+        $response['success'] = true;
+        $response['msj'] = 'Factura impresa exitosamente.';
+        header('Content-Type: application/json');
+        echo json_encode($response);
+    } catch (Exception $e) {
+        http_response_code(500);
+        $response['success'] = false;
+        $response['msj'] = 'Error al imprimir la factura: ' . $e->getMessage();
+        header('Content-Type: application/json');
+        echo json_encode($response);
+    }
+}
+
+
 
 
 		public function GuardarFactura() {

@@ -128,7 +128,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="window.print()">Imprimir</button>
+                <button type="button" class="btn btn-primary" onclick="ImprimirTicket()">Imprimir</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
@@ -271,6 +271,31 @@
                 alertify.error('Acción cancelada'); // Mostrar mensaje de cancelación con Alertify
             }
         );
+    }
+
+    function ImprimirTicket() {
+
+        //obtener el id de la factura
+
+        var idFactura = $('#FacturaId').text();
+
+        $.ajax({
+            url: '?c=ventas&a=ImprimirTicket',
+            type: 'POST',
+            data: { id: idFactura },
+            dataType: 'json',
+            success: function(response) {
+                console.log(response);
+                if (response.status === 'ok') {
+                    window.print();
+                } else {
+                    alert('Error al imprimir el ticket: ' + response.error);
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('Error al realizar la solicitud: ' + error);
+            }
+        });
     }
 </script>
 
