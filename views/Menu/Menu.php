@@ -17,7 +17,13 @@
                 console.log($TipoUsuario);
             </script>";
     }
-
+    else if($_SESSION['TipoUsuario'] == 2)
+    {
+        require 'views/Content/sidebar2.php'; 
+            print "<script>
+                console.log($TipoUsuario);
+            </script>";
+    }
 
 
 ?>

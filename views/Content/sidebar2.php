@@ -38,23 +38,12 @@
             <li class="menu-item">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-dock-top"></i>
-                <div data-i18n="Account Settings">Pagos</div>
+                <div data-i18n="Account Settings">Ventas</div>
               </a>
               <ul class="menu-sub">
                 <li class="menu-item">
-                  <a href="?c=Pagos" class="menu-link">
-                    <div data-i18n="Account">Pagos</div>
-                  </a>
-                </li>
-                <li class="menu-item">
-                  <a href="?c=Servicios" class="menu-link">
-                    <div data-i18n="Account">Servicios</div>
-                  </a>
-                </li>
-
-                <li class="menu-item">
-                  <a href="?c=Multas" class="menu-link">
-                    <div data-i18n="Account">Multas</div>
+                  <a href="?c=Ventas" class="menu-link">
+                    <div data-i18n="Account">Ventas</div>
                   </a>
                 </li>
               </ul>
@@ -65,38 +54,9 @@
                 <div data-i18n="Authentications">Asistecia</div>
               </a>
               <ul class="menu-sub">
-
-
-              <li class="menu-item">
-                  <a href="?c=Eventos" class="menu-link" >
-                    <div data-i18n="Basic">Eventos</div>
-                  </a>
-                </li>
-
-        
-
                 <li class="menu-item">
                   <a href="?c=Asistencia" class="menu-link">
-                    <div data-i18n="Basic">Toma de asistencia</div>
-                  </a>
-                </li>
-
-        
-
-                
-
-              </ul>
-            </li>
-            <li class="menu-item">
-              <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-cube-alt"></i>
-                <div data-i18n="Misc">Kardex</div>
-              </a>
-              <ul class="menu-sub">
- 
-                <li class="menu-item">
-                  <a href="pages-misc-under-maintenance.html" class="menu-link">
-                    <div data-i18n="Under Maintenance">Gastos</div>
+                    <div data-i18n="Basic">Asistencia</div>
                   </a>
                 </li>
               </ul>
