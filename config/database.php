@@ -62,6 +62,33 @@
 			}
 		}
 
+		//metodo para realizar backup de la base de datos o exportar
+
+		public function realizarBackup($ruta)
+		{
+			if (!is_dir($ruta)) {
+				mkdir($ruta, 0777, true);
+			}
+		
+			$fecha = date('Y-m-d_His');
+			$basededatos = str_replace(['dbname=', ';'], '', $this->DataBase);
+			$nombrearchivo = rtrim($ruta, '/\\') . "/backup_" . $basededatos . "_" . $fecha . ".sql";
+			$mysqldump = "C:\\AppServ\\MySQL\\bin\\mysqldump.exe";
+			$comando = "\"$mysqldump\" --user=$this->Usuario --password=$this->Contraseña --databases $basededatos > \"$nombrearchivo\"";
+		
+			exec($comando, $output, $retval);
+		
+			if ($retval !== 0 || !file_exists($nombrearchivo)) {
+				throw new Exception("Error al realizar el backup de la base de datos.");
+			}
+		
+			// Si todo va bien, puedes opcionalmente devolver el nombre del archivo
+			return $nombrearchivo;
+		}
+		
+
+		
+
 		//FIN DE LA LOGICA
 	}
 ?>

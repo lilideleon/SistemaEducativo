@@ -253,7 +253,7 @@
                       <div class="dropdown-divider"></div>
                     </li>
                     <li>
-                      <a class="dropdown-item" href="#">
+                      <a class="dropdown-item" href="?c=Opciones">
                         <i class="bx bx-cog me-2"></i>
                         <span class="align-middle">Opciones</span>
                       </a>
