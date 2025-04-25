@@ -145,8 +145,8 @@
                             <div>
                                 <h6 class="stats-title mb-2">Compras del Mes</h6>
                                 <h3 class="stats-value mb-2" id="comprasMes">Q. 0.00</h3>
-                                <small class="trend-indicator trend-down" id="comprasTrend">
-                                    <i class="bx bx-down-arrow-alt"></i> procesadas
+                                <small class="trend-indicator trend-up" id="comprasTrend">
+                                    <i class="bx bx-up-arrow-alt"></i> procesadas
                                 </small>
                             </div>
                             <div class="avatar bg-light-warning p-2">
@@ -344,31 +344,35 @@ function inicializarGraficas() {
         }
     });
 
-    // Cargar datos iniciales
-    actualizarGraficaVentas('7');
-    actualizarGraficaProductos();
+    // Cargar datos iniciales basado en el tiempo o dias elegidos
+    actualizarGraficaVentas($('#ventasRange').text());
+    actualizarGraficaProductos($('#ventasRange').text());
 }
 
 function actualizarGraficaVentas(dias) {
     $.ajax({
-        url: '?c=Menu&a=VentasPorPeriodo',
+        url: '?c=Menu&a=ProductosMasVendidos',
         type: 'GET',
         data: { dias: dias },
         dataType: 'json',
         success: function(response) {
+            console.log(response);
             if (response && response.labels && response.datos) {
                 window.ventasChart.data.labels = response.labels;
                 window.ventasChart.data.datasets[0].data = response.datos;
                 window.ventasChart.update();
+
             }
         }
     });
 }
 
-function actualizarGraficaProductos() {
+function actualizarGraficaProductos(dias) {
     $.ajax({
         url: '?c=Menu&a=ProductosMasVendidos',
         type: 'GET',
+        data: { dias: dias },
+
         dataType: 'json',
         success: function(response) {
             if (response && response.labels && response.datos) {
@@ -411,6 +415,7 @@ function cambiarRangoVentas(dias) {
     $('#ventasRange').text(dias === '7' ? 'Últimos 7 días' : 
                           dias === '30' ? 'Último mes' : 'Último trimestre');
     actualizarGraficaVentas(dias);
+    actualizarGraficaProductos(dias);
 }
 
 function formatearNumero(numero) {

@@ -234,7 +234,7 @@
 
         //metodo para productos mas vendidos los ultimos 30 dias
 
-        public function ProductosMasVendidos()
+        public function ProductosMasVendidos($numerodias)
         {
             try {
                 $this->ConexionSql = $this->Conexion->CrearConexion();
@@ -244,11 +244,12 @@
                                 FROM detallefactura df
                                 INNER JOIN productos p ON p.IdProducto = df.ProductoId
                                 INNER JOIN factura f ON f.Id = df.FacturaId
-                                WHERE f.Fecha >= CURDATE() - INTERVAL 30 DAY AND f.Estado = 1
+                                WHERE f.Fecha >= CURDATE() - INTERVAL :dias DAY AND f.Estado = 1
                                 GROUP BY p.Nombre
                                 ORDER BY TotalVendido DESC
                                 LIMIT 5";
                 $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
+                $this->Procedure->bindParam(':dias', $numerodias, PDO::PARAM_INT);
                 $this->Procedure->execute();
                 return $this->Procedure->fetchAll(PDO::FETCH_OBJ);
             } catch (Exception $e) {

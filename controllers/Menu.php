@@ -102,16 +102,24 @@
 		}
 
 		//metodo para mostrar los productos mas vendidos
-
 		public function ProductosMasVendidos()
 		{
 			$model = new Menu_model();
+			$dias = $_GET['dias'];
+			$datos = $model->ProductosMasVendidos($dias);
+			$labels = [];
+			$valores = [];
 
-			foreach ($model->ProductosMasVendidos() as $r):
-				$datos[] = $r;
-			endforeach;
+			foreach ($datos as $item) {
+				$labels[] = trim($item->Nombre);
+				$valores[] = floatval($item->TotalVendido);
+			}
 
-			echo json_encode($datos);
+			header('Content-Type: application/json');
+			echo json_encode([
+				'labels' => $labels,
+				'datos' => $valores
+			]);
 		}
 
 
