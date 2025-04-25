@@ -33,7 +33,7 @@
         $idFactura = $_POST['id'];
 
         // Nombre de la impresora - usa el que funcionaba antes
-        $nombre_impresora = "SAT15T2U"; // Cambia esto a "POS-80" si esa era tu impresora anterior
+        $nombre_impresora = "SAT15T2U1"; // Cambia esto a "POS-80" si esa era tu impresora anterior
 
         // Conexión a la impresora
         $connector = new WindowsPrintConnector($nombre_impresora);
@@ -76,9 +76,17 @@
 
         $printer->feed(2);
         $printer->setJustification(Printer::JUSTIFY_CENTER);
-        $printer->text("¡Gracias por su compra!\n");
-        $printer->text("ESTE DOCUMENTO ES UN COMPROBANTE DE VENTA\n");
-        $printer->text("POR FAVOR PIDA SU FACTURA\n");
+		$printer->text("¡Gracias por su compra!\n");
+        $printer->text("Esperemos regrese pronto\n");
+		
+		//letra mas pequeña 
+        $printer->setTextSize(1,1);
+        $printer->text("Este es un comprobante de venta\n");
+        $printer->text("Por favor pida su factura\n");
+
+		//negrita
+		$printer->setEmphasis(true);
+		$printer->text("\n EN DIOS CREEMOS\n ");
 
         $printer->feed(3);
         $printer->cut();

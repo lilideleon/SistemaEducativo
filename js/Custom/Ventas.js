@@ -290,6 +290,14 @@ function finalizarOrden() {
                     });
                 });
 
+                //alertify para preguntar si desea imprimir el ticket
+
+                alertify.confirm('¿Desea imprimir el ticket?', function(e) {
+                    if (e) {
+                        ImprimirTicket(facturaId);
+                    }
+                });
+
                 alertify.success('Orden finalizada y factura generada exitosamente.');
                 document.getElementById('listaOrdenes').innerHTML = ''; // Limpiar la tabla
                 actualizarTotalGeneral();
@@ -303,6 +311,31 @@ function finalizarOrden() {
         error: function(error) {
             console.error('Error al finalizar la orden:', error);
             alertify.error('Ocurrió un error al finalizar la orden.');
+        }
+    });
+}
+
+function ImprimirTicket(idFac) {
+
+    //obtener el id de la factura
+
+    var idFactura = idFac;
+
+    $.ajax({
+        url: '?c=ventas&a=ImprimirTicket',
+        type: 'POST',
+        data: { id: idFactura },
+        dataType: 'json',
+        success: function(response) {
+            console.log(response);
+            if (response.status === 'ok') {
+                window.print();
+            } else {
+                alert('Error al imprimir el ticket: ' + response.error);
+            }
+        },
+        error: function(xhr, status, error) {
+            alert('Error al realizar la solicitud: ' + error);
         }
     });
 }

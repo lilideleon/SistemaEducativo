@@ -113,89 +113,94 @@ class InventarioController {
         }
     }
 
-   public function Tabla()
-{
-    $Conexion = new ClaseConexion();
-    $ConexionSql = $Conexion->CrearConexion();
-
-    $aColumnas = array("i.Id", "p.Nombre AS Producto", "i.Cantidad", "i.Fecha", "i.Estado");
-    $sIndexColumn = "i.Id";
-
-    $sLimit = "";
-    if (isset($_GET['iDisplayStart']) && $_GET['iDisplayLength'] != '-1') {
-        $sLimit = "LIMIT " . $_GET['iDisplayStart'] . ", " . $_GET['iDisplayLength'];
-    }
-
-    $sOrder = "";
-    if (isset($_GET['iSortCol_0'])) {
-        $sOrder = "ORDER BY  ";
-        for ($i = 0; $i < intval($_GET['iSortingCols']); $i++) {
-            if ($_GET['bSortable_' . intval($_GET['iSortCol_' . $i])] == "true") {
-                $colOrden = explode(" AS ", $aColumnas[intval($_GET['iSortCol_' . $i])])[0];
-                $sOrder .= $colOrden . " " . $_GET['sSortDir_' . $i] . ", ";
+    public function Tabla()
+    {
+        $Conexion = new ClaseConexion();
+        $ConexionSql = $Conexion->CrearConexion();
+    
+        $aColumnas = array("i.Id", "p.Nombre", "i.Cantidad", "i.Fecha", "i.Estado");
+        $sIndexColumn = "i.Id";
+    
+        // LIMIT
+        $sLimit = "";
+        if (isset($_GET['start']) && $_GET['length'] != '-1') {
+            $sLimit = "LIMIT " . intval($_GET['start']) . ", " . intval($_GET['length']);
+        }
+    
+        // ORDER BY
+        $sOrder = "";
+        if (isset($_GET['order'][0]['column'])) {
+            $colIdx = intval($_GET['order'][0]['column']);
+            $dir = $_GET['order'][0]['dir'];
+            $colOrden = explode(" AS ", $aColumnas[$colIdx])[0];
+            $sOrder = "ORDER BY $colOrden $dir";
+        }
+    
+        // WHERE (filtro global)
+        $sWhere = "WHERE i.Estado = 1";
+        if (!empty($_GET['search']['value'])) {
+            $search = $_GET['search']['value'];
+            $sWhere .= " AND (";
+            foreach ($aColumnas as $col) {
+                $colLimpio = explode(" AS ", $col)[0];
+                $sWhere .= "$colLimpio LIKE '%$search%' OR ";
             }
+            $sWhere = rtrim($sWhere, " OR ") . ")";
         }
-        $sOrder = rtrim($sOrder, ", ");
-    }
-
-    $sWhere = "WHERE i.Estado = 1";
-    if (!empty($_GET['sSearch'])) {
-        $sWhere = "WHERE (";
-        foreach ($aColumnas as $col) {
-            $colLimpio = explode(" AS ", $col)[0];
-            $sWhere .= "$colLimpio LIKE '%" . $_GET['sSearch'] . "%' OR ";
+    
+        // Consulta principal con FOUND_ROWS
+        $sQuery = "
+            SELECT SQL_CALC_FOUND_ROWS 
+                i.Id,
+                p.Nombre AS Producto,
+                i.Cantidad,
+                i.Fecha,
+                i.Estado
+            FROM inventario i
+            INNER JOIN productos p ON i.ProductoId = p.IdProducto
+            $sWhere
+            $sOrder
+            $sLimit
+        ";
+        $rResult = $ConexionSql->prepare($sQuery);
+        $rResult->execute();
+    
+        // Total de registros filtrados
+        $rTotalFiltrado = $ConexionSql->query("SELECT FOUND_ROWS()")->fetchColumn();
+    
+        // Total de registros sin filtro
+        $rTotal = $ConexionSql->query("SELECT COUNT(i.Id) FROM inventario i WHERE i.Estado = 1")->fetchColumn();
+    
+        // Formato de salida compatible con DataTables
+        $output = array(
+            "draw" => intval($_GET['draw']),
+            "recordsTotal" => intval($rTotal),
+            "recordsFiltered" => intval($rTotalFiltrado),
+            "data" => array()
+        );
+    
+        while ($aRow = $rResult->fetch(PDO::FETCH_ASSOC)) {
+            $row = array();
+            $row[] = $aRow['Id'];
+            $row[] = $aRow['Producto'];
+            $row[] = $aRow['Cantidad'];
+            $row[] = $aRow['Fecha'];
+            $row[] = $aRow['Estado'] == 1
+                ? '<span class="badge bg-success">Activo</span>'
+                : '<span class="badge bg-danger">Inactivo</span>';
+            $row[] = '
+                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#EditarInventarioModal" onclick="DatosInventario(' . $aRow['Id'] . ')">
+                    <i class="fa fa-edit"></i> Editar
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="EliminarInventario(' . $aRow['Id'] . ')">
+                    <i class="fa fa-trash"></i> Eliminar
+                </button>
+            ';
+            $output['data'][] = $row;
         }
-        $sWhere = rtrim($sWhere, " OR ");
-        $sWhere .= ") AND i.Estado = 1";
+    
+        header('Content-Type: application/json');
+        echo json_encode($output);
     }
-
-    $sQuery = "
-        SELECT SQL_CALC_FOUND_ROWS 
-            i.Id,
-            p.Nombre AS Producto,
-            i.Cantidad,
-            i.Fecha,
-            i.Estado
-        FROM inventario i
-        INNER JOIN productos p ON i.ProductoId = p.IdProducto
-        $sWhere
-        $sOrder
-        $sLimit
-    ";
-
-    $rResult = $ConexionSql->prepare($sQuery);
-    $rResult->execute();
-
-    $output = array(
-        "sEcho" => intval($_GET['sEcho']),
-        "iTotalRecords" => $rResult->rowCount(),
-        "iTotalDisplayRecords" => $rResult->rowCount(),
-        "aaData" => array()
-    );
-
-    while ($aRow = $rResult->fetch(PDO::FETCH_ASSOC)) {
-        $row = array();
-        $row[] = $aRow['Id'];
-        $row[] = $aRow['Producto'];
-        $row[] = $aRow['Cantidad'];
-        $row[] = $aRow['Fecha'];
-        $row[] = $aRow['Estado'] == 1
-            ? '<span class="badge bg-success">Activo</span>'
-            : '<span class="badge bg-danger">Inactivo</span>';
-
-        $row[] = '
-            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#EditarInventarioModal" onclick="DatosInventario(' . $aRow['Id'] . ')">
-                <i class="fa fa-edit"></i> Editar
-            </button>
-            <button class="btn btn-danger btn-sm" onclick="EliminarInventario(' . $aRow['Id'] . ')">
-                <i class="fa fa-trash"></i> Eliminar
-            </button>
-        ';
-
-        $output['aaData'][] = $row;
-    }
-
-    echo json_encode($output);
-}
-
+    
 }

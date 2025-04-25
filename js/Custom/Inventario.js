@@ -2,7 +2,7 @@ window.onload = function () {
     Cargar(); // Primera carga al abrir la página
 
     // Ejecutar Cargar() cada 5 segundos
-    setInterval(Cargar, 15000);
+    //setInterval(Cargar, 15000);
 
     // Cargar productos al abrir los modales
     $('#NuevoInventarioModal').on('show.bs.modal', CargarProductos);
