@@ -61,56 +61,6 @@ if ($_SESSION['TipoUsuario'] == '') {
                         <button type="button" class="btn btn-primary" onclick="realizarBackup()">Realizar Backup</button>
                     </div>
                 </div>
-   
-                <!-- card de opcion para cambiar el tema del sistema -->
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title">Cambiar Tema del Sistema</h5>
-                        <p class="card-text">Cambia el tema del sistema.</p>
-                        <!-- elegir paleta de colores -->
-                        <div class="row">
-                            <div class="col-12 col-md-6 col-lg-3">
-                                <div class="card mb-4">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Tema 1</h5>
-                                        <p class="card-text">Tema 1</p>
-                                        <button type="button" class="btn btn-primary">Seleccionar</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-6 col-lg-3">
-                                <div class="card mb-4">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Tema 2</h5>
-                                        <p class="card-text">Tema 2</p>
-                                        <button type="button" class="btn btn-primary">Seleccionar</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-6 col-lg-3">
-                                <div class="card mb-4">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Tema 3</h5>
-                                        <p class="card-text">Tema 3</p>
-                                        <button type="button" class="btn btn-primary">Seleccionar</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-6 col-lg-3">
-                                <div class="card mb-4">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Tema 4</h5>
-                                        <p class="card-text">Tema 4</p>
-                                        <button type="button" class="btn btn-primary">Seleccionar</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-                </div>
             </div>
         </div>
     </div>

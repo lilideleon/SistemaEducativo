@@ -8,11 +8,11 @@
 
         <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
           <div class="app-brand demo">
-            <a href="index.html" class="app-brand-link">
+            <a href="?c=Menu" class="app-brand-link">
               <span class="app-brand-logo demo">
 
               </span>
-              <span class="app-brand-text demo menu-text fw-bolder ms-2">ADECAP.</span>
+              <h3>DON FRANCO</h3>
             </a>
 
             <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -32,6 +32,23 @@
             </li>
 
 
+              <ul class="menu-sub">
+                <li class="menu-item">
+                  <a href="?c=Inventario" class="menu-link">
+                    <div data-i18n="Without menu">Inventario</div>
+                  </a>
+                </li>
+              </ul>
+
+              <ul class="menu-sub">
+                <li class="menu-item">
+                  <a href="?c=Compras" class="menu-link">
+                    <div data-i18n="Without menu">Compras</div>
+                  </a>
+                </li>
+              </ul>
+
+
             <li class="menu-header small text-uppercase">
               <span class="menu-header-text">Contabilidad</span>
             </li>
@@ -42,8 +59,8 @@
               </a>
               <ul class="menu-sub">
                 <li class="menu-item">
-                  <a href="?c=Ventas" class="menu-link">
-                    <div data-i18n="Account">Ventas</div>
+                  <a href="?c=ventas" class="menu-link">
+                    <div data-i18n="Account">ventas</div>
                   </a>
                 </li>
               </ul>
@@ -51,35 +68,51 @@
             <li class="menu-item">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-lock-open-alt"></i>
-                <div data-i18n="Authentications">Asistecia</div>
+                <div data-i18n="Authentications">Caja</div>
               </a>
               <ul class="menu-sub">
+
+
+              <li class="menu-item">
+                  <a href="?c=caja" class="menu-link" >
+                    <div data-i18n="Basic">Caja</div>
+                  </a>
+                </li>
+
+
+                
+
+              </ul>
+            </li>
+            <li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-cube-alt"></i>
+                <div data-i18n="Misc">Asistencia</div>
+                <!-- &nbsp;
+                    <span class="badge badge-warning">EN DESARROLLO</span> -->
+              </a>
+              <ul class="menu-sub">
+ 
                 <li class="menu-item">
                   <a href="?c=Asistencia" class="menu-link">
-                    <div data-i18n="Basic">Asistencia</div>
+                    <div data-i18n="Under Maintenance">Asistencia</div>
                   </a>
                 </li>
               </ul>
             </li>
-            <!-- Components -->
-            <li class="menu-header small text-uppercase"><span class="menu-header-text">Reportes</span></li>
+            
+       
             <!-- Cards -->
             <li class="menu-item">
-              <a href="cards-basic.html" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-collection"></i>
-                <div data-i18n="Basic">Reportes</div>
-              </a>
+                <a href="?c=Ayuda" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-collection"></i>
+                    <div data-i18n="Basic">Ayuda</div> &nbsp;
+                    
+                </a>
             </li>
- 
 
 
-
-            <li class="menu-item">
-              <a href="?c=Notificaciones" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-crown"></i>
-                <div data-i18n="Boxicons">Notificaciones</div>
-              </a>
-            </li>
+           
 
           
           </ul>
@@ -129,7 +162,7 @@
                 <li class="nav-item navbar-dropdown dropdown-user dropdown">
                   <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                     <div class="avatar avatar-online">
-                      <img src="assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                      <img src="img/usericon.png" alt class="w-px-40 h-auto rounded-circle" />
                     </div>
                   </a>
                   
@@ -139,12 +172,12 @@
                         <div class="d-flex">
                           <div class="flex-shrink-0 me-3">
                             <div class="avatar avatar-online">
-                              <img src="assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                              <img src="img/usericon.png" alt class="w-px-40 h-auto rounded-circle" />
                             </div>
                           </div>
                           <div class="flex-grow-1">
-                            <span class="fw-semibold d-block">Usuario</span>
-                            <small class="text-muted">Admin</small>
+                            <span class="fw-semibold d-block"><?php echo $_SESSION['PrimerNombre'] . ' ' . $_SESSION['PrimerApellido']; ?></span>
+                            <small class="text-muted"><?php if($_SESSION['TipoUsuario'] == 1){echo "Admin";} else {echo "Vendedor";} ?></small>
                           </div>
                         </div>
                       </a>
@@ -153,31 +186,15 @@
                       <div class="dropdown-divider"></div>
                     </li>
                     <li>
-                      <a class="dropdown-item" href="#">
-                        <i class="bx bx-user me-2"></i>
-                        <span class="align-middle">Mi perfil</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
+                      <a class="dropdown-item" href="?c=Opciones">
                         <i class="bx bx-cog me-2"></i>
                         <span class="align-middle">Opciones</span>
                       </a>
                     </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        <span class="d-flex align-items-center align-middle">
-                          <i class="flex-shrink-0 bx bx-credit-card me-2"></i>
-                          <span class="flex-grow-1 align-middle">Pagos</span>
-                          <span class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">4</span>
-                        </span>
-                      </a>
-                    </li>
-                    <li>
                       <div class="dropdown-divider"></div>
                     </li>
                     <li>
-                      <a class="dropdown-item" href="?c=Usuarios&a=CerrarSesion">
+                      <a class="dropdown-item" onclick="CerrarSesion()">
                         <i class="bx bx-power-off me-2"></i>
                         <span class="align-middle">Cerrar sesion</span>
                       </a>

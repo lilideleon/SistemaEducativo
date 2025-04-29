@@ -10,6 +10,9 @@ if ($_SESSION['TipoUsuario'] == '') {
 } else if ($_SESSION['TipoUsuario'] == 1) {
     require 'views/Content/sidebar.php'; 
 } 
+else if ($_SESSION['TipoUsuario'] == 2) {
+    require 'views/Content/sidebar2.php'; 
+}
 ?>
 
 <style>
