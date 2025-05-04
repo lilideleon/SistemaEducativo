@@ -90,6 +90,8 @@ function obtenerProductos() {
     });
 }
 
+
+/*
 function seleccionarProducto(id, nombre, precio, stock) {
     // Verificar si el stock es cero
     if (stock === 0) {
@@ -176,6 +178,98 @@ function seleccionarProducto(id, nombre, precio, stock) {
     }
 
     // Actualizar el total general
+    actualizarTotalGeneral();
+}*/
+
+function seleccionarProducto(id, nombre, precio, stock) {
+    $.ajax({
+        url: '?c=Ventas&a=VerificarCombo',
+        method: 'POST',
+        data: { idProducto: id },
+        dataType: 'json',
+        success: function(data) {
+            if (!data.permitido) {
+                alertify.error(data.msj || 'No se puede vender este producto.');
+                return;
+            }
+
+            // Si todo está bien, agregar producto a la orden
+            agregarProductoAVenta(id, nombre, precio);
+        },
+        error: function(error) {
+            console.error('Error al verificar combo:', error);
+            alertify.error('No se pudo verificar el producto.');
+        }
+    });
+}
+
+function agregarProductoAVenta(id, nombre, precio) {
+    const listaOrdenes = document.getElementById('listaOrdenes');
+    const filaExistente = listaOrdenes.querySelector(`tr[data-id='${id}']`);
+
+    if (filaExistente) {
+        const cantidadInput = filaExistente.querySelector('.cantidad');
+        cantidadInput.value = parseInt(cantidadInput.value) + 1;
+
+        const totalCell = filaExistente.querySelector('.total');
+        const nuevaCantidad = parseInt(cantidadInput.value);
+        totalCell.textContent = (precio * nuevaCantidad).toFixed(2);
+    } else {
+        const cantidad = 1;
+        const total = precio * cantidad;
+
+        const nuevaFila = document.createElement('tr');
+        nuevaFila.setAttribute('data-id', id);
+
+        const tdNombre = document.createElement('td');
+        tdNombre.textContent = nombre;
+        nuevaFila.appendChild(tdNombre);
+
+        const tdPrecio = document.createElement('td');
+        tdPrecio.textContent = precio.toFixed(2);
+        nuevaFila.appendChild(tdPrecio);
+
+        const tdCantidad = document.createElement('td');
+        const btnMas = document.createElement('button');
+        btnMas.className = 'btn btn-success btn-sm';
+        btnMas.textContent = '+';
+        btnMas.onclick = function () { actualizarCantidad(this, 1, precio); };
+        tdCantidad.appendChild(btnMas);
+
+        const inputCantidad = document.createElement('input');
+        inputCantidad.type = 'number';
+        inputCantidad.className = 'cantidad';
+        inputCantidad.value = cantidad;
+        inputCantidad.min = 1;
+        inputCantidad.style.width = '50px';
+        inputCantidad.style.textAlign = 'center';
+        inputCantidad.onchange = function () { actualizarCantidadInput(this, precio); };
+        tdCantidad.appendChild(inputCantidad);
+
+        const btnMenos = document.createElement('button');
+        btnMenos.className = 'btn btn-warning btn-sm';
+        btnMenos.textContent = '-';
+        btnMenos.onclick = function () { actualizarCantidad(this, -1, precio); };
+        tdCantidad.appendChild(btnMenos);
+
+        nuevaFila.appendChild(tdCantidad);
+
+        const tdTotal = document.createElement('td');
+        tdTotal.className = 'total';
+        tdTotal.textContent = total.toFixed(2);
+        nuevaFila.appendChild(tdTotal);
+
+        const tdAccion = document.createElement('td');
+        const btnEliminar = document.createElement('button');
+        btnEliminar.className = 'btn btn-danger btn-sm';
+        btnEliminar.textContent = 'x';
+        btnEliminar.onclick = function () { eliminarProducto(this); };
+        tdAccion.appendChild(btnEliminar);
+        nuevaFila.appendChild(tdAccion);
+
+        listaOrdenes.appendChild(nuevaFila);
+    }
+
     actualizarTotalGeneral();
 }
 

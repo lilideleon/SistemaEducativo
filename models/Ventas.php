@@ -74,7 +74,7 @@
         }
 
         // MÉTODO PARA OBTENER PRODUCTOS
-        public function obtenerProductos() {
+        /*public function obtenerProductos() {
             try {
                 $this->ConexionSql = $this->Conexion->CrearConexion();
                 $this->SentenciaSql = "SELECT 
@@ -97,9 +97,103 @@
             } finally {
                 $this->Conexion->CerrarConexion();
             }
+        }*/
+
+
+        public function obtenerProductos() {
+            try {
+                $this->ConexionSql = $this->Conexion->CrearConexion();
+        
+                // Ejecutar el SET por separado
+                $this->ConexionSql->exec("SET @rn := 0, @prev := NULL;");
+        
+                // Ahora ejecutar el SELECT
+                $this->SentenciaSql = "
+                    SELECT IdProducto, Nombre, PrecioCosto, PrecioVenta, Imagen, Cantidad
+                    FROM (
+                        SELECT 
+                            p.IdProducto, 
+                            p.Nombre, 
+                            p.PrecioCosto, 
+                            p.PrecioVenta, 
+                            p.Imagen,
+                            IFNULL(i.Cantidad, 0) AS Cantidad,
+                            @rn := IF(@prev = p.IdProducto, @rn + 1, 1) AS row_num,
+                            @prev := p.IdProducto
+                        FROM (
+                            SELECT DISTINCT
+                                p.IdProducto, 
+                                p.Nombre, 
+                                p.PrecioCosto, 
+                                p.PrecioVenta, 
+                                p.Imagen
+                            FROM despiecesproducto d
+                            INNER JOIN productos p ON p.IdProducto = d.ProductoOrigenId
+                            WHERE p.Estado = 1 AND d.Estado = 1
+        
+                            UNION ALL
+        
+                            SELECT DISTINCT
+                                p.IdProducto, 
+                                p.Nombre, 
+                                p.PrecioCosto, 
+                                p.PrecioVenta, 
+                                p.Imagen
+                            FROM despiecesproducto d
+                            INNER JOIN productos p ON p.IdProducto = d.ProductoResultadoId
+                            WHERE p.Estado = 1 AND d.Estado = 1
+                        ) AS p
+                        LEFT JOIN inventario i ON i.ProductoId = p.IdProducto AND i.Estado = 1
+                        ORDER BY p.IdProducto, Cantidad DESC
+                    ) AS final
+                    WHERE row_num = 1;
+                ";
+        
+                $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
+                $this->Procedure->execute();
+                return $this->Procedure->fetchAll(PDO::FETCH_OBJ);
+        
+            } catch (Exception $e) {
+                echo "ERROR AL OBTENER PRODUCTOS: " . $e->getMessage();
+            } finally {
+                $this->Conexion->CerrarConexion();
+            }
         }
-
-
+        
+        public function verificarCombo($idProducto) {
+            try {
+                $conn = $this->Conexion->CrearConexion();
+        
+                $sql = "SELECT dp.ProductoResultadoId, dp.Cantidad, IFNULL(i.Cantidad, 0) AS StockDisponible
+                        FROM despiecesproducto dp
+                        LEFT JOIN inventario i ON i.ProductoId = dp.ProductoResultadoId AND i.Estado = 1
+                        WHERE dp.ProductoOrigenId = ? AND dp.Estado = 1";
+        
+                $stmt = $conn->prepare($sql);
+                $stmt->execute([$idProducto]);
+                $componentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+                if (count($componentes) === 0) {
+                    return ['esCombo' => false, 'permitido' => true];
+                }
+        
+                foreach ($componentes as $comp) {
+                    if ($comp['StockDisponible'] < $comp['Cantidad']) {
+                        return [
+                            'esCombo' => true,
+                            'permitido' => false,
+                            'msj' => 'Falta stock para el componente ID ' . $comp['ProductoResultadoId']
+                        ];
+                    }
+                }
+        
+                return ['esCombo' => true, 'permitido' => true];
+            } catch (Exception $e) {
+                return ['esCombo' => null, 'permitido' => false, 'msj' => 'Error: ' . $e->getMessage()];
+            } finally {
+                $this->Conexion->CerrarConexion();
+            }
+        }
         
 
 

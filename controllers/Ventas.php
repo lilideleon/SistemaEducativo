@@ -200,6 +200,26 @@
             header('Content-Type: application/json');
             echo json_encode($response);
         }
+
+
+
+		public function VerificarCombo() {
+			$Ejecuta = new Ventas_model();
+			header('Content-Type: application/json');
+		
+			try {
+				$idProducto = $_POST['idProducto'];
+				$resultado = $Ejecuta->verificarCombo($idProducto);
+		
+				echo json_encode($resultado);
+			} catch (Exception $e) {
+				echo json_encode([
+					'esCombo' => null,
+					'permitido' => false,
+					'msj' => 'Error al procesar la solicitud: ' . $e->getMessage()
+				]);
+			}
+		}
 		
 
 
