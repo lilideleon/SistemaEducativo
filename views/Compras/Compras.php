@@ -225,7 +225,7 @@ if ($_SESSION['TipoUsuario'] == '') {
 
         row.innerHTML = `
             <td>
-                <select class="form-control chosen-select" name="ProductoId[]" required>
+                <select class="form-control chosen-select" name="ProductoId[]" required onchange="actualizarPrecioCosto(this)">
                     <option value="">Seleccione un producto</option>
                 </select>
             </td>
@@ -244,22 +244,35 @@ if ($_SESSION['TipoUsuario'] == '') {
         fetch('?c=Compras&a=ObtenerProducto', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: JSON.stringify({ nombreProducto: '' }) // Optionally, you can pass a search term here
+            body: 'nombreProducto='
         })
         .then(response => response.json())
-       .then(data => {
-    const select = row.querySelector('select[name="ProductoId[]"]');
-    data.forEach(producto => {
-        const option = document.createElement('option');
-        option.value = producto.idProducto; // Usar la clave correcta del objeto
-        option.textContent = producto.Nombre; // Usar la clave correcta del objeto
-        select.appendChild(option);
-    });
-    $(select).trigger('chosen:updated');
-})
+        .then(data => {
+            const select = row.querySelector('select[name="ProductoId[]"]');
+            data.forEach(producto => {
+                const option = document.createElement('option');
+                option.value = producto.idProducto;
+                option.textContent = producto.Nombre;
+                option.dataset.precioCosto = producto.PrecioCosto;
+                select.appendChild(option);
+            });
+            $(select).trigger('chosen:updated');
+        })
         .catch(error => console.error('Error fetching products:', error));
+    }
+
+    function actualizarPrecioCosto(select) {
+        const row = select.closest('tr');
+        const selectedOption = select.options[select.selectedIndex];
+        const precioCosto = selectedOption.dataset.precioCosto;
+        const precioUnitarioInput = row.querySelector('input[name="PrecioUnitario[]"]');
+        
+        if (precioCosto) {
+            precioUnitarioInput.value = precioCosto;
+            ActualizarSubtotal(precioUnitarioInput);
+        }
     }
 
     function EliminarFilaDetalle(button) {
@@ -418,7 +431,7 @@ if ($_SESSION['TipoUsuario'] == '') {
     }
 
 
-    // Función para eliminar una compraq
+    // Función para eliminar una compra
 
     function EliminarCompra(compraId) {
 
