@@ -358,7 +358,7 @@ function finalizarOrden() {
         });
     });
 
-    // Enviar la factura al servidor usando AJAX
+    // Enviar la factura y los detalles al servidor en una sola solicitud
     $.ajax({
         url: '?c=Ventas&a=GuardarFactura',
         method: 'POST',
@@ -368,36 +368,41 @@ function finalizarOrden() {
             if (data.success) {
                 const facturaId = data.facturaId;
 
-                // Enviar los detalles de la factura
+                // Agregar el ID de la factura a cada detalle
                 factura.Detalles.forEach(detalle => {
                     detalle.IdFactura = facturaId;
-                    $.ajax({
-                        url: '?c=Ventas&a=Guardardetallefactura',
-                        method: 'POST',
-                        data: detalle,
-                        dataType: 'json',
-                        success: function(detalleData) {
-                            if (!detalleData.success) {
-                                console.error('Error al guardar el detalle:', detalleData.msj);
-                            }
-                        }
-                    });
                 });
 
-                //alertify para preguntar si desea imprimir el ticket
+                // Enviar todos los detalles en una sola solicitud
+                $.ajax({
+                    url: '?c=Ventas&a=Guardardetallefactura',
+                    method: 'POST',
+                    data: JSON.stringify(factura.Detalles),
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    success: function(detalleData) {
+                        if (detalleData.success) {
+                            alertify.confirm('¿Desea imprimir el ticket?', function(e) {
+                                if (e) {
+                                    ImprimirTicket(facturaId);
+                                }
+                            });
 
-                alertify.confirm('¿Desea imprimir el ticket?', function(e) {
-                    if (e) {
-                        ImprimirTicket(facturaId);
+                            alertify.success('Orden finalizada y factura generada exitosamente.');
+                            document.getElementById('listaOrdenes').innerHTML = ''; // Limpiar la tabla
+                            actualizarTotalGeneral();
+
+                            // Volver a cargar los productos
+                            obtenerProductos();
+                        } else {
+                            alertify.error('Error al guardar los detalles de la factura: ' + detalleData.msj);
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Error al guardar los detalles de la factura:', error);
+                        alertify.error('Ocurrió un error al guardar los detalles de la factura.');
                     }
                 });
-
-                alertify.success('Orden finalizada y factura generada exitosamente.');
-                document.getElementById('listaOrdenes').innerHTML = ''; // Limpiar la tabla
-                actualizarTotalGeneral();
-
-                // Volver a cargar los productos
-                obtenerProductos();
             } else {
                 alertify.error('Error al generar la factura: ' + data.msj);
             }
