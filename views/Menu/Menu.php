@@ -1,438 +1,198 @@
-<?php 
-   include 'views/Content/header.php';
-?>
- 
- <?php 
-                           
-    if($_SESSION['TipoUsuario'] == '')
-    {
-        print "<script>
-            window.location='?c=Login'; 
-            </script>";
-    }
-    else if($_SESSION['TipoUsuario'] == 1)
-    {
-        require 'views/Content/sidebar.php'; 
-            print "<script>
-                console.log($TipoUsuario);
-            </script>";
-    }
-    else if($_SESSION['TipoUsuario'] == 2)
-    {
-        require 'views/Content/sidebar2.php'; 
-            print "<script>
-                console.log($TipoUsuario);
-            </script>";
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sistema Educativo — Menú Principal</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg-teal: #4f8f8a;          /* fondo general estilo maqueta */
+      --panel-border: #2e655f;     /* bordes áreas de contenido */
+      --title-blue: #235c9c;       /* título superior */
+      --sidebar-header: #a8c0bb;   /* cabecera "Principal" */
     }
 
-
-?>
-
-<style>
-    .stats-card {
-        transition: all 0.3s ease;
-        border: none;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    .stats-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
-    
-    .stats-icon {
-        width: 48px;
-        height: 48px;
-        margin-bottom: 1rem;
-    }
-    
-    .stats-title {
-        color: #566a7f;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        margin-bottom: 0.5rem;
-    }
-    
-    .stats-value {
-        color: #566a7f;
-        font-size: 1.5rem;
-        font-weight: bold;
-    }
-    
-    .chart-container {
-        position: relative;
-        margin: 20px 0;
-        height: 300px;
+    body {
+      min-height: 100vh;
+      background-color: var(--bg-teal);
+      display: flex;
+      flex-direction: column;
     }
 
-    .trend-indicator {
-        font-size: 0.8rem;
-        padding: 2px 8px;
-        border-radius: 12px;
+    /* Título centrado dentro de una caja blanca, como en la imagen */
+    .title-box {
+      background: #ffffff;
+      color: var(--title-blue);
+      font-weight: 700;
+      border-radius: .25rem;
+      display: inline-block;
+      padding: .4rem 1.5rem;
+      box-shadow: 0 2px 0 rgba(0,0,0,.25) inset;
     }
 
-    .trend-up {
-        background-color: #e8f5e9;
-        color: #2e7d32;
+    /* Layout principal */
+    .app-wrapper { flex: 1; }
+
+    /* Sidebar */
+    .sidebar {
+      max-width: 260px;
+      width: 100%;
     }
 
-    .trend-down {
-        background-color: #ffebee;
-        color: #c62828;
+    .sidebar-box {
+      background: rgba(255,255,255,.1);
+      border-radius: .5rem;
+      padding: .75rem;
     }
-</style>
 
-<div class="content-wrapper" style="padding: 20px;">
-    <div class="container-fluid">
-        <!-- Tarjetas de Estadísticas -->
-        <div class="row g-4 mb-4">
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card stats-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <h6 class="stats-title mb-2">Ventas del Día</h6>
-                                <h3 class="stats-value mb-2" id="ventasHoy">Q. 0.00</h3>
-                                <small class="trend-indicator trend-up" id="ventasTrend">
-                                    <i class="bx bx-up-arrow-alt"></i> ventas diarias
-                                </small>
-                            </div>
-                            <div class="avatar bg-light-primary p-2">
-                                <i class="bx bx-cart text-primary" style="font-size: 2rem;"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    .sidebar-header {
+      background: var(--sidebar-header);
+      color: #1f2937;
+      font-weight: 600;
+      padding: .5rem .75rem;
+      border-radius: .35rem;
+      text-align: left;
+      margin-bottom: .75rem;
+    }
 
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card stats-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <h6 class="stats-title mb-2">Productos Activos</h6>
-                                <h3 class="stats-value mb-2" id="productosActivos">0</h3>
-                                <small class="trend-indicator trend-up" id="productosTrend">
-                                    <i class="bx bx-box"></i> en stock
-                                </small>
-                            </div>
-                            <div class="avatar bg-light-success p-2">
-                                <i class="bx bx-box text-success" style="font-size: 2rem;"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    /* Botones estilo "capsula" con brillo azulado */
+    .btn-glow {
+      position: relative;
+      border: 0;
+      border-radius: 1rem;
+      padding: .9rem 1.1rem;
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: .2px;
+      background:
+        radial-gradient(140% 120% at 50% 40%, rgba(255,255,255,.28) 0%, rgba(255,255,255,.08) 42%, rgba(0,0,0,.22) 75%),
+        linear-gradient(180deg, #0f1c2e 0%, #1f3554 100%);
+      box-shadow: 0 8px 18px rgba(0,0,0,.25), inset 0 -2px 0 rgba(255,255,255,.1);
+      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+      text-align: left;
+    }
+    .btn-glow:hover { transform: translateY(-2px); filter: brightness(1.02); }
+    .btn-glow.active { outline: 2px solid rgba(255,255,255,.35); }
 
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card stats-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <h6 class="stats-title mb-2">Usuarios Activos</h6>
-                                <h3 class="stats-value mb-2" id="usuariosActivos">0</h3>
-                                <small class="trend-indicator trend-up" id="usuariosTrend">
-                                    <i class="bx bx-user"></i> registrados
-                                </small>
-                            </div>
-                            <div class="avatar bg-light-info p-2">
-                                <i class="bx bx-user text-info" style="font-size: 2rem;"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    /* Área de contenido con bordes marcados como en la maqueta */
+    .content-panel {
+      background: transparent;
+      border: 2px solid var(--panel-border);
+      border-radius: .25rem;
+      min-height: 36vh;
+    }
 
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card stats-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <h6 class="stats-title mb-2">Compras del Mes</h6>
-                                <h3 class="stats-value mb-2" id="comprasMes">Q. 0.00</h3>
-                                <small class="trend-indicator trend-up" id="comprasTrend">
-                                    <i class="bx bx-up-arrow-alt"></i> procesadas
-                                </small>
-                            </div>
-                            <div class="avatar bg-light-warning p-2">
-                                <i class="bx bx-shopping-bag text-warning" style="font-size: 2rem;"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Gráficas -->
-        <div class="row g-4">
-            <!-- Gráfica de Ventas -->
-            <div class="col-12 col-xl-8">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">Ventas vs Tiempo</h5>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="ventasRange" data-bs-toggle="dropdown">
-                                Últimos 7 días
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#" onclick="cambiarRangoVentas('7')">Últimos 7 días</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="cambiarRangoVentas('30')">Último mes</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="cambiarRangoVentas('90')">Último trimestre</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="ventasChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Gráfica de Productos -->
-            <div class="col-12 col-xl-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Top Productos Vendidos</h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="productosChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tabla de Últimas Transacciones -->
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Últimas Transacciones</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Fecha</th>
-                                        <th>Tipo</th>
-                                        <th>Cliente/Proveedor</th>
-                                        <th>Total</th>
-                                        <th>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="ultimasTransacciones">
-                                    <!-- Se llenará dinámicamente -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    @media (max-width: 767.98px) {
+      .sidebar { max-width: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Encabezado -->
+  <header class="container py-3">
+    <div class="d-flex justify-content-center">
+      <div class="title-box h5 mb-0">Sistema Educativo</div>
     </div>
-</div>
+  </header>
 
-<!-- Incluir Chart.js -->
-<script src="res/plugins/chart.js/Chart.min.js"></script>
+  <!-- Botón para abrir menú en móviles -->
+  <div class="container d-md-none mb-2">
+    <button class="btn btn-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
+      <i class="bi bi-list"></i> Menú
+    </button>
+  </div>
 
-<script>
-window.onload = function() {
-    cargarDashboard();
-    inicializarGraficas();
-};
+  <!-- Contenido principal -->
+  <main class="container app-wrapper pb-4">
+    <div class="row g-3">
+      <!-- Sidebar (desktop) -->
+      <aside class="col-md-3 col-lg-2 d-none d-md-block sidebar">
+        <div class="sidebar-box">
+          <div class="sidebar-header">Principal</div>
+          <div class="d-grid gap-3">
+            <button class="btn btn-glow fs-5" data-section="menu"><i class="bi bi-grid-fill me-2"></i>Menú</button>
+            <button class="btn btn-glow fs-5" data-section="alumnos"><i class="bi bi-people-fill me-2"></i>Alumnos</button>
+            <button class="btn btn-glow fs-5" data-section="directores"><i class="bi bi-person-gear me-2"></i>Directores</button>
+            <button class="btn btn-glow fs-5" data-section="evaluacion"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</button>
+            <button class="btn btn-glow fs-5" data-section="reportes"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</button>
+          </div>
+        </div>
+      </aside>
 
-function cargarDashboard() {
-    // Cargar estadísticas
-    obtenerEstadistica('TotalVentasPorDia', '#ventasHoy', 'Q. ');
-    obtenerEstadistica('TotalProductosActivos', '#productosActivos', '');
-    obtenerEstadistica('TotalUsuariosActivos', '#usuariosActivos', '');
-    obtenerEstadistica('TotalComprasMes', '#comprasMes', 'Q. ');
-    
-    // Cargar últimas transacciones
-    cargarUltimasTransacciones();
-}
+      <!-- Offcanvas (mobile) -->
+      <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasSidebar" aria-labelledby="offcanvasSidebarLabel">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title" id="offcanvasSidebarLabel">Principal</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+        </div>
+        <div class="offcanvas-body">
+          <div class="d-grid gap-3">
+            <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="menu"><i class="bi bi-grid-fill me-2"></i>Menú</button>
+            <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="alumnos"><i class="bi bi-people-fill me-2"></i>Alumnos</button>
+            <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="directores"><i class="bi bi-person-gear me-2"></i>Directores</button>
+            <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="evaluacion"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</button>
+            <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="reportes"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</button>
+          </div>
+        </div>
+      </div>
 
-function obtenerEstadistica(accion, selector, prefijo) {
-    $.ajax({
-        url: '?c=Menu&a=' + accion,
-        type: 'GET',
-        dataType: 'json',
-        success: function(response) {
-            if (response && response.length > 0) {
-                // Obtener dinámicamente el primer valor del primer objeto
-                let valor = Object.values(response[0])[0];
+      <!-- Área de contenido -->
+      <section class="col-md-9 col-lg-10">
+        <div class="content-panel mb-3 p-3" id="panelTop">
+          <h2 class="h6 text-white-50 mb-3" id="contentTitle">Bienvenido</h2>
+          <div id="contentArea" class="text-white">
+            <p class="mb-0">Selecciona una opción del menú para cargar contenido aquí.</p>
+          </div>
+        </div>
+        <div class="content-panel p-3" id="panelBottom">
+          <h2 class="h6 text-white-50 mb-3">Panel secundario</h2>
+          <p class="text-white-50 mb-0">Espacio para tablas, gráficos o formularios.</p>
+        </div>
+      </section>
+    </div>
+  </main>
 
-                $(selector).text(prefijo + formatearNumero(valor));
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Interacciones simples de ejemplo
+    const items = document.querySelectorAll('[data-section]');
+    const title = document.getElementById('contentTitle');
+    const area  = document.getElementById('contentArea');
 
-                // Si la tendencia es parte del objeto, intentamos obtenerla también
-                let tendencia = response[0].tendencia !== undefined ? response[0].tendencia : 0;
+    const TEMPLATES = {
+      menu: `<div class="row g-3">
+              <div class="col-md-6">
+                <div class="p-3 bg-dark bg-opacity-25 rounded">Acceso rápido a módulos.</div>
+              </div>
+              <div class="col-md-6">
+                <div class="p-3 bg-dark bg-opacity-25 rounded">Atajos configurables.</div>
+              </div>
+            </div>`,
+      alumnos: `<div class="bg-dark bg-opacity-25 rounded p-3">Listado, inscripción, historial académico…</div>`,
+      directores: `<div class="bg-dark bg-opacity-25 rounded p-3">Gestión de directores y permisos.</div>`,
+      evaluacion: `<div class="bg-dark bg-opacity-25 rounded p-3">Rubricas, calificaciones y reportes parciales.</div>`,
+      reportes: `<div class="bg-dark bg-opacity-25 rounded p-3">KPIs, exportación y tableros.</div>`
+    };
 
-                if (tendencia > 0) {
-                    $(selector).siblings('.trend-indicator')
-                        .removeClass('trend-down')
-                        .addClass('trend-up')
-                        .find('i')
-                        .removeClass('bx-down-arrow-alt')
-                        .addClass('bx-up-arrow-alt');
-                } else if (tendencia < 0) {
-                    $(selector).siblings('.trend-indicator')
-                        .removeClass('trend-up')
-                        .addClass('trend-down')
-                        .find('i')
-                        .removeClass('bx-up-arrow-alt')
-                        .addClass('bx-down-arrow-alt');
-                }
-            }
-        },
-        error: function() {
-            console.error('Error al obtener estadística:', accion);
-        }
+    function setActive(btn){
+      items.forEach(i => i.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    items.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const section = btn.getAttribute('data-section');
+        setActive(btn);
+        title.textContent = section.charAt(0).toUpperCase() + section.slice(1);
+        area.innerHTML = TEMPLATES[section] || '';
+      });
     });
-}
-
-
-function inicializarGraficas() {
-    // Gráfica de Ventas
-    const ctxVentas = document.getElementById('ventasChart').getContext('2d');
-    window.ventasChart = new Chart(ctxVentas, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'Ventas',
-                data: [],
-                borderColor: '#696cff',
-                tension: 0.4,
-                fill: true,
-                backgroundColor: 'rgba(105, 108, 255, 0.1)'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return 'Q. ' + value;
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    // Gráfica de Productos
-    const ctxProductos = document.getElementById('productosChart').getContext('2d');
-    window.productosChart = new Chart(ctxProductos, {
-        type: 'doughnut',
-        data: {
-            labels: [],
-            datasets: [{
-                data: [],
-                backgroundColor: [
-                    '#696cff',
-                    '#71dd37',
-                    '#03c3ec',
-                    '#ffab00',
-                    '#ff3e1d'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
-
-    // Cargar datos iniciales basado en el tiempo o dias elegidos
-    actualizarGraficaVentas($('#ventasRange').text());
-    actualizarGraficaProductos($('#ventasRange').text());
-}
-
-function actualizarGraficaVentas(dias) {
-    $.ajax({
-        url: '?c=Menu&a=ProductosMasVendidos',
-        type: 'GET',
-        data: { dias: dias },
-        dataType: 'json',
-        success: function(response) {
-            console.log(response);
-            if (response && response.labels && response.datos) {
-                window.ventasChart.data.labels = response.labels;
-                window.ventasChart.data.datasets[0].data = response.datos;
-                window.ventasChart.update();
-
-            }
-        }
-    });
-}
-
-function actualizarGraficaProductos(dias) {
-    $.ajax({
-        url: '?c=Menu&a=ProductosMasVendidos',
-        type: 'GET',
-        data: { dias: dias },
-
-        dataType: 'json',
-        success: function(response) {
-            if (response && response.labels && response.datos) {
-                window.productosChart.data.labels = response.labels;
-                window.productosChart.data.datasets[0].data = response.datos;
-                window.productosChart.update();
-            }
-        }
-    });
-}
-
-function cargarUltimasTransacciones() {
-    $.ajax({
-        url: '?c=Menu&a=getTransacciones',
-        type: 'GET',
-        dataType: 'json',
-        success: function(response) {
-            if (response && response.length > 0) {
-                const tbody = $('#ultimasTransacciones');
-                tbody.empty();
-                
-                response.forEach(trans => {
-                    tbody.append(`
-                        <tr>
-                            <td>${trans.Id}</td>
-                            <td>${trans.Fecha}</td>
-                            <td>${trans.Tipo}</td>
-                            <td>${trans.ClienteProveedor}</td>
-                            <td>Q. ${formatearNumero(trans.Total)}</td>
-                            <td><span class="badge bg-${trans.Estado === 'Activo' ? 'success' : 'danger'}">${trans.Estado}</span></td>
-                        </tr>
-                    `);
-                });
-            }
-        }
-    });
-}
-
-function cambiarRangoVentas(dias) {
-    $('#ventasRange').text(dias === '7' ? 'Últimos 7 días' : 
-                          dias === '30' ? 'Último mes' : 'Último trimestre');
-    actualizarGraficaVentas(dias);
-    actualizarGraficaProductos(dias);
-}
-
-function formatearNumero(numero) {
-    return new Intl.NumberFormat('es-GT', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }).format(numero);
-}
-
-// Actualizar datos cada 5 minutos
-setInterval(cargarDashboard, 300000);
-</script>
-
-<?php require 'views/Content/footer.php'; ?>
+  </script>
+</body>
+</html>

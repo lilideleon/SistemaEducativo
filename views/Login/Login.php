@@ -124,25 +124,53 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // Validación nativa Bootstrap 5
+    // Manejo del formulario de login
     (() => {
       const form = document.getElementById('loginForm');
-      form.addEventListener('submit', (event) => {
-        if (!form.checkValidity()) {
-          event.preventDefault();
-          event.stopPropagation();
-        } else {
-          event.preventDefault(); // Quita esto cuando conectes el backend
-          // Demo: mostrar datos en consola
-          const data = Object.fromEntries(new FormData(form).entries());
-          console.log('Enviando login', data);
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
 
-          // Simula respuesta OK
+        if (form.checkValidity()) {
           const btn = form.querySelector('button[type="submit"]');
           const original = btn.innerHTML;
-          btn.disabled = true; btn.innerHTML = 'Ingresando…';
-          setTimeout(() => { btn.disabled = false; btn.innerHTML = original; alert('Login correcto (demo)'); }, 800);
+          
+          try {
+            // Mostrar estado de carga
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Ingresando...';
+
+            // Realizar la petición al servidor
+            const response = await fetch('?c=Login&a=Validate', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: new URLSearchParams({
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value
+              })
+            });
+
+            const data = await response.json();
+            
+            // Redirigir al menú si la respuesta es exitosa
+            if (data.success) {
+              window.location.href = '?c=Menu';
+            } else {
+              // Mostrar mensaje de error si es necesario
+              alert('Error en las credenciales');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            // En caso de error, redirigir de todas formas (según lo solicitado)
+            window.location.href = '?c=Menu';
+          } finally {
+            btn.disabled = false;
+            btn.innerHTML = original;
+          }
         }
+        
         form.classList.add('was-validated');
       }, false);
     })();
