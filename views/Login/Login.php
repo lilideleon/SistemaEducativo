@@ -1,131 +1,162 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Login</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <link rel="stylesheet" href="./css/main.css">
-    <!-- Alertify local CSS -->
-    <link rel="stylesheet" href="res/plugins/Alertify/css/alertify.min.css"/>
-    <link rel="stylesheet" href="res/plugins/Alertify/css/alertify.rtl.min.css"/>
-    <link rel="stylesheet" href="res/plugins/Alertify/css/themes/default.rtl.min.css"/>
-    <link rel="stylesheet" href="res/plugins/Alertify/css/themes/semantic.rtl.min.css"/>
-    <link rel="stylesheet" href="res/plugins/Alertify/css/themes/bootstrap.rtl.min.css"/>
-    <style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sistema Educativo — Login</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Icons (opcional) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      --brand: #0d6efd; /* primary */
+      --brand-2: #6ea8fe; /* primary-300 approx */
+    }
+
     body {
-        background: #fff !important;
-        color: #000 !important;
+      min-height: 100vh;
+      background: radial-gradient(1200px 1200px at 80% -10%, rgba(80, 147, 138, 0.3), transparent),
+                  radial-gradient(900px 900px at -10% 110%, rgba(80, 147, 138, 0.2), transparent),
+                  linear-gradient(180deg, #50938a, #3a6b64);
+      display: grid;
+      place-items: center;
     }
-    .full-box.login-container.cover {
-        position: relative;
-        background-color: #fff;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+
+    .login-card {
+      width: 100%;
+      max-width: 440px;
+      margin: 0 auto;
+      background-color: #dee7e5;
+      border: 1px solid rgba(80, 147, 138, 0.2);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.08);
+      border-radius: 1.25rem;
     }
-    .login-form-box {
-        background: #f9f9f9;
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-        border-radius: 16px;
-        padding: 40px 30px 30px 30px;
-        max-width: 400px;
-        width: 100%;
-        margin: 40px auto;
-        z-index: 2;
-        color: #000;
-        min-height: 520px; /* Aumenta el alto mínimo del contenedor */
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+
+    .brand-badge {
+      width: 56px; height: 56px;
+      display: grid; place-items: center;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color: #fff; font-weight: 700;
+      box-shadow: 0 10px 25px rgba(13,110,253,.35);
     }
-    .login-form-box label,
-    .login-form-box p,
-    .login-form-box .form-control {
-        color: #000 !important;
+
+    .form-check-input:checked {
+      background-color: var(--brand);
+      border-color: var(--brand);
     }
-    .form-control::placeholder {
-        color: #888 !important;
-        opacity: 1;
+
+    .btn-brand {
+      background: #888484;
+      color: #212529;
+      border: 1px solid #dee2e6;
+      transition: all 0.2s ease;
     }
-    .btn-info {
-        background-color: #17a2b8;
-        border: none;
+    .btn-brand:hover {
+      background: #dee2e6;
+      color: #212529;
     }
-    .btn-info:hover {
-        background-color: #138496;
-    }
-    </style>
+
+    .input-group .form-control:focus { z-index: 3; }
+
+    .footer-links a { color: #6c757d; text-decoration: none; }
+    .footer-links a:hover { color: #0d6efd; text-decoration: underline; }
+  </style>
 </head>
 <body>
-    <div class="full-box login-container cover">
-        <div class="login-form-box">
-            <form action="#" method="post" autocomplete="off" class="logInForm">
-                <div class="text-center mb-3">
-                    <img src="img/logo.png" alt="Logo" style="max-width:120px; max-height:120px; margin-bottom:10px;">
-                </div>
-                <p class="text-center text-muted text-uppercase">Inicia sesión con tu cuenta</p>
-                <div class="form-group label-floating">
-                    <label class="control-label" for="UserName">Usuario</label>
-                    <input class="form-control" id="UserName" name="UserName" type="text" required placeholder="Usuario">
-                    <p class="help-block">Escribe tú nombre de usuario</p>
-                </div>
-                <div class="form-group label-floating">
-                    <label class="control-label" for="UserPass">Contraseña</label>
-                    <input class="form-control" id="UserPass" name="UserPass" type="password" required placeholder="Contraseña">
-                    <p class="help-block">Escribe tú contraseña</p>
-                </div>
-                <div class="form-group text-center">
-                    <button type="button" class="btn btn-info" style="color: #FFF;" onclick="iniciarSesion()">Iniciar sesión</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <!--====== Scripts: Core JS -->
-    <script src="./js/jquery-3.1.1.min.js"></script>
-    <script src="./js/bootstrap.min.js"></script>
-    <script src="./js/material.min.js"></script>
-    <script src="./js/ripples.min.js"></script>
-    <script src="./js/sweetalert2.min.js"></script>
-    <script src="./js/jquery.mCustomScrollbar.concat.min.js"></script>
-    <script src="./js/main.js"></script>
-    <!-- Alertify local JS -->
-    <script src="res/plugins/Alertify/alertify.min.js"></script>
-    <script>
-        $.material.init();
-        function iniciarSesion() {
-            // Obtener los datos del formulario
-            var formData = {
-                UserName: $('#UserName').val(),
-                UserPass: $('#UserPass').val()
-            };
-            // Validar que los campos no estén vacíos
-            if (!formData.UserName || !formData.UserPass) {
-                alertify.error('Por favor, completa todos los campos');
-                return;
-            }
-            // Enviar los datos al controlador mediante AJAX
-            $.ajax({
-                url: '?c=Login&a=Validate',
-                type: 'POST',
-                data: formData,
-                dataType: 'json',
-                success: function (response) {
-                    if (response.success) {
-                        alertify.success('Bienvenido al Sistema');
-                        setTimeout(function () {
-                            window.location.href = '?c=Menu';
-                        }, 2000);
-                    } else {
-                        alertify.error('Usuario o contraseña incorrectos');
-                    }
-                },
-                error: function (xhr, status, error) {
-                    alertify.error('Error al iniciar sesión: ' + error);
-                }
-            });
+  <main class="container d-flex align-items-center justify-content-center min-vh-100 py-4">
+    <div class="card login-card p-3 p-sm-4 p-md-5">
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <div class="brand-badge">
+          <i class="bi bi-mortarboard-fill fs-4" aria-hidden="true"></i>
+        </div>
+        <div>
+          <h1 class="h4 mb-1">Sistema Educativo</h1>
+          <p class="text-secondary mb-0">Inicia sesión con tu cuenta</p>
+        </div>
+      </div>
+
+      <form class="needs-validation" novalidate id="loginForm">
+        <div class="mb-3">
+          <label for="username" class="form-label">Usuario</label>
+          <input type="text" class="form-control" id="username" name="username" placeholder="admin" required autocomplete="username" />
+          <div class="invalid-feedback">Ingresa tu usuario.</div>
+        </div>
+
+        <div class="mb-2">
+          <label for="password" class="form-label">Contraseña</label>
+          <div class="input-group">
+            <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required autocomplete="current-password" />
+            <button class="btn btn-outline-secondary" type="button" id="togglePass" aria-label="Mostrar u ocultar contraseña">
+              <i class="bi bi-eye" id="eyeIcon" aria-hidden="true"></i>
+            </button>
+            <div class="invalid-feedback">Ingresa tu contraseña.</div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="1" id="rememberMe" />
+            <label class="form-check-label" for="rememberMe">Recordarme</label>
+          </div>
+          <a href="#" class="small">Olvidé mi contraseña</a>
+        </div>
+
+        <div class="d-grid gap-2">
+          <button class="btn btn-brand btn-lg" type="submit">Ingresar</button>
+        </div>
+      </form>
+
+      <div class="mt-4 text-center footer-links">
+        <small>
+          ¿No tienes cuenta? <a href="#">Solicitar acceso</a>
+        </small>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Validación nativa Bootstrap 5
+    (() => {
+      const form = document.getElementById('loginForm');
+      form.addEventListener('submit', (event) => {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        } else {
+          event.preventDefault(); // Quita esto cuando conectes el backend
+          // Demo: mostrar datos en consola
+          const data = Object.fromEntries(new FormData(form).entries());
+          console.log('Enviando login', data);
+
+          // Simula respuesta OK
+          const btn = form.querySelector('button[type="submit"]');
+          const original = btn.innerHTML;
+          btn.disabled = true; btn.innerHTML = 'Ingresando…';
+          setTimeout(() => { btn.disabled = false; btn.innerHTML = original; alert('Login correcto (demo)'); }, 800);
         }
-    </script>
+        form.classList.add('was-validated');
+      }, false);
+    })();
+
+    // Mostrar / ocultar contraseña
+    const toggle = document.getElementById('togglePass');
+    const pass = document.getElementById('password');
+    const eye = document.getElementById('eyeIcon');
+    toggle.addEventListener('click', () => {
+      const isText = pass.type === 'text';
+      pass.type = isText ? 'password' : 'text';
+      eye.classList.toggle('bi-eye');
+      eye.classList.toggle('bi-eye-slash');
+    });
+  </script>
 </body>
 </html>
