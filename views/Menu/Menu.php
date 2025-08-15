@@ -139,11 +139,11 @@
       <div class="sidebar-box">
         <div class="sidebar-header">Principal</div>
         <div class="d-grid gap-3">
-          <button class="btn btn-glow fs-5" data-section="menu"><i class="bi bi-grid-fill me-2"></i>Menú</button>
-          <button class="btn btn-glow fs-5" data-section="alumnos"><i class="bi bi-people-fill me-2"></i>Alumnos</button>
-          <button class="btn btn-glow fs-5" data-section="directores"><i class="bi bi-person-gear me-2"></i>Directores</button>
-          <button class="btn btn-glow fs-5" data-section="evaluacion"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</button>
-          <button class="btn btn-glow fs-5" data-section="reportes"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</button>
+          <a href="?c=Menu" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-grid-fill me-2"></i>Menú</a>
+          <a href="?c=Alumnos" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-people-fill me-2"></i>Alumnos</a>
+          <a href="#" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-person-gear me-2"></i>Directores</a>
+          <a href="#" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</a>
+          <a href="#" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</a>
         </div>
       </div>
     </aside>
@@ -156,11 +156,11 @@
       </div>
       <div class="offcanvas-body">
         <div class="d-grid gap-3">
-          <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="menu"><i class="bi bi-grid-fill me-2"></i>Menú</button>
-          <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="alumnos"><i class="bi bi-people-fill me-2"></i>Alumnos</button>
-          <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="directores"><i class="bi bi-person-gear me-2"></i>Directores</button>
-          <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="evaluacion"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</button>
-          <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="reportes"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</button>
+          <a href="?c=Menu" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-grid-fill me-2"></i>Menú</a>
+          <a href="?c=Alumnos" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-people-fill me-2"></i>Alumnos</a>
+          <a href="#" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-person-gear me-2"></i>Directores</a>
+          <a href="#" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</a>
+          <a href="#" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</a>
         </div>
       </div>
     </div>
@@ -221,17 +221,28 @@
         reportes: `<p>Generación de informes detallados del sistema.</p>`
       };
 
-      // Cargar inicial
-      contentArea.innerHTML = TEMPLATES.menu;
-
-      items.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const section = btn.getAttribute('data-section');
-          items.forEach(i => i.classList.remove('active'));
-          btn.classList.add('active');
-          contentArea.innerHTML = TEMPLATES[section] || '<p>Contenido no disponible.</p>';
-        });
+      // Resaltar elemento activo
+    function setActiveNav() {
+      const currentUrl = window.location.search;
+      const navLinks = document.querySelectorAll('.sidebar a, .offcanvas-body a');
+      
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === currentUrl || 
+            (currentUrl.includes('c=Menu') && link.getAttribute('href') === '?c=Menu') ||
+            (currentUrl.includes('c=Alumnos') && link.getAttribute('href') === '?c=Alumnos')) {
+          link.classList.add('active');
+        }
       });
+    }
+    
+    // Cargar contenido inicial si estamos en el menú principal
+    if (window.location.search === '' || window.location.search.includes('c=Menu')) {
+      contentArea.innerHTML = TEMPLATES.menu;
+    }
+    
+    // Inicializar navegación activa
+    setActiveNav();
     });
   </script>
 </body>

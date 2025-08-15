@@ -6,6 +6,7 @@
 	require_once "controllers/Login.php";
 	require_once "controllers/Menu.php";
 	require_once "controllers/Usuarios.php";
+	require_once "controllers/Alumnos.php";
 
 	
 	
