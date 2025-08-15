@@ -181,6 +181,16 @@
                   <option value="Colegio Privado Mixto">Colegio Privado Mixto</option>
                 </select>
               </div>
+              <div class="col-md-3">
+                <label for="rol" class="form-label">Rol</label>
+                <select class="form-select form-select-sm" id="rol" required>
+                  <option value="" selected disabled>Seleccione un rol</option>
+                  <option value="Alumno">Alumno</option>
+                  <option value="Director">Director</option>
+                  <option value="Secretario">Secretario</option>
+                  <option value="Profesor">Profesor</option>
+                </select>
+              </div>
               <div class="col-md-3 ms-auto text-md-end">
                 <button type="submit" class="btn-registrar mt-2" id="btnGuardar">
                   Registrar
