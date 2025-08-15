@@ -103,11 +103,11 @@
       <div class="sidebar-box">
         <div class="sidebar-header">Principal</div>
         <div class="d-grid gap-3">
-          <button class="btn btn-glow fs-5" data-section="menu"><i class="bi bi-grid-fill me-2"></i>Menú</button>
-          <button class="btn btn-glow fs-5 active" data-section="alumnos"><i class="bi bi-people-fill me-2"></i>Alumnos</button>
-          <button class="btn btn-glow fs-5" data-section="directores"><i class="bi bi-person-gear me-2"></i>Directores</button>
-          <button class="btn btn-glow fs-5" data-section="evaluacion"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</button>
-          <button class="btn btn-glow fs-5" data-section="reportes"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</button>
+          <a href="?c=Menu" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-grid-fill me-2"></i>Menú</a>
+          <a href="?c=Alumnos" class="btn btn-glow fs-5 text-decoration-none active"><i class="bi bi-people-fill me-2"></i>Alumnos</a>
+          <a href="#" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-person-gear me-2"></i>Directores</a>
+          <a href="#" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</a>
+          <a href="#" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</a>
         </div>
       </div>
     </aside>
@@ -120,11 +120,11 @@
       </div>
       <div class="offcanvas-body">
         <div class="d-grid gap-3">
-          <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas"><i class="bi bi-grid-fill me-2"></i>Menú</button>
-          <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas"><i class="bi bi-people-fill me-2"></i>Alumnos</button>
-          <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas"><i class="bi bi-person-gear me-2"></i>Directores</button>
-          <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</button>
-          <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</button>
+          <a href="?c=Menu" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-grid-fill me-2"></i>Menú</a>
+          <a href="?c=Alumnos" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-people-fill me-2"></i>Alumnos</a>
+          <a href="#" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-person-gear me-2"></i>Directores</a>
+          <a href="#" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</a>
+          <a href="#" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</a>
         </div>
       </div>
     </div>
@@ -155,11 +155,31 @@
               </div>
               <div class="col-md-3">
                 <label for="grado" class="form-label">Grado</label>
-                <input type="text" class="form-control form-control-sm" id="grado" required>
+                <select class="form-select form-select-sm" id="grado" required>
+                  <option value="" selected disabled>Seleccione un grado</option>
+                  <option value="1ro Básico">1ro Básico</option>
+                  <option value="2do Básico">2do Básico</option>
+                  <option value="3ro Básico">3ro Básico</option>
+                  <option value="4to Básico">4to Básico</option>
+                  <option value="5to Básico">5to Básico</option>
+                  <option value="6to Básico">6to Básico</option>
+                  <option value="1ro Diversificado">1ro Diversificado</option>
+                  <option value="2do Diversificado">2do Diversificado</option>
+                  <option value="3ro Diversificado">3ro Diversificado</option>
+                  <option value="4to Diversificado">4to Diversificado</option>
+                </select>
               </div>
               <div class="col-md-3">
                 <label for="instituto" class="form-label">Instituto</label>
-                <input type="text" class="form-control form-control-sm" id="instituto" required>
+                <select class="form-select form-select-sm" id="instituto" required>
+                  <option value="" selected disabled>Seleccione un instituto</option>
+                  <option value="Instituto Nacional de Educación Básica">Instituto Nacional de Educación Básica</option>
+                  <option value="Colegio Mixto Bilingüe">Colegio Mixto Bilingüe</option>
+                  <option value="Centro Educativo Técnico">Centro Educativo Técnico</option>
+                  <option value="Academia Cristiana de Educación">Academia Cristiana de Educación</option>
+                  <option value="Instituto Técnico Vocacional">Instituto Técnico Vocacional</option>
+                  <option value="Colegio Privado Mixto">Colegio Privado Mixto</option>
+                </select>
               </div>
               <div class="col-md-3 ms-auto text-md-end">
                 <button type="submit" class="btn-registrar mt-2" id="btnGuardar">
@@ -213,16 +233,26 @@
         codigo:   document.getElementById('codigo').value.trim(),
         nombres:  document.getElementById('nombres').value.trim(),
         apellidos:document.getElementById('apellidos').value.trim(),
-        grado:    document.getElementById('grado').value.trim(),
-        instituto:document.getElementById('instituto').value.trim()
+        grado:    document.getElementById('grado').value,
+        instituto:document.getElementById('instituto').value
       });
 
       const setForm = (o) => {
         document.getElementById('codigo').value = o.codigo || '';
         document.getElementById('nombres').value = o.nombres || '';
         document.getElementById('apellidos').value = o.apellidos || '';
-        document.getElementById('grado').value = o.grado || '';
-        document.getElementById('instituto').value = o.instituto || '';
+        
+        if (o.grado) {
+          const gradoSelect = document.getElementById('grado');
+          const option = Array.from(gradoSelect.options).find(opt => opt.value === o.grado);
+          if (option) option.selected = true;
+        }
+        
+        if (o.instituto) {
+          const institutoSelect = document.getElementById('instituto');
+          const option = Array.from(institutoSelect.options).find(opt => opt.value === o.instituto);
+          if (option) option.selected = true;
+        }
       };
 
       const clearForm = () => setForm({});
@@ -291,7 +321,11 @@
 
       // Demo: fila inicial
       tbody.insertAdjacentHTML('beforeend', rowHTML(sec++, {
-        codigo:'A-001', instituto:'Instituto Central', nombres:'María', apellidos:'Gómez', grado:'3ro Básico'
+        codigo:'A-001', 
+        instituto:'Instituto Nacional de Educación Básica', 
+        nombres:'María', 
+        apellidos:'Gómez', 
+        grado:'3ro Básico'
       }));
     })();
   </script>
