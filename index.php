@@ -6,17 +6,7 @@
 	require_once "controllers/Login.php";
 	require_once "controllers/Menu.php";
 	require_once "controllers/Usuarios.php";
-	require_once "controllers/Productos.php";
-	require_once "controllers/ventas.php";
-	require_once "controllers/Notificaciones.php";
-	require_once "controllers/Multas.php";
-	require_once "controllers/Asistencia.php";
-	require_once "controllers/caja.php";
-	require_once "controllers/Categorias.php";
-	require_once "controllers/Despieces.php";
-	require_once "controllers/Compras.php";
-	require_once "controllers/Ayuda.php";
-	require_once "controllers/Opciones.php";
+
 	
 	
 	if(isset($_GET['c']))
