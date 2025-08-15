@@ -11,6 +11,10 @@
 			$this->Conexion = new ClaseConexion();
 		}
 		
+        public function hola()
+        {
+            
+        }
 
 
 		public function InsertarToken()
