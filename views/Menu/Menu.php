@@ -12,37 +12,44 @@
 
   <style>
     :root {
-      --bg-teal: #4f8f8a;          /* fondo general estilo maqueta */
-      --panel-border: #2e655f;     /* bordes áreas de contenido */
-      --title-blue: #235c9c;       /* título superior */
-      --sidebar-header: #a8c0bb;   /* cabecera "Principal" */
+      --bg-teal: #4f8f8a;          /* fondo general */
+      --title-blue: #235c9c;       /* título */
+      --sidebar-header: #a8c0bb;   /* cabecera sidebar */
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      min-height: 100vh;
       background-color: var(--bg-teal);
       display: flex;
       flex-direction: column;
     }
 
-    /* Título centrado dentro de una caja blanca, como en la imagen */
-    .title-box {
-      background: #ffffff;
-      color: var(--title-blue);
-      font-weight: 700;
-      border-radius: .25rem;
-      display: inline-block;
-      padding: .4rem 1.5rem;
-      box-shadow: 0 2px 0 rgba(0,0,0,.25) inset;
-    }
-
     /* Layout principal */
-    .app-wrapper { flex: 1; }
+    .app-wrapper {
+      display: flex;
+      flex: 1;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
 
     /* Sidebar */
     .sidebar {
-      max-width: 260px;
-      width: 100%;
+      width: 260px;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      overflow-y: auto;
+      background-color: #50938a;
+      padding: 1rem;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      z-index: 1000;
     }
 
     .sidebar-box {
@@ -57,140 +64,173 @@
       font-weight: 600;
       padding: .5rem .75rem;
       border-radius: .35rem;
-      text-align: left;
       margin-bottom: .75rem;
     }
 
-    /* Botones estilo "capsula" con brillo azulado */
+    /* Botones menú */
     .btn-glow {
-      position: relative;
       border: 0;
       border-radius: 1rem;
       padding: .9rem 1.1rem;
       color: #fff;
       font-weight: 700;
-      letter-spacing: .2px;
       background:
         radial-gradient(140% 120% at 50% 40%, rgba(255,255,255,.28) 0%, rgba(255,255,255,.08) 42%, rgba(0,0,0,.22) 75%),
         linear-gradient(180deg, #0f1c2e 0%, #1f3554 100%);
       box-shadow: 0 8px 18px rgba(0,0,0,.25), inset 0 -2px 0 rgba(255,255,255,.1);
-      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+      transition: transform .12s ease, filter .12s ease;
       text-align: left;
     }
     .btn-glow:hover { transform: translateY(-2px); filter: brightness(1.02); }
     .btn-glow.active { outline: 2px solid rgba(255,255,255,.35); }
 
-    /* Área de contenido con bordes marcados como en la maqueta */
-    .content-panel {
-      background: transparent;
-      border: 2px solid var(--panel-border);
-      border-radius: .25rem;
-      min-height: 36vh;
+    /* Contenido principal */
+    section.main-content {
+      margin-left: 260px;
+      width: calc(100% - 260px);
+      padding: 2rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
+    /* Panel blanco ocupa todo el alto */
+    .content-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: white;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin: 0;
+      box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+      min-height: 0;
+    }
+
+    #contentArea {
+      flex: 1;
+      overflow: auto;
+    }
+
+    /* Responsive móvil */
     @media (max-width: 767.98px) {
-      .sidebar { max-width: none; }
+      .sidebar { display: none; }
+      section.main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 1rem !important;
+        min-height: calc(100vh - 56px);
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Encabezado -->
-  <header class="container py-3">
-    <div class="d-flex justify-content-center">
-      <div class="title-box h5 mb-0">Sistema Educativo</div>
-    </div>
-  </header>
 
-  <!-- Botón para abrir menú en móviles -->
+  <!-- Botón menú móvil -->
   <div class="container d-md-none mb-2">
-    <button class="btn btn-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
+    <button class="btn btn-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar">
       <i class="bi bi-list"></i> Menú
     </button>
   </div>
 
-  <!-- Contenido principal -->
-  <main class="container app-wrapper pb-4">
-    <div class="row g-3">
-      <!-- Sidebar (desktop) -->
-      <aside class="col-md-3 col-lg-2 d-none d-md-block sidebar">
-        <div class="sidebar-box">
-          <div class="sidebar-header">Principal</div>
-          <div class="d-grid gap-3">
-            <button class="btn btn-glow fs-5" data-section="menu"><i class="bi bi-grid-fill me-2"></i>Menú</button>
-            <button class="btn btn-glow fs-5" data-section="alumnos"><i class="bi bi-people-fill me-2"></i>Alumnos</button>
-            <button class="btn btn-glow fs-5" data-section="directores"><i class="bi bi-person-gear me-2"></i>Directores</button>
-            <button class="btn btn-glow fs-5" data-section="evaluacion"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</button>
-            <button class="btn btn-glow fs-5" data-section="reportes"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</button>
-          </div>
-        </div>
-      </aside>
-
-      <!-- Offcanvas (mobile) -->
-      <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasSidebar" aria-labelledby="offcanvasSidebarLabel">
-        <div class="offcanvas-header">
-          <h5 class="offcanvas-title" id="offcanvasSidebarLabel">Principal</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
-        </div>
-        <div class="offcanvas-body">
-          <div class="d-grid gap-3">
-            <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="menu"><i class="bi bi-grid-fill me-2"></i>Menú</button>
-            <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="alumnos"><i class="bi bi-people-fill me-2"></i>Alumnos</button>
-            <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="directores"><i class="bi bi-person-gear me-2"></i>Directores</button>
-            <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="evaluacion"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</button>
-            <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="reportes"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</button>
-          </div>
+  <main class="app-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar d-none d-md-block">
+      <div class="sidebar-box">
+        <div class="sidebar-header">Principal</div>
+        <div class="d-grid gap-3">
+          <button class="btn btn-glow fs-5" data-section="menu"><i class="bi bi-grid-fill me-2"></i>Menú</button>
+          <button class="btn btn-glow fs-5" data-section="alumnos"><i class="bi bi-people-fill me-2"></i>Alumnos</button>
+          <button class="btn btn-glow fs-5" data-section="directores"><i class="bi bi-person-gear me-2"></i>Directores</button>
+          <button class="btn btn-glow fs-5" data-section="evaluacion"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</button>
+          <button class="btn btn-glow fs-5" data-section="reportes"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</button>
         </div>
       </div>
+    </aside>
 
-      <!-- Área de contenido -->
-      <section class="col-md-9 col-lg-10">
-        <div class="content-panel mb-3 p-3" id="panelTop">
-          <h2 class="h6 text-white-50 mb-3" id="contentTitle">Bienvenido</h2>
-          <div id="contentArea" class="text-white">
-            <p class="mb-0">Selecciona una opción del menú para cargar contenido aquí.</p>
-          </div>
+    <!-- Offcanvas móvil -->
+    <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasSidebar">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Principal</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+      </div>
+      <div class="offcanvas-body">
+        <div class="d-grid gap-3">
+          <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="menu"><i class="bi bi-grid-fill me-2"></i>Menú</button>
+          <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="alumnos"><i class="bi bi-people-fill me-2"></i>Alumnos</button>
+          <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="directores"><i class="bi bi-person-gear me-2"></i>Directores</button>
+          <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="evaluacion"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</button>
+          <button class="btn btn-glow fs-5" data-bs-dismiss="offcanvas" data-section="reportes"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</button>
         </div>
-        <div class="content-panel p-3" id="panelBottom">
-          <h2 class="h6 text-white-50 mb-3">Panel secundario</h2>
-          <p class="text-white-50 mb-0">Espacio para tablas, gráficos o formularios.</p>
-        </div>
-      </section>
+      </div>
     </div>
+
+    <!-- Contenido -->
+    <section class="col-12 main-content">
+      <header class="mb-4">
+        <h1 class="h3">Bienvenido al Sistema Educativo</h1>
+        <p class="text-muted">Selecciona una opción del menú para comenzar</p>
+      </header>
+      <div class="content-panel" id="panelTop">
+        <h2 class="h6 text-black-50 mb-3" id="contentTitle">Bienvenido</h2>
+        <div id="contentArea">
+          <p class="mb-0">Selecciona una opción del menú para cargar contenido aquí.</p>
+        </div>
+      </div>
+    </section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Interacciones simples de ejemplo
-    const items = document.querySelectorAll('[data-section]');
-    const title = document.getElementById('contentTitle');
-    const area  = document.getElementById('contentArea');
+    document.addEventListener('DOMContentLoaded', function() {
+      const items = document.querySelectorAll('[data-section]');
+      const contentArea = document.getElementById('contentArea');
 
-    const TEMPLATES = {
-      menu: `<div class="row g-3">
-              <div class="col-md-6">
-                <div class="p-3 bg-dark bg-opacity-25 rounded">Acceso rápido a módulos.</div>
+      const TEMPLATES = {
+        menu: `
+          <div class="row g-4">
+            <div class="col-md-4">
+              <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title">Alumnos</h5>
+                  <p class="card-text">Gestión de estudiantes y sus registros académicos.</p>
+                </div>
               </div>
-              <div class="col-md-6">
-                <div class="p-3 bg-dark bg-opacity-25 rounded">Atajos configurables.</div>
+            </div>
+            <div class="col-md-4">
+              <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title">Docentes</h5>
+                  <p class="card-text">Administración del personal docente.</p>
+                </div>
               </div>
-            </div>`,
-      alumnos: `<div class="bg-dark bg-opacity-25 rounded p-3">Listado, inscripción, historial académico…</div>`,
-      directores: `<div class="bg-dark bg-opacity-25 rounded p-3">Gestión de directores y permisos.</div>`,
-      evaluacion: `<div class="bg-dark bg-opacity-25 rounded p-3">Rubricas, calificaciones y reportes parciales.</div>`,
-      reportes: `<div class="bg-dark bg-opacity-25 rounded p-3">KPIs, exportación y tableros.</div>`
-    };
+            </div>
+            <div class="col-md-4">
+              <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title">Reportes</h5>
+                  <p class="card-text">Generación de informes y estadísticas.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `,
+        alumnos: `<p>Módulo para administrar la información de los estudiantes.</p>`,
+        directores: `<p>Gestión de usuarios con privilegios administrativos.</p>`,
+        evaluacion: `<p>Sistema de evaluación y seguimiento académico.</p>`,
+        reportes: `<p>Generación de informes detallados del sistema.</p>`
+      };
 
-    function setActive(btn){
-      items.forEach(i => i.classList.remove('active'));
-      btn.classList.add('active');
-    }
+      // Cargar inicial
+      contentArea.innerHTML = TEMPLATES.menu;
 
-    items.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const section = btn.getAttribute('data-section');
-        setActive(btn);
-        title.textContent = section.charAt(0).toUpperCase() + section.slice(1);
-        area.innerHTML = TEMPLATES[section] || '';
+      items.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const section = btn.getAttribute('data-section');
+          items.forEach(i => i.classList.remove('active'));
+          btn.classList.add('active');
+          contentArea.innerHTML = TEMPLATES[section] || '<p>Contenido no disponible.</p>';
+        });
       });
     });
   </script>
