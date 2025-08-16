@@ -7,6 +7,9 @@
 	require_once "controllers/Menu.php";
 	require_once "controllers/Usuarios.php";
 	require_once "controllers/Evaluacion.php";
+	require_once "controllers/Material.php";
+	require_once "controllers/Reportes.php";
+
 
 	
 	

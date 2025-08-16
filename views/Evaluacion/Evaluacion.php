@@ -108,7 +108,8 @@
           <a class="link-glow fs-5" href="?c=Menu"><i class="bi bi-grid-fill me-2"></i>Menú</a>
           <a class="link-glow fs-5" href="?c=Usuarios"><i class="bi bi-people-fill me-2"></i>Usuarios</a>
           <a class="link-glow fs-5 active" href="?c=Evaluacion"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</a>
-          <a class="link-glow fs-5" href="#"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</a>
+          <a class="link-glow fs-5" href="?c=Reportes"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</a>
+          <a class="link-glow fs-5" href="?c=Material"><i class="bi bi-bar-chart-fill me-2"></i>Material</a>
         </div>
       </div>
     </aside>
@@ -125,7 +126,8 @@
           <a class="link-glow fs-5" data-bs-dismiss="offcanvas" href="#">Usuarios</a>
           <a class="link-glow fs-5" data-bs-dismiss="offcanvas" href="#">Evaluación</a>
           <a class="link-glow fs-5" data-bs-dismiss="offcanvas" href="#">Reportes</a>
-        </div>
+          <a class="link-glow fs-5" data-bs-dismiss="offcanvas" href="#">Material</a>
+          </div>
       </div>
     </div>
 
