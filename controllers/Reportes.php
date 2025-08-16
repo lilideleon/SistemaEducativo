@@ -1,17 +1,17 @@
 <?php
 
-class AlumnosController
+class ReportesController
 {
     public function __construct()
     {
         @session_start();
         //require_once "models/Alumnos.php";
-        $data["titulo"] = "Alumnos";
+        $data["titulo"] = "Reportes";
     }
 
     public function index()
     {
-        require_once "views/Alumnos/Alumnos.php";
+        require_once "views/Reportes/Reportes.php";
     }
 
     

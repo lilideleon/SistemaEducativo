@@ -140,9 +140,8 @@
         <div class="sidebar-header">Principal</div>
         <div class="d-grid gap-3">
           <a href="?c=Menu" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-grid-fill me-2"></i>Menú</a>
-          <a href="?c=Alumnos" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-people-fill me-2"></i>Alumnos</a>
-          <a href="#" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-person-gear me-2"></i>Directores</a>
-          <a href="#" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</a>
+          <a href="?c=Usuarios" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-people-fill me-2"></i>Usuarios</a>
+          <a href="?c=Evaluacion" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</a>
           <a href="#" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</a>
         </div>
       </div>
@@ -157,9 +156,8 @@
       <div class="offcanvas-body">
         <div class="d-grid gap-3">
           <a href="?c=Menu" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-grid-fill me-2"></i>Menú</a>
-          <a href="?c=Alumnos" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-people-fill me-2"></i>Alumnos</a>
-          <a href="#" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-person-gear me-2"></i>Directores</a>
-          <a href="#" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</a>
+          <a href="?c=Usuarios" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-people-fill me-2"></i>Usuarios</a>
+          <a href="?c=Evaluacion" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</a>
           <a href="#" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</a>
         </div>
       </div>
