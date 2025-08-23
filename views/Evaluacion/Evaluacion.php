@@ -1,14 +1,46 @@
+<?php 
+   include 'views/Menu/Aside.php';
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sistema Educativo — Evaluación</title>
+  <title>Mi página con sidebar reusable</title>
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <!-- Bootstrap 5 + Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
 
   <style>
+    :root{ --bg-teal:#4f8f8a; --sidebar-header:#a8c0bb; }
+    html,body{height:100%;margin:0}
+    body{background-color:var(--bg-teal);display:flex;flex-direction:column}
+    .app-wrapper{display:flex;flex:1;height:100vh}
+    .sidebar{width:260px;height:100vh;position:fixed;left:0;top:0;overflow-y:auto;background:#50938a;padding:1rem;box-shadow:2px 0 5px rgba(0,0,0,.1);z-index:1000}
+    .sidebar-box{background:rgba(255,255,255,.1);border-radius:.5rem;padding:.75rem}
+    .sidebar-header{background:var(--sidebar-header);color:#1f2937;font-weight:600;padding:.5rem .75rem;border-radius:.35rem;margin-bottom:.75rem}
+    .btn-glow{border:0;border-radius:1rem;padding:.9rem 1.1rem;color:#fff;font-weight:700;background:
+      radial-gradient(140% 120% at 50% 40%, rgba(255,255,255,.28) 0%, rgba(255,255,255,.08) 42%, rgba(0,0,0,.22) 75%),
+      linear-gradient(180deg,#0f1c2e 0%,#1f3554 100%);box-shadow:0 8px 18px rgba(0,0,0,.25), inset 0 -2px 0 rgba(255,255,255,.1);
+      transition:transform .12s ease, filter .12s ease; text-align:left}
+    .btn-glow.active{outline:2px solid rgba(255,255,255,.35)}
+
+    /* contenido */
+    section.main-content{margin-left:260px;width:calc(100% - 260px);padding:2rem;min-height:100vh;display:flex;flex-direction:column}
+    .content-panel{flex:1;background:#fff;border-radius:.5rem;padding:1.5rem;box-shadow:0 .125rem .25rem rgba(0,0,0,.075)}
+
+    /* móvil: sin sidebar fijo */
+    @media (max-width:767.98px){
+      section.main-content{margin-left:0 !important;width:100% !important;padding:1rem !important;min-height:calc(100vh - 56px)}
+    }
+
+    /* Si NO quieres sidebar en alguna página, añade class="no-sidebar" al body */
+    body.no-sidebar section.main-content{margin-left:0;width:100%}
+
     :root{ --bg-teal:#4f8f8a; --sidebar-header:#a8c0bb; --line:#2e655f; --ink:#173a38; }
     html,body{height:100%;margin:0}
     body{background:var(--bg-teal);display:flex;flex-direction:column}
@@ -100,36 +132,7 @@
   </div>
 
   <main class="app-wrapper">
-    <!-- Sidebar -->
-    <aside class="sidebar d-none d-md-block">
-      <div class="sidebar-box">
-        <div class="sidebar-header">Principal</div>
-        <div class="d-grid gap-3">
-          <a class="link-glow fs-5" href="?c=Menu"><i class="bi bi-grid-fill me-2"></i>Menú</a>
-          <a class="link-glow fs-5" href="?c=Usuarios"><i class="bi bi-people-fill me-2"></i>Usuarios</a>
-          <a class="link-glow fs-5 active" href="?c=Evaluacion"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</a>
-          <a class="link-glow fs-5" href="?c=Reportes"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</a>
-          <a class="link-glow fs-5" href="?c=Material"><i class="bi bi-bar-chart-fill me-2"></i>Material</a>
-        </div>
-      </div>
-    </aside>
 
-    <!-- Offcanvas móvil -->
-    <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasSidebar">
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title">Principal</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
-      </div>
-      <div class="offcanvas-body">
-        <div class="d-grid gap-3">
-          <a class="link-glow fs-5" data-bs-dismiss="offcanvas" href="#">Menú</a>
-          <a class="link-glow fs-5" data-bs-dismiss="offcanvas" href="#">Usuarios</a>
-          <a class="link-glow fs-5" data-bs-dismiss="offcanvas" href="#">Evaluación</a>
-          <a class="link-glow fs-5" data-bs-dismiss="offcanvas" href="#">Reportes</a>
-          <a class="link-glow fs-5" data-bs-dismiss="offcanvas" href="#">Material</a>
-          </div>
-      </div>
-    </div>
 
     <!-- Contenido -->
     <section class="main-content">

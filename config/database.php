@@ -19,7 +19,7 @@
 		{
 		    $this->Usuario = 'system';
 			$this->Contraseña = '31107449';
-			$this->DataBase = 'dbname=rapicomida;';
+			$this->DataBase = 'dbname=educativo;';
 			$this->Servidor = 'mysql:host=localhost;';
 			$this->JuegoCaract = 'charset=utf8';
 		}
