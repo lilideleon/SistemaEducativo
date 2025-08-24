@@ -188,6 +188,24 @@ class Usuarios_model
         }
     }
 
+    public function ObtenerUsuario($id)
+    {
+        try {
+            $this->ConexionSql = $this->Conexion->CrearConexion();
+            $this->SentenciaSql = "SELECT id, codigo, nombres, apellidos, grado_id, institucion_id, rol, seccion
+                                   FROM usuarios
+                                   WHERE id = ? AND activo = 1";
+            $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
+            $this->Procedure->bindParam(1, $id, PDO::PARAM_INT);
+            $this->Procedure->execute();
+            return $this->Procedure->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            throw new Exception("Error al obtener usuario: " . $e->getMessage());
+        } finally {
+            $this->Conexion->CerrarConexion();
+        }
+    }
+
 
 
     // Getters y Setters

@@ -9,7 +9,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mi página con sidebar reusable</title>
+  <title>Usuarios</title>
 
   <!-- Bootstrap 5 + Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -67,6 +67,7 @@
           <div class="form-title">Registro de Alumnos</div>
           <div class="p-3">
             <form id="frmAlumno" class="row g-3 align-items-end">
+              <input type="hidden" id="idUsuario" />
               <div class="col-md-3">
                 <label for="codigo" class="form-label">Código</label>
                 <input type="text" class="form-control form-control-sm" id="codigo" required>
@@ -151,6 +152,25 @@
         </div>
 
         <div id="contentArea"></div>
+        
+        <!-- Modal Confirmación Eliminar -->
+        <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteLabel">Confirmar eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                ¿Está seguro que desea eliminar el usuario <strong>ID <span id="deleteUserIdSpan"></span></strong>?
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmDelete">Eliminar</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </main>
@@ -192,6 +212,7 @@
       let urlListarGrados = makeUrl('ListarGrados');
       let urlTabla = makeUrl('Tabla');
       let urlListarSecciones = makeUrl('ListarSecciones');
+      let urlObtener = makeUrl('Obtener');
 
       const switchToFallbackBase = () => {
         if (currentBase === baseCandidates[0]) {
@@ -203,8 +224,17 @@
           urlListarInstituciones = makeUrl('ListarInstituciones');
           urlListarGrados = makeUrl('ListarGrados');
           urlListarSecciones = makeUrl('ListarSecciones');
+          urlObtener = makeUrl('Obtener');
         }
       };
+
+      // Exponer función global para abrir modal de confirmación
+      window.EliminarDatos = function(id) {
+        deleteId = id;
+        document.getElementById('deleteUserIdSpan').textContent = String(id);
+        const confirmModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+        confirmModal.show();
+      }
 
       const rolMap = {
         'Alumno': 'ALUMNO',
@@ -218,6 +248,9 @@
         return [first, parts.join(' ')];
       };
 
+      let editId = null;
+      let deleteId = null;
+
       const clearForm = () => {
         frm.reset();
         document.getElementById('grado').selectedIndex = 0;
@@ -225,6 +258,9 @@
         document.getElementById('rol').selectedIndex = 0;
         const seccion = document.getElementById('seccion');
         if (seccion) seccion.value = '';
+        document.getElementById('idUsuario').value = '';
+        editId = null;
+        btnGuardar.textContent = 'Registrar';
       };
 
       // Cargar catálogos desde el backend
@@ -446,7 +482,87 @@
           ],
           order: [[0, 'asc']]
         });
+
+        // Confirmar eliminación
+        const modalEl = document.getElementById('confirmDeleteModal');
+        const btnConfirmDelete = document.getElementById('btnConfirmDelete');
+        const confirmModal = new bootstrap.Modal(modalEl);
+        btnConfirmDelete.addEventListener('click', function() {
+          if (!deleteId) return;
+          $.ajax({
+            url: urlEliminar,
+            method: 'POST',
+            dataType: 'json',
+            data: { IdUsuario: deleteId }
+          }).done((resp) => {
+            if (resp && resp.success) {
+              if (dt) dt.ajax.reload(null, false);
+              clearForm();
+            }
+            confirmModal.hide();
+            alert(resp && resp.msj ? resp.msj.replace(/<[^>]+>/g, '') : (resp && resp.success ? 'Eliminado' : 'No se pudo eliminar'));
+          }).fail((jq, ts) => {
+            confirmModal.hide();
+            console.error('Eliminar error:', ts, jq.responseText);
+            alert('Error de comunicación al eliminar');
+          }).always(() => {
+            deleteId = null;
+          });
+        });
       });
+
+      // Helper: esperar a que un select tenga una opción y luego asignar su valor
+      const setSelectValueWhenLoaded = (sel, value, maxRetries = 20) => {
+        let attempts = 0;
+        const trySet = () => {
+          const $sel = $(sel);
+          if ($sel.find(`option[value="${value}"]`).length > 0 || value === '' || value === null) {
+            $sel.val(value || '');
+          } else if (attempts < maxRetries) {
+            attempts++;
+            setTimeout(trySet, 150);
+          }
+        };
+        trySet();
+      };
+
+      // Exponer función global usada por el botón Editar en la tabla
+      window.DatosUsuario = function(id) {
+        console.log('Cargando datos de usuario', id, 'desde:', urlObtener);
+        $.ajax({ url: urlObtener, dataType: 'json', method: 'GET', data: { id } })
+          .done((resp) => {
+            if (!resp || !resp.success || !resp.data) {
+              alert('No se pudo obtener el usuario');
+              return;
+            }
+            const u = resp.data;
+            // Poblar campos
+            $('#idUsuario').val(u.id);
+            $('#codigo').val(u.codigo);
+            $('#nombres').val(u.nombres);
+            $('#apellidos').val(u.apellidos);
+
+            // Rol: backend usa ADMIN/DIRECTOR/DOCENTE/ALUMNO, mapear al texto del select
+            const rolTxtMap = { 'ALUMNO': 'Alumno', 'DIRECTOR': 'Director', 'DOCENTE': 'Profesor', 'ADMIN': 'Admin' };
+            const rolText = rolTxtMap[u.rol] || '';
+            if (rolText) {
+              $('#rol').val(rolText);
+            }
+
+            // Setear selects (esperar a que hayan cargado)
+            setSelectValueWhenLoaded('#grado', u.grado_id);
+            setSelectValueWhenLoaded('#instituto', u.institucion_id);
+            setSelectValueWhenLoaded('#seccion', u.seccion);
+
+            // Activar modo edición
+            editId = u.id;
+            btnGuardar.textContent = 'Actualizar';
+          })
+          .fail((jq, ts, err) => {
+            console.error('Error Obtener usuario:', ts, err, jq.responseText);
+            alert('Error al cargar el usuario');
+          });
+      };
 
       const rowHTML = (id, d) => `
         <tr data-id="${id}">
@@ -518,8 +634,14 @@
           Seccion: Rol === 'ALUMNO' ? seccionSafe : ''
         };
 
+        const isEdit = !!editId;
+        const submitUrl = isEdit ? urlActualizar : urlAgregar;
+        if (isEdit) {
+          payload.IdUsuario = editId;
+        }
+
         $.ajax({
-          url: urlAgregar,
+          url: submitUrl,
           method: 'POST',
           data: payload,
           dataType: 'json'

@@ -237,6 +237,25 @@ class UsuariosController
         }
     }
 
+    public function Obtener()
+    {
+        header('Content-Type: application/json');
+        try {
+            if (!isset($_GET['id']) && !isset($_POST['id'])) {
+                throw new Exception('ID requerido');
+            }
+            $id = isset($_GET['id']) ? (int)$_GET['id'] : (int)$_POST['id'];
+            $m = new Usuarios_model();
+            $data = $m->ObtenerUsuario($id);
+            if (!$data) {
+                throw new Exception('Usuario no encontrado');
+            }
+            echo json_encode(['success' => true, 'data' => $data]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'msj' => 'Error: ' . $e->getMessage()]);
+        }
+    }
+
     public function Tabla()
     {
         header('Content-Type: application/json');
