@@ -9,6 +9,7 @@ class Usuarios_model
     private $apellidos;
     private $grado_id;
     private $institucion_id;
+    private $seccion;
     private $rol;
     private $password_hash;
     private $activo;
@@ -52,7 +53,7 @@ class Usuarios_model
     {
         try {
             $this->ConexionSql = $this->Conexion->CrearConexion();
-            $this->SentenciaSql = "CALL sp_usuarios_insert_min(?, ?, ?, ?, ?, ?, ?, @id)";
+            $this->SentenciaSql = "CALL sp_usuarios_insert_min(?, ?, ?, ?, ?, ?, ?, ?, @id)";
             $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
 
             $this->Procedure->bindParam(1, $this->getCodigo(), PDO::PARAM_STR);
@@ -62,6 +63,7 @@ class Usuarios_model
             $this->Procedure->bindParam(5, $this->getInstitucionId(), PDO::PARAM_INT);
             $this->Procedure->bindParam(6, $this->getRol(), PDO::PARAM_STR);
             $this->Procedure->bindParam(7, $this->getPasswordHash(), PDO::PARAM_STR);
+            $this->Procedure->bindParam(8, $this->getSeccion(), PDO::PARAM_INT);
 
             $this->Procedure->execute();
             
@@ -82,7 +84,7 @@ class Usuarios_model
     {
         try {
             $this->ConexionSql = $this->Conexion->CrearConexion();
-            $this->SentenciaSql = "CALL sp_usuarios_update_min(?, ?, ?, ?, ?, ?, ?, ?, @rows_affected)";
+            $this->SentenciaSql = "CALL sp_usuarios_update_min(?, ?, ?, ?, ?, ?, ?, ?, ?, @rows_affected)";
             $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
 
             $this->Procedure->bindParam(1, $this->getId(), PDO::PARAM_INT);
@@ -93,6 +95,7 @@ class Usuarios_model
             $this->Procedure->bindParam(6, $this->getInstitucionId(), PDO::PARAM_INT);
             $this->Procedure->bindParam(7, $this->getRol(), PDO::PARAM_STR);
             $this->Procedure->bindParam(8, $this->getPasswordHash(), PDO::PARAM_STR);
+            $this->Procedure->bindParam(9, $this->getSeccion(), PDO::PARAM_INT);
 
             $this->Procedure->execute();
             
@@ -164,6 +167,22 @@ class Usuarios_model
             return $this->Procedure->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             throw new Exception("Error al listar grados: " . $e->getMessage());
+        } finally {
+            $this->Conexion->CerrarConexion();
+        }
+    }
+
+    public function ListarSecciones()
+    {
+        try {
+            $this->ConexionSql = $this->Conexion->CrearConexion();
+            $this->SentenciaSql = "SELECT id, nombre FROM seccion ORDER BY nombre ASC";
+            $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
+            $this->Procedure->execute();
+
+            return $this->Procedure->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            throw new Exception("Error al listar secciones: " . $e->getMessage());
         } finally {
             $this->Conexion->CerrarConexion();
         }
@@ -297,6 +316,20 @@ class Usuarios_model
             $this->grado_id = null;
         } else {
             $this->grado_id = (int)$grado_id;
+        }
+    }
+
+    public function getSeccion()
+    {
+        return $this->seccion;
+    }
+
+    public function setSeccion($seccion)
+    {
+        if ($seccion === '' || $seccion === null) {
+            $this->seccion = null;
+        } else {
+            $this->seccion = (int)$seccion;
         }
     }
 

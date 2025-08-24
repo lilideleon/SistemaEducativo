@@ -30,6 +30,19 @@ class UsuariosController
         if ($_POST['Rol'] === 'ALUMNO') {
             $usuario->setGradoId($_POST['GradoId']);
             $usuario->setInstitucionId($_POST['InstitucionId']);
+            // Sección obligatoria y numérica para alumnos
+            if (isset($_POST['Seccion']) && $_POST['Seccion'] !== '') {
+                if (!ctype_digit((string)$_POST['Seccion'])) {
+                    throw new Exception('La sección debe ser numérica');
+                }
+                $usuario->setSeccion($_POST['Seccion']);
+            } else {
+                throw new Exception('La sección es requerida para alumnos');
+            }
+        }
+        else {
+            // Para roles no alumno, limpiar sección
+            $usuario->setSeccion(null);
         }
         
         // Establecer contraseña (el modelo se encarga de hashearla)
@@ -83,10 +96,31 @@ class UsuariosController
             if ($_POST['Rol'] === 'ALUMNO') {
                 $usuario->setGradoId(isset($_POST['GradoId']) ? $_POST['GradoId'] : null);
                 $usuario->setInstitucionId(isset($_POST['InstitucionId']) ? $_POST['InstitucionId'] : null);
+                // Actualizar sección si es proporcionada
+                if (isset($_POST['Seccion'])) {
+                    if ($_POST['Seccion'] === '' || $_POST['Seccion'] === null) {
+                        $usuario->setSeccion(null);
+                    } else if (!ctype_digit((string)$_POST['Seccion'])) {
+                        throw new Exception('La sección debe ser numérica');
+                    } else {
+                        $usuario->setSeccion($_POST['Seccion']);
+                    }
+                }
             } else {
                 // Limpiar grado e institución si no es estudiante
                 $usuario->setGradoId(null);
                 $usuario->setInstitucionId(null);
+                $usuario->setSeccion(null);
+            }
+        }
+        // Si no viene Rol pero sí Seccion, permitir actualización directa de sección manteniendo rol actual
+        elseif (isset($_POST['Seccion'])) {
+            if ($_POST['Seccion'] === '' || $_POST['Seccion'] === null) {
+                $usuario->setSeccion(null);
+            } else if (!ctype_digit((string)$_POST['Seccion'])) {
+                throw new Exception('La sección debe ser numérica');
+            } else {
+                $usuario->setSeccion($_POST['Seccion']);
             }
         }
         
@@ -185,6 +219,18 @@ class UsuariosController
         try {
             $m = new Usuarios_model();
             $data = $m->ListarGrados();
+            echo json_encode(['success' => true, 'data' => $data]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'msj' => 'Error: ' . $e->getMessage()]);
+        }
+    }
+
+    public function ListarSecciones()
+    {
+        header('Content-Type: application/json');
+        try {
+            $m = new Usuarios_model();
+            $data = $m->ListarSecciones();
             echo json_encode(['success' => true, 'data' => $data]);
         } catch (Exception $e) {
             echo json_encode(['success' => false, 'msj' => 'Error: ' . $e->getMessage()]);

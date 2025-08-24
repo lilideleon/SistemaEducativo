@@ -83,28 +83,18 @@
                 <label for="grado" class="form-label">Grado</label>
                 <select class="form-select form-select-sm" id="grado" required>
                   <option value="" selected disabled>Seleccione un grado</option>
-                  <option value="1ro Básico">1ro Básico</option>
-                  <option value="2do Básico">2do Básico</option>
-                  <option value="3ro Básico">3ro Básico</option>
-                  <option value="4to Básico">4to Básico</option>
-                  <option value="5to Básico">5to Básico</option>
-                  <option value="6to Básico">6to Básico</option>
-                  <option value="1ro Diversificado">1ro Diversificado</option>
-                  <option value="2do Diversificado">2do Diversificado</option>
-                  <option value="3ro Diversificado">3ro Diversificado</option>
-                  <option value="4to Diversificado">4to Diversificado</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label for="seccion" class="form-label">Sección</label>
+                <select class="form-select form-select-sm" id="seccion">
+                  <option value="" selected disabled>Seleccione una sección</option>
                 </select>
               </div>
               <div class="col-md-3">
                 <label for="instituto" class="form-label">Instituto</label>
                 <select class="form-select form-select-sm" id="instituto" required>
                   <option value="" selected disabled>Seleccione un instituto</option>
-                  <option value="Instituto Nacional de Educación Básica">Instituto Nacional de Educación Básica</option>
-                  <option value="Colegio Mixto Bilingüe">Colegio Mixto Bilingüe</option>
-                  <option value="Centro Educativo Técnico">Centro Educativo Técnico</option>
-                  <option value="Academia Cristiana de Educación">Academia Cristiana de Educación</option>
-                  <option value="Instituto Técnico Vocacional">Instituto Técnico Vocacional</option>
-                  <option value="Colegio Privado Mixto">Colegio Privado Mixto</option>
                 </select>
               </div>
               <div class="col-md-3">
@@ -201,6 +191,7 @@
       let urlListarInstituciones = makeUrl('ListarInstituciones');
       let urlListarGrados = makeUrl('ListarGrados');
       let urlTabla = makeUrl('Tabla');
+      let urlListarSecciones = makeUrl('ListarSecciones');
 
       const switchToFallbackBase = () => {
         if (currentBase === baseCandidates[0]) {
@@ -211,6 +202,7 @@
           urlEliminar = makeUrl('Eliminar');
           urlListarInstituciones = makeUrl('ListarInstituciones');
           urlListarGrados = makeUrl('ListarGrados');
+          urlListarSecciones = makeUrl('ListarSecciones');
         }
       };
 
@@ -231,6 +223,8 @@
         document.getElementById('grado').selectedIndex = 0;
         document.getElementById('instituto').selectedIndex = 0;
         document.getElementById('rol').selectedIndex = 0;
+        const seccion = document.getElementById('seccion');
+        if (seccion) seccion.value = '';
       };
 
       // Cargar catálogos desde el backend
@@ -280,6 +274,55 @@
                 });
             } else {
               $sel.empty().append('<option value="" disabled>Error al cargar instituciones</option>');
+            }
+          });
+      };
+
+      const cargarSecciones = () => {
+        const $sel = $('#seccion');
+        $sel.prop('disabled', true)
+            .empty()
+            .append('<option value="" selected disabled>Cargando secciones...</option>');
+        console.time('AJAX secciones');
+        console.log('Solicitando secciones a:', urlListarSecciones);
+        $.ajax({ url: urlListarSecciones, dataType: 'json' })
+          .done((resp, textStatus, jqXHR) => {
+            console.timeEnd('AJAX secciones');
+            console.log('Respuesta secciones status=', jqXHR.status, 'payload=', resp);
+            $sel.empty().append('<option value="" selected disabled>Seleccione una sección</option>');
+            if (resp && resp.success && Array.isArray(resp.data)) {
+              resp.data.forEach(it => {
+                $sel.append($('<option>', { value: it.id, text: it.nombre }));
+              });
+              $sel.prop('disabled', false);
+            } else {
+              $sel.append('<option value="" disabled>Error: respuesta inválida</option>');
+            }
+          })
+          .fail((jqXHR, textStatus, errorThrown) => {
+            console.timeEnd('AJAX secciones');
+            console.error('Error secciones:', textStatus, errorThrown, 'status=', jqXHR.status, 'resp=', jqXHR.responseText);
+            if (jqXHR.status === 404 || jqXHR.status === 0) {
+              switchToFallbackBase();
+              const retryUrl = urlListarSecciones;
+              console.log('Reintentando secciones con:', retryUrl);
+              $.ajax({ url: retryUrl, dataType: 'json' })
+                .done((resp2, _ts2, jqXHR2) => {
+                  console.log('Respuesta secciones (retry) status=', jqXHR2.status, 'payload=', resp2);
+                  $sel.empty().append('<option value="" selected disabled>Seleccione una sección</option>');
+                  if (resp2 && resp2.success && Array.isArray(resp2.data)) {
+                    resp2.data.forEach(it => $sel.append($('<option>', { value: it.id, text: it.nombre })));
+                    $sel.prop('disabled', false);
+                  } else {
+                    $sel.append('<option value="" disabled>Error: respuesta inválida</option>');
+                  }
+                })
+                .fail((jqXHR2, ts2, err2) => {
+                  console.error('Retry secciones falló:', ts2, err2, 'status=', jqXHR2.status, 'resp=', jqXHR2.responseText);
+                  $sel.empty().append('<option value="" disabled>Error al cargar secciones</option>');
+                });
+            } else {
+              $sel.empty().append('<option value="" disabled>Error al cargar secciones</option>');
             }
           });
       };
@@ -340,6 +383,7 @@
         console.log('Init Usuarios: base candidates=', baseCandidates, 'currentBase=', currentBase);
         cargarInstituciones();
         cargarGrados();
+        cargarSecciones();
 
         // Inicializar DataTable con server-side hacia el endpoint Tabla
         dt = $('#tblAlumnos').DataTable({
@@ -432,6 +476,7 @@
         const institutoTexto = $('#instituto option:selected').text() || '';
         const rolTxt = document.getElementById('rol').value;
         const password = document.getElementById('password').value;
+        const seccionVal = (document.getElementById('seccion').value || '').trim();
 
         if (!codigo || !nombresStr || !apellidosStr || !rolTxt || !password) {
           alert('Complete los campos requeridos.');
@@ -444,6 +489,16 @@
         if (!Rol) {
           alert('Rol no válido. Use Alumno, Director o Profesor.');
           return;
+        }
+
+        // Validar sección si es alumno
+        let seccionSafe = '';
+        if (Rol === 'ALUMNO') {
+          if (!/^\d+$/.test(seccionVal)) {
+            alert('Ingrese una sección numérica válida para alumnos.');
+            return;
+          }
+          seccionSafe = seccionVal;
         }
 
         // Asegurar IDs numéricos; si no son numéricos, enviar vacío para que sea NULL en el servidor
@@ -459,7 +514,8 @@
           Rol,
           'Contraseña': password,
           GradoId: Rol === 'ALUMNO' ? gradoIdSafe : '',
-          InstitucionId: Rol === 'ALUMNO' ? institucionIdSafe : ''
+          InstitucionId: Rol === 'ALUMNO' ? institucionIdSafe : '',
+          Seccion: Rol === 'ALUMNO' ? seccionSafe : ''
         };
 
         $.ajax({
