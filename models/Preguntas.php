@@ -108,5 +108,27 @@ class Preguntas_model
             $this->Conexion->CerrarConexion();
         }
     }
+
+    // LISTAR por encuesta en orden aleatorio (solo activas por defecto)
+    public function ListarPorEncuestaRandom($encuesta_id, $soloActivas = true)
+    {
+        try {
+            $this->ConexionSql = $this->Conexion->CrearConexion();
+            $sql = "SELECT p.id, p.encuesta_id, p.enunciado, p.tipo, p.ponderacion, p.orden, p.activo
+                      FROM preguntas p
+                     WHERE p.encuesta_id = :eid" . ($soloActivas ? " AND p.activo = 1" : "") . "
+                     ORDER BY RAND()";
+            $stmt = $this->ConexionSql->prepare($sql);
+            $stmt->bindValue(':eid', (int)$encuesta_id, PDO::PARAM_INT);
+            $stmt->execute();
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $stmt->closeCursor();
+            return $rows;
+        } catch (Exception $e) {
+            throw new Exception('Error al listar preguntas por encuesta: ' . $e->getMessage());
+        } finally {
+            $this->Conexion->CerrarConexion();
+        }
+    }
 }
 ?>

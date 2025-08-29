@@ -145,17 +145,16 @@
         <div class="gform-wrap">
           <!-- Combo FUERA del card -->
           <div class="gform-toolbar">
-            <label for="curso" class="fw-semibold">Curso:</label>
-            <select id="curso" class="form-select form-select-sm">
-              <option value="mat" selected>Matemática</option>
-              <option value="comp">Computación</option>
+            <label for="encuesta_id" class="fw-semibold">Evaluación:</label>
+            <select id="encuesta_id" class="form-select form-select-sm">
+              <option value="">Cargando evaluaciones...</option>
             </select>
           </div>
 
           <!-- Card del test -->
           <div class="gform-card">
             <h2 class="gform-title">Bienvenido Carlos Gómez</h2>
-            <div class="gform-subtle mb-2"><strong id="tema">Tema: Ecuaciones de Primer Grado</strong></div>
+            <div class="gform-subtle mb-2"><strong id="tema">Selecciona una evaluación para iniciar</strong></div>
 
             <form id="frmEval">
               <div id="qContainer"><!-- preguntas dinámicas --></div>
@@ -173,60 +172,126 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Temas por curso
-    const THEMES = { mat:'Ecuaciones de Primer Grado', comp:'Fundamentos de Computación' };
-
-    // Pregunta demo por curso
-    const QUESTIONS = {
-      mat: `
-        <div class="gq">
-          <div class="gq-number">1</div>
-          <div>
-            <div class="gq-statement mb-3">Resuelva la ecuación <b>3X - 5 = X + 3</b>.</div>
-            <div class="gq-options">
-              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="mat1a" value="2"><label class="form-check-label" for="mat1a">X = 2</label></div>
-              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="mat1b" value="9"><label class="form-check-label" for="mat1b">X = 9</label></div>
-              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="mat1c" value="4"><label class="form-check-label" for="mat1c">X = 4</label></div>
-            </div>
-          </div>
-        </div>`,
-      comp: `
-        <div class="gq">
-          <div class="gq-number">1</div>
-          <div>
-            <div class="gq-statement mb-3">En binario, ¿a qué número decimal equivale <b>1011</b>?</div>
-            <div class="gq-options">
-              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="comp1a" value="9"><label class="form-check-label" for="comp1a">9</label></div>
-              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="comp1b" value="11"><label class="form-check-label" for="comp1b">11</label></div>
-              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="comp1c" value="13"><label class="form-check-label" for="comp1c">13</label></div>
-            </div>
-          </div>
-        </div>`
-    };
-
-    const curso = document.getElementById('curso');
+    const selEncuesta = document.getElementById('encuesta_id');
     const tema  = document.getElementById('tema');
     const qContainer = document.getElementById('qContainer');
+    const btnNext = document.getElementById('btnNext');
 
-    function loadCourse(key){
-      tema.textContent = 'Tema: ' + THEMES[key];
-      qContainer.innerHTML = QUESTIONS[key];
-      qContainer.closest('.gform-card').scrollIntoView({behavior:'smooth', block:'start'});
+    let preguntas = [];
+    let idx = -1;
+
+    // Cargar encuestas para el combo
+    function loadEncuestas(){
+      selEncuesta.innerHTML = '<option value="">Cargando evaluaciones...</option>';
+      fetch('?c=Evaluacion&a=ListarEncuestas')
+        .then(r => r.json())
+        .then(json => {
+          if(json && json.success){
+            const opts = ['<option value="">Seleccione evaluación...</option>']
+              .concat(json.data.map(e => `<option value="${e.id}" data-title="${e.titulo?.replaceAll('"','&quot;')}">${e.titulo} (ID: ${e.id})</option>`));
+            selEncuesta.innerHTML = opts.join('');
+          } else {
+            selEncuesta.innerHTML = '<option value="">No se pudo cargar</option>';
+          }
+        })
+        .catch(() => selEncuesta.innerHTML = '<option value="">Error al cargar</option>');
     }
 
-    // Inicial
-    loadCourse('mat');
+    function renderPregunta(){
+      if(idx < 0 || idx >= preguntas.length){
+        qContainer.innerHTML = '<div class="alert alert-success">Evaluación finalizada. ¡Gracias!</div>';
+        btnNext.classList.add('disabled');
+        return;
+      }
+      const p = preguntas[idx];
+      const numero = idx + 1;
+      let opciones = '';
+      if(p.tipo === 'opcion_unica' || p.tipo === 'opcion_multiple'){
+        const tipoCtrl = (p.tipo === 'opcion_unica') ? 'radio' : 'checkbox';
+        const list = Array.isArray(p.respuestas) ? p.respuestas : [];
+        if(list.length === 0){
+          opciones = '<div class="alert alert-warning">Esta pregunta no tiene opciones activas configuradas.</div>';
+        } else {
+          opciones = '<div class="gq-options">' + list.map((r,i)=>{
+            const inputId = `p${p.id}_r${r.id}`;
+            const name = `q_${p.id}` + (tipoCtrl==='checkbox' ? '[]' : '');
+            const label = (r.respuesta_texto != null && r.respuesta_texto !== ''
+                         ? r.respuesta_texto
+                         : (r.respuesta_numero != null ? r.respuesta_numero : '')).toString();
+            return `
+              <div class="form-check">
+                <input class="form-check-input" type="${tipoCtrl}" name="${name}" id="${inputId}" value="${r.id}">
+                <label class="form-check-label" for="${inputId}">${label}</label>
+              </div>`;
+          }).join('') + '</div>';
+        }
+      } else if (p.tipo === 'abierta'){
+        opciones = '<textarea class="form-control" name="q_'+p.id+'" rows="3" placeholder="Escribe tu respuesta..."></textarea>';
+      } else if (p.tipo === 'numerica'){
+        opciones = '<input class="form-control" type="number" step="any" name="q_'+p.id+'" placeholder="Ingresa un número">';
+      }
+      qContainer.innerHTML = `
+        <div class="gq">
+          <div class="gq-number">${numero}</div>
+          <div>
+            <div class="gq-statement mb-3">${p.enunciado}</div>
+            ${opciones}
+          </div>
+        </div>`;
+    }
 
-    // Cambio de curso
-    curso.addEventListener('change', e => loadCourse(e.target.value));
+    function startEval(encuestaId, title){
+      if(!encuestaId){ qContainer.innerHTML=''; return; }
+      tema.textContent = 'Evaluación: ' + (title || ('ID ' + encuestaId));
+      qContainer.innerHTML = '<div class="text-center py-3">Cargando preguntas...</div>';
+      btnNext.classList.remove('disabled');
+      fetch(`?c=Evaluacion&a=CargarEvaluacion&encuesta_id=${encodeURIComponent(encuestaId)}`)
+        .then(r=>r.json())
+        .then(json=>{
+          try { console.log('Evaluacion data:', json); } catch(_){ }
+          if(json && json.success){
+            preguntas = json.data || [];
+            idx = 0;
+            renderPregunta();
+          } else {
+            preguntas = []; idx = -1;
+            qContainer.innerHTML = '<div class="alert alert-warning">No hay preguntas disponibles.</div>';
+          }
+        })
+        .catch(()=>{
+          preguntas = []; idx = -1;
+          qContainer.innerHTML = '<div class="alert alert-danger">Error cargando la evaluación.</div>';
+        });
+    }
 
-    // “Siguiente” de demo
-    document.getElementById('btnNext').addEventListener('click', function(e){
-      e.preventDefault();
-      const choice = document.querySelector('#qContainer input[name="q1"]:checked');
-      if(!choice){ alert('Selecciona una respuesta antes de continuar.'); return; }
-      alert('Curso: ' + curso.options[curso.selectedIndex].text + '\nRespuesta: ' + choice.value + '\n(Continuar con la siguiente pregunta…)');
+    selEncuesta.addEventListener('change', e => {
+      const opt = selEncuesta.options[selEncuesta.selectedIndex];
+      const title = opt ? opt.getAttribute('data-title') : '';
+      startEval(e.target.value, title);
     });
+
+    btnNext.addEventListener('click', function(e){
+      e.preventDefault();
+      if(idx < 0) return;
+      // Validación mínima: exigir selección/entrada en opcion_unica/multiple
+      const p = preguntas[idx];
+      let ok = true;
+      if(p.tipo === 'opcion_unica'){
+        ok = !!document.querySelector('input[name="q_'+p.id+'"]:checked');
+      } else if (p.tipo === 'opcion_multiple'){
+        ok = document.querySelectorAll('input[name="q_'+p.id+'[]"]:checked').length > 0;
+      } else if (p.tipo === 'abierta' || p.tipo === 'numerica'){
+        const el = document.querySelector('[name="q_'+p.id+'"]');
+        ok = el && el.value.trim() !== '';
+      }
+      if(!ok){ alert('Responde la pregunta antes de continuar.'); return; }
+
+      idx += 1;
+      renderPregunta();
+    });
+
+    // Inicial: cargar encuestas
+    loadEncuestas();
   </script>
 </body>
 </html>
