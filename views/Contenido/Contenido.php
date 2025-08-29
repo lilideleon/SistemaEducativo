@@ -76,7 +76,7 @@
                   <option>Historia</option>
                 </select>
               </div>
-              <div class="col-md-3">
+              <div class="col-md-2">
                 <label class="form-label fw-semibold">Grado</label>
                 <select id="grado" class="form-select form-select-sm">
                   <option value="1°">1°</option>
@@ -87,13 +87,27 @@
                   <option value="6°">6°</option>
                 </select>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-2">
+                <label class="form-label fw-semibold">Unidad</label>
+                <select id="unidad" class="form-select form-select-sm">
+                  <option value="Unidad 1">Unidad 1</option>
+                  <option value="Unidad 2">Unidad 2</option>
+                  <option value="Unidad 3">Unidad 3</option>
+                  <option value="Unidad 4">Unidad 4</option>
+                  <option value="Unidad 5">Unidad 5</option>
+                  <option value="Unidad 6">Unidad 6</option>
+                  <option value="Unidad 7">Unidad 7</option>
+                  <option value="Unidad 8">Unidad 8</option>
+                  <option value="Unidad 9">Unidad 9</option>
+                  <option value="Unidad 10">Unidad 10</option>
+                </select>
+              </div>
+              <div class="col-md-3">
                 <label class="form-label fw-semibold">Título del material</label>
                 <input id="titulo" class="form-control form-control-sm" placeholder="Ej.: Unidad 2 — Álgebra / Guía y diapositivas">
               </div>
               <div class="col-md-2 text-md-end">
-                <a href="#" id="lnkPublicar" class="link-btn">Publicar <span id="qtySel">0</span> archivo(s)</a>
-                <a href="#" id="lnkLimpiar" class="link-btn link-ghost ms-2">Limpiar selección</a>
+                <a href="#" id="lnkPublicar" class="link-btn">Publicar</a>
               </div>
             </div>
 
@@ -102,36 +116,22 @@
               <textarea id="desc" class="form-control" rows="2" placeholder="Breve contexto del material..."></textarea>
             </div>
 
-            <input id="fileInput" type="file" multiple class="d-none"
-                   accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,image/*,video/*" />
-
-            <div id="drop" class="dropzone mt-3">
-              <div class="mb-1">
-                <i class="bi bi-cloud-arrow-up-fill me-1"></i>
-                Arrastra y suelta archivos aquí
-              </div>
-              <div class="dz-hint">o <a href="#" id="lnkElegir">haz clic para seleccionarlos</a></div>
-            </div>
+            
           </form>
 
-          <!-- Lista de pendientes -->
-          <div id="pending" class="d-none">
-            <h6 class="mb-2">Archivos seleccionados</h6>
-            <div class="vstack gap-2" id="pendingList"></div>
-          </div>
 
           <!-- Publicados -->
           <hr class="my-4"/>
           <div class="d-flex align-items-center justify-content-between mb-2">
             <h5 class="mb-0">Material publicado</h5>
-            <small class="text-muted">Acciones: <i class="bi bi-eye"></i> ver • <i class="bi bi-download"></i> descargar • <i class="bi bi-trash"></i> eliminar</small>
+            <small class="text-muted">Acciones: <i class="bi bi-trash"></i> eliminar</small>
           </div>
 
           <div class="table-wrap">
             <table class="table table-sm table-bordered mb-0" id="tblPub">
               <thead>
                 <tr>
-                  <th>ID</th><th>Título</th><th>Curso</th><th>Grado</th><th>Tipo</th><th>Tamaño</th><th>Fecha</th><th>Acciones</th>
+                  <th>ID</th><th>Título</th><th>Curso</th><th>Grado</th><th>Unidad</th><th>Fecha</th><th>Acciones</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -149,100 +149,33 @@
     const q = sel => document.querySelector(sel);
     const byId = id => document.getElementById(id);
 
-    const drop = byId('drop'), input = byId('fileInput'), list = byId('pendingList');
-    const pendingBox = byId('pending'), qtySel = byId('qtySel');
-
-    let queue = [];     // archivos para publicar
     let published = []; // materiales publicados
     let seq = 1;
 
     // ======= Utilidades =======
-    const fmtBytes = b => {
-      if(!b && b !== 0) return '-';
-      const u = ['B','KB','MB','GB']; let i = 0;
-      while(b >= 1024 && i < u.length-1){ b/=1024; i++; }
-      return `${b.toFixed(1)} ${u[i]}`;
-    };
-    const ext = name => (name.split('.').pop() || '').toLowerCase();
-
-    const iconByExt = e => {
-      if(['png','jpg','jpeg','gif','webp','bmp','svg'].includes(e)) return 'bi-image';
-      if(['pdf'].includes(e))  return 'bi-file-earmark-pdf';
-      if(['doc','docx','rtf'].includes(e)) return 'bi-file-earmark-word';
-      if(['ppt','pptx','key'].includes(e)) return 'bi-file-earmark-slides';
-      if(['xls','xlsx','csv'].includes(e)) return 'bi-file-earmark-excel';
-      if(['zip','rar','7z'].includes(e))   return 'bi-file-zip';
-      if(['mp4','mov','avi','mkv','webm'].includes(e)) return 'bi-file-earmark-play';
-      return 'bi-file-earmark';
-    };
-
-    function typeLabel(e){
-      if(['png','jpg','jpeg','gif','webp','bmp','svg'].includes(e)) return 'Imagen';
-      if(['pdf'].includes(e))  return 'PDF';
-      if(['doc','docx','rtf'].includes(e)) return 'Word';
-      if(['ppt','pptx','key'].includes(e)) return 'Presentación';
-      if(['xls','xlsx','csv'].includes(e)) return 'Excel';
-      if(['zip','rar','7z'].includes(e))   return 'Comprimido';
-      if(['mp4','mov','avi','mkv','webm'].includes(e)) return 'Video';
-      return 'Archivo';
-    }
+    
 
     // ======= Manejo de selección =======
-    function addFiles(files){
-      for(const f of files){
-        const id = crypto.randomUUID?.() || (Date.now() + '-' + Math.random());
-        const item = { id, file:f, name:f.name, size:f.size, ext:ext(f.name), url: URL.createObjectURL(f) };
-        queue.push(item);
-      }
-      renderPending();
-    }
-
-    function renderPending(){
-      qtySel.textContent = queue.length;
-      pendingBox.classList.toggle('d-none', queue.length === 0);
-      list.innerHTML = queue.map(it => `
-        <div class="pending-item" data-id="${it.id}">
-          <div class="thumb">
-            ${
-              ['png','jpg','jpeg','gif','webp','bmp'].includes(it.ext)
-              ? `<img src="${it.url}" class="w-100 h-100 rounded" style="object-fit:cover"/>`
-              : `<i class="bi ${iconByExt(it.ext)}"></i>`
-            }
-          </div>
-          <div>
-            <div class="file-title">${it.name}</div>
-            <div class="file-meta">${typeLabel(it.ext)} • ${fmtBytes(it.size)}</div>
-          </div>
-          <div class="text-end">
-            <a href="#" class="link-btn link-danger" data-action="remove">Quitar</a>
-          </div>
-        </div>
-      `).join('');
-    }
+    
 
     // ======= Publicación =======
     function publish(){
-      if(queue.length === 0) return;
       const curso = byId('curso').value;
+      const grado = byId('grado').value;
+      const unidad = byId('unidad')?.value || '';
       const titulo = byId('titulo').value.trim() || 'Material sin título';
       const desc = byId('desc').value.trim();
 
-      for(const it of queue){
-        const item = {
-          pid: seq++,
-          titulo,
-          curso,
-          tipo: typeLabel(it.ext),
-          size: it.size,
-          fecha: new Date(),
-          url: it.url,
-          nombreArchivo: it.name,
-          desc
-        };
-        published.unshift(item);
-      }
-      queue = [];
-      renderPending();
+      const item = {
+        pid: seq++,
+        titulo,
+        curso,
+        grado,
+        unidad,
+        fecha: new Date(),
+        desc
+      };
+      published.unshift(item);
       renderPublished();
     }
 
@@ -254,12 +187,9 @@
           <td>${p.titulo}</td>
           <td>${p.curso}</td>
           <td>${p.grado || '-'}</td>
-          <td>${p.tipo}</td>
-          <td>${fmtBytes(p.size)}</td>
+          <td>${p.unidad || '-'}</td>
           <td>${p.fecha.toLocaleString()}</td>
           <td class="text-nowrap">
-            <a class="me-2" href="${p.url}" target="_blank" title="Ver"><i class="bi bi-eye"></i></a>
-            <a class="me-2" href="${p.url}" download="${p.nombreArchivo}" title="Descargar"><i class="bi bi-download"></i></a>
             <a class="link-danger px-1 py-0" href="#" data-action="del" title="Eliminar"><i class="bi bi-trash"></i></a>
           </td>
         </tr>
@@ -267,25 +197,8 @@
     }
 
     // ======= Eventos =======
-    byId('lnkElegir').addEventListener('click', e => { e.preventDefault(); input.click(); });
-    input.addEventListener('change', e => addFiles(e.target.files));
-
-    ;['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('drag'); }));
-    ;['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('drag'); }));
-    drop.addEventListener('drop', e => addFiles(e.dataTransfer.files));
-    drop.addEventListener('click', () => input.click());
-
     byId('lnkPublicar').addEventListener('click', e => { e.preventDefault(); publish(); });
-    byId('lnkLimpiar').addEventListener('click', e => { e.preventDefault(); queue = []; renderPending(); });
-
-    // Quitar de lista pendiente
-    list.addEventListener('click', e => {
-      const a = e.target.closest('a[data-action="remove"]'); if(!a) return;
-      e.preventDefault();
-      const id = a.closest('.pending-item').dataset.id;
-      queue = queue.filter(x => x.id !== id);
-      renderPending();
-    });
+    
 
     // Eliminar publicado
     q('#tblPub tbody').addEventListener('click', e => {
@@ -296,11 +209,10 @@
       renderPublished();
     });
 
-    // Demo: un registro inicial (sin archivo real)
+    // Demo: un registro inicial
     published.push({
       pid: seq++, titulo:'Sílabos y guía de ejercicios — Unidad 1',
-      curso:'Matemática', tipo:'PDF', size: 534000, fecha: new Date(),
-      url:'#', nombreArchivo:'silabos-unidad1.pdf', desc:''
+      curso:'Matemática', grado:'-', unidad:'Unidad 1', fecha: new Date(), desc:''
     });
     renderPublished();
   </script>
