@@ -1,4 +1,8 @@
 <?php 
+   // Validación de autenticación y permisos de administrador
+   require_once 'core/AuthValidation.php';
+   validarAdmin(); // Solo administradores pueden gestionar preguntas
+   
    include 'views/Menu/Aside.php';
 ?>
 
@@ -108,7 +112,9 @@
     <section class="main-content">
       <header class="d-flex align-items-center justify-content-between mb-3">
         <h1 class="page-title">Sistema Educativo</h1>
-        <i class="bi bi-arrow-right-square-fill fs-2 text-light d-none d-md-inline"></i>
+        <a href="?c=Login&a=Logout" class="btn btn-outline-light btn-sm" title="Cerrar Sesión">
+          <i class="bi bi-box-arrow-right"></i> Salir
+        </a>
       </header>
 
       <div class="content-panel">

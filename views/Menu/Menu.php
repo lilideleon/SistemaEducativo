@@ -1,4 +1,8 @@
 <?php 
+   // Validación de autenticación
+   require_once 'core/AuthValidation.php';
+   validarAutenticacion();
+   
    include 'views/Menu/Aside.php';
 ?>
 
@@ -49,9 +53,14 @@
 
     <!-- Tu contenido propio -->
     <section class="col-12 main-content">
-      <header class="mb-4">
-        <h1 class="h3">Sistema Educativo</h1>
-        <p class="text-muted">Selecciona una opción del menú para comenzar</p>
+      <header class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+          <h1 class="h3">Sistema Educativo</h1>
+          <p class="text-muted">Selecciona una opción del menú para comenzar</p>
+        </div>
+        <a href="?c=Login&a=Logout" class="btn btn-outline-light btn-sm" title="Cerrar Sesión">
+          <i class="bi bi-box-arrow-right"></i> Salir
+        </a>
       </header>
 
       <div class="content-panel">

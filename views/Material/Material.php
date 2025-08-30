@@ -1,4 +1,8 @@
 <?php 
+   // Validación de autenticación y permisos de docentes y administradores
+   require_once 'core/AuthValidation.php';
+   validarRol(['ADMIN', 'DOCENTE', 'DIRECTOR']); // Solo docentes y administradores pueden gestionar material
+   
    include 'views/Menu/Aside.php';
 ?>
 

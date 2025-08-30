@@ -1,17 +1,10 @@
 <?php
-require 'views/Content/header.php';
-?>
-
-<?php
-if ($_SESSION['TipoUsuario'] == '') {
-    print "<script>
-        window.location='?c=Login'; 
-    </script>";
-} else if ($_SESSION['TipoUsuario'] == 1) {
-    require 'views/Content/sidebar.php';
-} else if ($_SESSION['TipoUsuario'] == 2) {
-    require 'views/Content/sidebar2.php';
-}
+   // Validación de autenticación y permisos de administradores y docentes
+   require_once 'core/AuthValidation.php';
+   validarRol(['ADMIN', 'DOCENTE', 'DIRECTOR']); // Solo admin, docentes y directores pueden gestionar inventario
+   
+   require 'views/Content/header.php';
+   include 'views/Menu/Aside.php';
 ?>
 
 <style>
@@ -44,9 +37,12 @@ if ($_SESSION['TipoUsuario'] == '') {
         <!-- Listado de Inventario -->
         <div class="col-12 col-md-6 col-lg-11">
             <div class="card mb-4">
-                <center>
-                    <h1 class="card-header">Listado de Inventario</h1>
-                </center>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h1 class="mb-0">Listado de Inventario</h1>
+                    <a href="?c=Login&a=Logout" class="btn btn-outline-danger btn-sm" title="Cerrar Sesión">
+                        <i class="bi bi-box-arrow-right"></i> Salir
+                    </a>
+                </div>
                 <div class="card-body demo-vertical-spacing demo-only-element">
                     <div class="card-body">
                         <small class="text fw-semibold">En este módulo puede visualizar, registrar y modificar el inventario.</small>
