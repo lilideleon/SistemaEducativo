@@ -75,10 +75,7 @@
       <div class="row align-items-center g-5">
         <div class="col-12 col-lg-6">
           <h1 class="display-5 fw-semibold mb-3">Bienvenido al Sistema Educativo</h1>
-          <p class="lead text-secondary mb-4">
-            Plataforma para gestión de usuarios, evaluaciones y materiales académicos.
-            Accede con tu cuenta para comenzar.
-          </p>
+  
       
         </div>
        
