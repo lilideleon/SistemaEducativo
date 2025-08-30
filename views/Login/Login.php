@@ -124,6 +124,36 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
+    // Función para mostrar alertas
+    function showAlert(type, message) {
+      // Remover alertas existentes
+      const existingAlert = document.querySelector('.alert');
+      if (existingAlert) {
+        existingAlert.remove();
+      }
+      
+      // Crear nueva alerta
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+      alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      
+      // Insertar antes del formulario
+      const form = document.getElementById('loginForm');
+      form.parentNode.insertBefore(alertDiv, form);
+      
+      // Auto-ocultar después de 5 segundos para alertas de éxito
+      if (type === 'success') {
+        setTimeout(() => {
+          if (alertDiv.parentNode) {
+            alertDiv.remove();
+          }
+        }, 5000);
+      }
+    }
+
     // Manejo del formulario de login
     (() => {
       const form = document.getElementById('loginForm');
@@ -156,15 +186,21 @@
             
             // Redirigir al menú si la respuesta es exitosa
             if (data.success) {
-              window.location.href = '?c=Menu';
+              // Mostrar mensaje de bienvenida
+              const welcomeMsg = `¡Bienvenido ${data.user.nombre_completo}!`;
+              showAlert('success', welcomeMsg);
+              
+              // Redirigir después de un breve delay
+              setTimeout(() => {
+                window.location.href = '?c=Menu';
+              }, 1500);
             } else {
-              // Mostrar mensaje de error si es necesario
-              alert('Error en las credenciales');
+              // Mostrar mensaje de error
+              showAlert('danger', data.message || 'Error en las credenciales');
             }
           } catch (error) {
             console.error('Error:', error);
-            // En caso de error, redirigir de todas formas (según lo solicitado)
-            window.location.href = '?c=Menu';
+            showAlert('danger', 'Error de conexión. Intenta nuevamente.');
           } finally {
             btn.disabled = false;
             btn.innerHTML = original;

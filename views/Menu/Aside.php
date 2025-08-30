@@ -6,10 +6,31 @@
   </button>
 </div>
 
+
+<?php
+    // Incluir el middleware de autenticación
+    require_once "core/AuthMiddleware.php";
+    
+    // Obtener información del usuario actual
+    $usuario = AuthMiddleware::getCurrentUser();
+    
+    // Verificar si el usuario está autenticado y tiene ID 1 (administrador)
+    $esAdmin = ($usuario && $usuario['id'] == 1);
+?>
+
+
+
 <!-- Sidebar desktop -->
 <aside class="sidebar d-none d-md-block">
   <div class="sidebar-box">
-    <div class="sidebar-header">Principal</div>
+    <?php if ($usuario): ?>
+      <div class="sidebar-header">
+        <small class="d-block text-light">Usuario: <?php echo htmlspecialchars(isset($usuario['nombre_completo']) ? $usuario['nombre_completo'] : 'Usuario'); ?></small>
+        <small class="d-block text-light opacity-75">Rol: <?php echo htmlspecialchars(isset($usuario['rol']) ? $usuario['rol'] : 'N/A'); ?></small>
+      </div>
+    <?php else: ?>
+      <div class="sidebar-header">Principal</div>
+    <?php endif; ?>
     <div class="d-grid gap-3">
       <a href="?c=Menu" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-grid-fill me-2"></i>Menú</a>
       <a href="?c=Usuarios" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-people-fill me-2"></i>Usuarios</a>
@@ -17,7 +38,9 @@
       <a href="?c=Reportes" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</a>
       <a href="?c=Material" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-folder2-open me-2"></i>Material</a>
       <a href="?c=Contenido" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-bar-chart-fill me-2"></i>Contenido</a>
-      <a href="?c=Preguntas" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-bar-chart-fill me-2"></i>Preguntas</a>
+      <?php if ($esAdmin): ?>
+        <a href="?c=Preguntas" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-bar-chart-fill me-2"></i>Preguntas</a>
+      <?php endif; ?>
     </div>
   </div>
 </aside>
@@ -36,7 +59,9 @@
       <a href="?c=Reportes" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</a>
       <a href="?c=Material" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-folder2-open me-2"></i>Material</a>
       <a href="?c=Contenido" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-bar-chart-fill me-2"></i>Contenido</a>
-      <a href="?c=Preguntas" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-bar-chart-fill me-2"></i>Preguntas</a>
+      <?php if ($esAdmin): ?>
+        <a href="?c=Preguntas" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-bar-chart-fill me-2"></i>Preguntas</a>
+      <?php endif; ?>
     </div>
   </div>
 </div>

@@ -153,7 +153,7 @@
 
           <!-- Card del test -->
           <div class="gform-card">
-            <h2 class="gform-title">Bienvenido Carlos Gómez</h2>
+            <h2 class="gform-title">Bienvenido <?php echo isset($_SESSION['user_nombre_completo']) ? $_SESSION['user_nombre_completo'] : 'Usuario'; ?></h2>
             <div class="gform-subtle mb-2"><strong id="tema">Selecciona una evaluación para iniciar</strong></div>
 
             <form id="frmEval">
@@ -179,6 +179,7 @@
 
     let preguntas = [];
     let idx = -1;
+    let respuestasGuardadas = []; // Array para almacenar las respuestas temporalmente
 
     // Cargar encuestas para el combo
     function loadEncuestas(){
@@ -199,8 +200,19 @@
 
     function renderPregunta(){
       if(idx < 0 || idx >= preguntas.length){
-        qContainer.innerHTML = '<div class="alert alert-success">Evaluación finalizada. ¡Gracias!</div>';
+        // Evaluación finalizada, mostrar botón para enviar
+        qContainer.innerHTML = `
+          <div class="alert alert-success">
+            <h4>¡Evaluación completada!</h4>
+            <p>Has respondido todas las preguntas. Haz clic en "Enviar Respuestas" para finalizar.</p>
+            <button type="button" class="btn btn-primary" id="btnEnviarRespuestas">
+              <i class="bi bi-send"></i> Enviar Respuestas
+            </button>
+          </div>`;
         btnNext.classList.add('disabled');
+        
+        // Agregar evento al botón de enviar
+        document.getElementById('btnEnviarRespuestas').addEventListener('click', enviarRespuestas);
         return;
       }
       const p = preguntas[idx];
@@ -245,6 +257,7 @@
       tema.textContent = 'Evaluación: ' + (title || ('ID ' + encuestaId));
       qContainer.innerHTML = '<div class="text-center py-3">Cargando preguntas...</div>';
       btnNext.classList.remove('disabled');
+      respuestasGuardadas = []; // Limpiar respuestas anteriores
       fetch(`?c=Evaluacion&a=CargarEvaluacion&encuesta_id=${encodeURIComponent(encuestaId)}`)
         .then(r=>r.json())
         .then(json=>{
@@ -273,6 +286,10 @@
     btnNext.addEventListener('click', function(e){
       e.preventDefault();
       if(idx < 0) return;
+      
+      // Guardar respuesta actual antes de continuar
+      guardarRespuestaActual();
+      
       // Validación mínima: exigir selección/entrada en opcion_unica/multiple
       const p = preguntas[idx];
       let ok = true;
@@ -289,6 +306,133 @@
       idx += 1;
       renderPregunta();
     });
+
+    // Función para guardar la respuesta actual
+    function guardarRespuestaActual() {
+      if(idx < 0 || idx >= preguntas.length) return;
+      
+      const p = preguntas[idx];
+      let respuesta = {
+        pregunta_id: p.id
+      };
+      
+      if(p.tipo === 'opcion_unica'){
+        const checked = document.querySelector('input[name="q_'+p.id+'"]:checked');
+        if(checked) {
+          respuesta.respuesta_id = parseInt(checked.value);
+        }
+      } else if (p.tipo === 'opcion_multiple'){
+        const checked = document.querySelectorAll('input[name="q_'+p.id+'[]"]:checked');
+        if(checked.length > 0) {
+          respuesta.respuesta_id = Array.from(checked).map(el => parseInt(el.value));
+        }
+      } else if (p.tipo === 'abierta'){
+        const el = document.querySelector('[name="q_'+p.id+'"]');
+        if(el && el.value.trim() !== '') {
+          respuesta.respuesta_texto = el.value.trim();
+        }
+      } else if (p.tipo === 'numerica'){
+        const el = document.querySelector('[name="q_'+p.id+'"]');
+        if(el && el.value.trim() !== '') {
+          respuesta.respuesta_numero = parseFloat(el.value);
+        }
+      }
+      
+      // Agregar o actualizar en el array de respuestas
+      const existingIndex = respuestasGuardadas.findIndex(r => r.pregunta_id === p.id);
+      if(existingIndex >= 0) {
+        respuestasGuardadas[existingIndex] = respuesta;
+      } else {
+        respuestasGuardadas.push(respuesta);
+      }
+    }
+
+    // Función para enviar todas las respuestas al servidor
+    function enviarRespuestas() {
+      const encuestaId = selEncuesta.value;
+      if(!encuestaId) {
+        alert('No hay encuesta seleccionada');
+        return;
+      }
+      
+      if(respuestasGuardadas.length === 0) {
+        alert('No hay respuestas para enviar');
+        return;
+      }
+      
+      // Verificar que el usuario esté autenticado (opcional, ya que el servidor también valida)
+      const userInfo = <?php echo json_encode(isset($_SESSION['user_id']) ? [
+        'id' => $_SESSION['user_id'],
+        'nombre' => isset($_SESSION['user_nombre_completo']) ? $_SESSION['user_nombre_completo'] : 'Usuario',
+        'rol' => isset($_SESSION['user_rol']) ? $_SESSION['user_rol'] : 'ALUMNO'
+      ] : null); ?>;
+      
+      if (!userInfo) {
+        alert('Debes iniciar sesión para enviar la evaluación');
+        window.location.href = '?c=Login';
+        return;
+      }
+      
+      // Deshabilitar botón para evitar doble envío
+      const btnEnviar = document.getElementById('btnEnviarRespuestas');
+      btnEnviar.disabled = true;
+      btnEnviar.innerHTML = '<i class="bi bi-hourglass-split"></i> Enviando...';
+      
+      // Preparar datos para enviar
+      const data = {
+        encuesta_id: parseInt(encuestaId),
+        respuestas: respuestasGuardadas
+      };
+      
+      fetch('?c=Evaluacion&a=GuardarRespuestas', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(result => {
+        if(result.success) {
+          const usuario = result.data.usuario;
+          qContainer.innerHTML = `
+            <div class="alert alert-success">
+              <h4>¡Encuesta enviada exitosamente!</h4>
+              <p>${result.msj}</p>
+              <hr>
+              <div class="row">
+                <div class="col-md-6">
+                  <p><strong>Estudiante:</strong> ${usuario.nombre}</p>
+                  <p><strong>Institución:</strong> ${usuario.institucion}</p>
+                  <p><strong>Grado:</strong> ${usuario.grado}</p>
+                  <p><strong>Sección:</strong> ${usuario.seccion}</p>
+                </div>
+                <div class="col-md-6">
+                  <p><strong>Total de respuestas:</strong> ${result.data.total_respuestas_guardadas}</p>
+                  <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-ES')}</p>
+                </div>
+              </div>
+              <hr>
+              <button type="button" class="btn btn-secondary" onclick="location.reload()">
+                <i class="bi bi-arrow-clockwise"></i> Iniciar Nueva Evaluación
+              </button>
+            </div>`;
+        } else {
+          throw new Error(result.msj || 'Error al enviar respuestas');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        qContainer.innerHTML = `
+          <div class="alert alert-danger">
+            <h4>Error al enviar respuestas</h4>
+            <p>${error.message}</p>
+            <button type="button" class="btn btn-primary" onclick="enviarRespuestas()">
+              <i class="bi bi-arrow-repeat"></i> Reintentar
+            </button>
+          </div>`;
+      });
+    }
 
     // Inicial: cargar encuestas
     loadEncuestas();

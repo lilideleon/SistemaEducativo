@@ -11,7 +11,7 @@ class Evaluacion_model
     }
 
     // Lista encuestas, por defecto solo activas (y opcionalmente estado ACTIVA)
-    public function evaluacion metodo ejemplo($soloActivas = true, $soloEstadoActiva = false)
+    /*public function evaluacion metodo ejemplo($soloActivas = true, $soloEstadoActiva = false)
     {
         try {
             $this->ConexionSql = $this->Conexion->CrearConexion();
@@ -35,6 +35,6 @@ class Evaluacion_model
         } finally {
             $this->Conexion->CerrarConexion();
         }
-    }
+    }*/
 }
 ?>
