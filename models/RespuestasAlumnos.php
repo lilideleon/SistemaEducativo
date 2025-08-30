@@ -11,10 +11,16 @@ class RespuestasAlumnos_model
     }
 
     // Guardar respuesta del alumno usando el procedimiento almacenado
-    public function GuardarRespuesta($alumno_user_id, $encuesta_id, $pregunta_id, $respuesta_id = null, $respuesta_texto = null, $respuesta_numero = null)
+    public function GuardarRespuesta($alumno_user_id, $encuesta_id, $pregunta_id, $respuesta_id = null, $respuesta_texto = null, $respuesta_numero = null, $conexion = null)
     {
         try {
-            $this->ConexionSql = $this->Conexion->CrearConexion();
+            // Usar la conexión proporcionada o crear una nueva
+            $usarConexionExterna = ($conexion !== null);
+            if (!$usarConexionExterna) {
+                $this->ConexionSql = $this->Conexion->CrearConexion();
+            } else {
+                $this->ConexionSql = $conexion;
+            }
 
             $stmt = $this->ConexionSql->prepare("CALL sp_respuestas_alumnos_agregar(?, ?, ?, ?, ?, ?, @p_id_nuevo)");
             
@@ -58,7 +64,10 @@ class RespuestasAlumnos_model
         } catch (Exception $e) {
             throw new Exception('Error al guardar respuesta del alumno: ' . $e->getMessage());
         } finally {
-            $this->Conexion->CerrarConexion();
+            // Solo cerrar la conexión si no es externa
+            if (!$usarConexionExterna) {
+                $this->Conexion->CerrarConexion();
+            }
         }
     }
 
@@ -86,7 +95,8 @@ class RespuestasAlumnos_model
                             $pregunta_id, 
                             $rid, 
                             null, 
-                            null
+                            null,
+                            $this->ConexionSql  // Pasar la conexión activa
                         );
                         
                         if ($id_nuevo) {
@@ -101,7 +111,8 @@ class RespuestasAlumnos_model
                         $pregunta_id, 
                         $respuesta_id, 
                         $respuesta_texto, 
-                        $respuesta_numero
+                        $respuesta_numero,
+                        $this->ConexionSql  // Pasar la conexión activa
                     );
                     
                     if ($id_nuevo) {
