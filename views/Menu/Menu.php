@@ -65,7 +65,7 @@
 
       <div class="content-panel">
         <div class="d-flex align-items-center justify-content-between mb-3">
-          <h2 class="h6 text-black-50 mb-0">Dashboard de Resultados</h2>
+          <h2 class="h6 text-black-50 mb-0">Alumnos con mejor promedio</h2>
           <div class="d-flex gap-2">
             <input type="number" min="1" class="form-control form-control-sm" id="encuestaId" value="1" title="ID de Encuesta" style="width:120px" />
             <input type="number" min="1" class="form-control form-control-sm" id="limit" value="10" title="Límite" style="width:100px" />
@@ -73,24 +73,11 @@
           </div>
         </div>
 
-        <div class="row g-3 mb-3" id="cards">
-          <div class="col-12 col-md-4">
-            <div class="p-3 border rounded bg-light">
-              <div class="text-secondary">Participantes</div>
-              <div class="fs-4 fw-semibold" id="kpiParticipantes">-</div>
-            </div>
-          </div>
-          <div class="col-12 col-md-4">
-            <div class="p-3 border rounded bg-light">
-              <div class="text-secondary">Puntaje promedio</div>
-              <div class="fs-4 fw-semibold" id="kpiPromedio">-</div>
-            </div>
-          </div>
-          <div class="col-12 col-md-4">
-            <div class="p-3 border rounded bg-light">
-              <div class="text-secondary">Respuestas correctas totales</div>
-              <div class="fs-4 fw-semibold" id="kpiCorrectas">-</div>
-            </div>
+        <div class="d-flex align-items-center p-3 mb-3 border rounded bg-light">
+          <i class="bi bi-trophy-fill text-warning me-2 fs-5" aria-hidden="true"></i>
+          <div>
+            <div class="fw-semibold mb-0">Alumnos con mejor promedio</div>
+            <small class="text-secondary">Listado de los alumnos con mejor promedio para la encuesta seleccionada.</small>
           </div>
         </div>
 
@@ -132,22 +119,9 @@
         const res = await fetch(url);
         const data = await res.json();
         if (!Array.isArray(data) || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Sin datos</td></tr>`;
-          document.getElementById('kpiParticipantes').textContent = '0';
-          document.getElementById('kpiPromedio').textContent = '0';
-          document.getElementById('kpiCorrectas').textContent = '0';
+          tbody.innerHTML = `<tr><td colspan=\"5\" class=\"text-center text-muted\">Sin datos</td></tr>`;
           return;
         }
-
-        // KPIs
-        const participantes = data.length;
-        const sumPuntaje = data.reduce((acc, r) => acc + (parseFloat(r.puntaje) || 0), 0);
-        const sumCorrectas = data.reduce((acc, r) => acc + (parseInt(r.correctas) || 0), 0);
-        const promedio = participantes ? (sumPuntaje / participantes) : 0;
-
-        document.getElementById('kpiParticipantes').textContent = participantes;
-        document.getElementById('kpiPromedio').textContent = promedio.toFixed(2);
-        document.getElementById('kpiCorrectas').textContent = sumCorrectas;
 
         // Tabla
         tbody.innerHTML = data.map((r, idx) => `
