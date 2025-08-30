@@ -258,6 +258,52 @@
                 $this->Conexion->CerrarConexion();
             }
         }
+
+        // Top resultados por encuesta (para dashboard)
+        public function getTopResultadosEncuesta($encuestaId, $limit = 10)
+        {
+            try {
+                $this->ConexionSql = $this->Conexion->CrearConexion();
+                $limit = intval($limit);
+                if ($limit <= 0) { $limit = 10; }
+
+                $this->SentenciaSql = "SELECT
+  ra.encuesta_id,
+  e.titulo AS encuesta_nombre,
+  ra.alumno_user_id,
+  CONCAT(u.nombres, ' ', u.apellidos) AS alumno_nombre,
+  SUM(CASE WHEN COALESCE(ra.es_correcta, r.es_correcta) = 1 THEN 1 ELSE 0 END) AS correctas,
+  COUNT(*) AS total,
+  SUM(CASE WHEN COALESCE(ra.es_correcta, r.es_correcta) = 1 THEN 5 ELSE 0 END) AS puntaje
+FROM respuestas_alumnos ra
+JOIN preguntas p
+  ON p.id = ra.pregunta_id
+ AND p.encuesta_id = ra.encuesta_id
+ AND p.activo = 1
+LEFT JOIN respuestas r
+  ON r.id = ra.respuesta_id
+JOIN usuarios u
+  ON u.id = ra.alumno_user_id
+JOIN encuestas e
+  ON e.id = ra.encuesta_id
+WHERE ra.encuesta_id = :encuestaId
+  AND ra.activo = 1
+  AND u.activo = 1
+  AND e.activo = 1
+GROUP BY ra.encuesta_id, e.titulo, ra.alumno_user_id, alumno_nombre
+ORDER BY puntaje DESC
+LIMIT $limit";
+
+                $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
+                $this->Procedure->bindParam(':encuestaId', $encuestaId, PDO::PARAM_INT);
+                $this->Procedure->execute();
+                return $this->Procedure->fetchAll(PDO::FETCH_OBJ);
+            } catch (Exception $e) {
+                die($e->getMessage());
+            } finally {
+                $this->Conexion->CerrarConexion();
+            }
+        }
     }
 ?>
 

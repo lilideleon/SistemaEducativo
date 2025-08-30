@@ -122,6 +122,17 @@
 			]);
 		}
 
+		// Dashboard: Top resultados por encuesta
+		public function TopResultadosEncuesta()
+		{
+			$model = new Menu_model();
+			$encuestaId = isset($_GET['encuestaId']) ? intval($_GET['encuestaId']) : 1;
+			$limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
+
+			$rows = $model->getTopResultadosEncuesta($encuestaId, $limit);
+			header('Content-Type: application/json');
+			echo json_encode($rows);
+		}
 
 	}
 ?>

@@ -64,8 +64,52 @@
       </header>
 
       <div class="content-panel">
-        <h2 class="h6 text-black-50 mb-3">Contenido</h2>
-        <p>Coloca aquí tu contenido específico.</p>
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h2 class="h6 text-black-50 mb-0">Dashboard de Resultados</h2>
+          <div class="d-flex gap-2">
+            <input type="number" min="1" class="form-control form-control-sm" id="encuestaId" value="1" title="ID de Encuesta" style="width:120px" />
+            <input type="number" min="1" class="form-control form-control-sm" id="limit" value="10" title="Límite" style="width:100px" />
+            <button class="btn btn-sm btn-primary" id="btnCargar"><i class="bi bi-arrow-repeat"></i> Cargar</button>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3" id="cards">
+          <div class="col-12 col-md-4">
+            <div class="p-3 border rounded bg-light">
+              <div class="text-secondary">Participantes</div>
+              <div class="fs-4 fw-semibold" id="kpiParticipantes">-</div>
+            </div>
+          </div>
+          <div class="col-12 col-md-4">
+            <div class="p-3 border rounded bg-light">
+              <div class="text-secondary">Puntaje promedio</div>
+              <div class="fs-4 fw-semibold" id="kpiPromedio">-</div>
+            </div>
+          </div>
+          <div class="col-12 col-md-4">
+            <div class="p-3 border rounded bg-light">
+              <div class="text-secondary">Respuestas correctas totales</div>
+              <div class="fs-4 fw-semibold" id="kpiCorrectas">-</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-sm table-striped align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>#</th>
+                <th>Alumno</th>
+                <th>Correctas</th>
+                <th>Total</th>
+                <th>Puntaje</th>
+              </tr>
+            </thead>
+            <tbody id="tablaResultados">
+              <tr><td colspan="5" class="text-center text-muted">Sin datos</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   </main>
@@ -75,6 +119,56 @@
 
   <!-- Opción A: usar include.js (archivo externo) -->
   <script src="include.js"></script>
+
+  <script>
+    async function cargarResultados() {
+      const encuestaId = document.getElementById('encuestaId').value || 1;
+      const limit = document.getElementById('limit').value || 10;
+      const url = `?c=Menu&a=TopResultadosEncuesta&encuestaId=${encodeURIComponent(encuestaId)}&limit=${encodeURIComponent(limit)}`;
+      const tbody = document.getElementById('tablaResultados');
+      tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Cargando...</td></tr>`;
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!Array.isArray(data) || data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Sin datos</td></tr>`;
+          document.getElementById('kpiParticipantes').textContent = '0';
+          document.getElementById('kpiPromedio').textContent = '0';
+          document.getElementById('kpiCorrectas').textContent = '0';
+          return;
+        }
+
+        // KPIs
+        const participantes = data.length;
+        const sumPuntaje = data.reduce((acc, r) => acc + (parseFloat(r.puntaje) || 0), 0);
+        const sumCorrectas = data.reduce((acc, r) => acc + (parseInt(r.correctas) || 0), 0);
+        const promedio = participantes ? (sumPuntaje / participantes) : 0;
+
+        document.getElementById('kpiParticipantes').textContent = participantes;
+        document.getElementById('kpiPromedio').textContent = promedio.toFixed(2);
+        document.getElementById('kpiCorrectas').textContent = sumCorrectas;
+
+        // Tabla
+        tbody.innerHTML = data.map((r, idx) => `
+          <tr>
+            <td>${idx + 1}</td>
+            <td>${r.alumno_nombre ?? ''}</td>
+            <td>${r.correctas ?? 0}</td>
+            <td>${r.total ?? 0}</td>
+            <td><span class="badge bg-primary">${r.puntaje ?? 0}</span></td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        console.error(e);
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Error al cargar datos</td></tr>`;
+      }
+    }
+
+    document.getElementById('btnCargar').addEventListener('click', cargarResultados);
+    // auto cargar al abrir
+    cargarResultados();
+  </script>
 
   <!-- Opción B (alternativa): snippet inline en lugar de include.js)
   <script>
