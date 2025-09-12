@@ -91,4 +91,10 @@
 
 		//FIN DE LA LOGICA
 	}
+
+	// Conexión PDO global para modelos modernos
+	if (!isset($pdo)) {
+	    $conexion = new ClaseConexion();
+	    $pdo = $conexion->CrearConexion();
+	}
 ?>
