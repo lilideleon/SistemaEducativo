@@ -331,8 +331,6 @@
     ;['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('drag'); }));
     ;['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('drag'); }));
     drop.addEventListener('drop', e => addFiles(e.dataTransfer.files));
-    // Quitar el click redundante sobre drop para evitar doble apertura
-    // drop.addEventListener('click', () => input.click());
 
     byId('lnkPublicar').addEventListener('click', e => { e.preventDefault(); publish(); });
     byId('lnkLimpiar').addEventListener('click', e => { e.preventDefault(); queue = []; renderPending(); });
@@ -347,12 +345,29 @@
     });
 
     // Eliminar publicado
-    q('#tblPub tbody').addEventListener('click', e => {
+    q('#tblPub tbody').addEventListener('click', async e => {
       const a = e.target.closest('a[data-action="del"]'); if(!a) return;
       e.preventDefault();
-      const tr = a.closest('tr'); const id = Number(tr.dataset.id);
-      published = published.filter(x => x.pid !== id);
-      renderPublished();
+      const tr = a.closest('tr');
+      const id = Number(tr.dataset.id);
+      if(!id) return;
+      if(!confirm('¿Está seguro que desea eliminar este material?')) return;
+      try {
+        const resp = await fetch('?c=Material&a=EliminarMaterial', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: 'id=' + encodeURIComponent(id)
+        });
+        const data = await resp.json();
+        if(data.success){
+          alert('Material eliminado correctamente');
+          cargarMateriales();
+        } else {
+          alert('Error al eliminar: ' + (data.msj || 'No se pudo eliminar.'));
+        }
+      } catch(e){
+        alert('Error de red o servidor.');
+      }
     });
 
     // Demo: un registro inicial (sin archivo real)
