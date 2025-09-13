@@ -1,0 +1,1 @@
+2025-09-13T03:21:15+00:00 {"id":1,"codigo":"00904","nombres":"Eli","apellidos":"De León","grado_id":1,"institucion_id":2,"rol":"DIRECTOR","password_hash":"$2y$10$SbF0vfHborKAPGjEJllBd.8ymDyPiCRIKAJT9muIG.KXPTxxcNSZK","seccion":0}

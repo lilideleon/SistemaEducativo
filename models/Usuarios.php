@@ -102,7 +102,7 @@ class Usuarios_model
             $this->Procedure->bindValue(2, $this->getCodigo(), PDO::PARAM_STR);
             $this->Procedure->bindValue(3, $this->getNombres(), PDO::PARAM_STR);
             $this->Procedure->bindValue(4, $this->getApellidos(), PDO::PARAM_STR);
-                // Bind correcto para grado_id en actualización
+            // Bind correcto para grado_id en actualización
                 if ($this->getGradoId() === null) {
                     $this->Procedure->bindValue(5, null, PDO::PARAM_NULL);
                 } else {
@@ -118,6 +118,26 @@ class Usuarios_model
             $this->Procedure->bindValue(7, $this->getRol(), PDO::PARAM_STR);
             $this->Procedure->bindValue(8, $this->getPasswordHash(), PDO::PARAM_STR);
             $this->Procedure->bindValue(9, $this->getSeccion(), PDO::PARAM_INT);
+
+                // --- DEBUG: registrar los valores ligados antes de ejecutar el SP ---
+                try {
+                    $dbgPath = __DIR__ . '/../res/logs/model_update_bindings.txt';
+                    @mkdir(dirname($dbgPath), 0777, true);
+                    $payloadDbg = [
+                        'id' => $this->getId(),
+                        'codigo' => $this->getCodigo(),
+                        'nombres' => $this->getNombres(),
+                        'apellidos' => $this->getApellidos(),
+                        'grado_id' => $this->getGradoId(),
+                        'institucion_id' => $this->getInstitucionId(),
+                        'rol' => $this->getRol(),
+                        'password_hash' => $this->getPasswordHash(),
+                        'seccion' => $this->getSeccion(),
+                    ];
+                    file_put_contents($dbgPath, date('c') . ' ' . json_encode($payloadDbg, JSON_UNESCAPED_UNICODE) . PHP_EOL, FILE_APPEND);
+                } catch (Exception $e) {
+                    // no bloquear la ejecución por errores de logging
+                }
 
             $this->Procedure->execute();
             
@@ -307,7 +327,13 @@ class Usuarios_model
 
     public function setNombres($nombres)
     {
-        $this->nombres = ucwords(strtolower(trim($nombres)));
+        $n = trim((string)$nombres);
+        // Normalizar respetando multibyte (tildes)
+        if (!empty($n)) {
+            $this->nombres = mb_convert_case(mb_strtolower($n, 'UTF-8'), MB_CASE_TITLE, 'UTF-8');
+        } else {
+            $this->nombres = '';
+        }
     }
 
     public function getApellidos()
@@ -317,7 +343,12 @@ class Usuarios_model
 
     public function setApellidos($apellidos)
     {
-        $this->apellidos = ucwords(strtolower(trim($apellidos)));
+        $a = trim((string)$apellidos);
+        if (!empty($a)) {
+            $this->apellidos = mb_convert_case(mb_strtolower($a, 'UTF-8'), MB_CASE_TITLE, 'UTF-8');
+        } else {
+            $this->apellidos = '';
+        }
     }
 
     // Alias para compatibilidad

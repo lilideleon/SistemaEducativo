@@ -2,3 +2,4 @@
 2025-09-13T02:38:21+00:00 {"Codigo":"345846","nombres":"dfa","apellidos":"fdas","Rol":"DIRECTOR","Contraseña":"fdsa","GradoId":"","InstitucionId":"","Seccion":""}
 2025-09-13T02:40:53+00:00 {"Codigo":"432432","nombres":"gdsas","apellidos":"gdsa","Rol":"DIRECTOR","Contraseña":"4321432","GradoId":"2","InstitucionId":"2","Seccion":""}
 2025-09-13T02:41:21+00:00 {"Codigo":"566546","nombres":"fdsafds","apellidos":"de leon","Rol":"ALUMNO","Contraseña":"342dfsa","GradoId":"4","InstitucionId":"3","Seccion":"1"}
+2025-09-13T03:21:44+00:00 {"Codigo":"ana","nombres":"de León","apellidos":"aguilar","Rol":"DIRECTOR","Contraseña":"test","GradoId":"4","InstitucionId":"3","Seccion":""}

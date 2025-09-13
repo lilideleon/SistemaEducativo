@@ -21,7 +21,8 @@
 			$this->Contraseña = '31107449';
 			$this->DataBase = 'dbname=educativo';
 			$this->Servidor = 'mysql:host=localhost;';
-			$this->JuegoCaracteres = 'charset=utf8';
+			// Usar utf8mb4 para manejar correctamente tildes y caracteres multibyte
+			$this->JuegoCaracteres = 'charset=utf8mb4';
 		}
 
 		//METODO PARA CREAR LA CONEXION A LA BASE DE DATOS
@@ -30,15 +31,17 @@
         {
             try
             {
-                $this->ConexionSql = new PDO(
-                    $this->Servidor.$this->DataBase.';'.$this->JuegoCaracteres,
-                    $this->Usuario,
-                    $this->Contraseña,
-                    array(
-                        PDO::ATTR_PERSISTENT => true,
-                        PDO::MYSQL_ATTR_MULTI_STATEMENTS => true  // Habilita múltiples declaraciones
-                    )
-                );
+				$this->ConexionSql = new PDO(
+					$this->Servidor.$this->DataBase.';'.$this->JuegoCaracteres,
+					$this->Usuario,
+					$this->Contraseña,
+					array(
+						PDO::ATTR_PERSISTENT => true,
+						PDO::MYSQL_ATTR_MULTI_STATEMENTS => true, // Habilita múltiples declaraciones
+						// Asegurar que la conexión use utf8mb4 para evitar problemas con tildes y caracteres multibyte
+						PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
+					)
+				);
             }
 			catch (PDOException $e)
 			{
