@@ -1,0 +1,2 @@
+2025-09-13T03:00:49+00:00 {"Codigo":"0906","nombres":"5435423","apellidos":"5432543","Rol":"DIRECTOR","Contraseña":"5432","GradoId":"1","InstitucionId":"2","Seccion":"","IdUsuario":"3"}
+2025-09-13T03:03:18+00:00 {"Codigo":"0906","nombres":"dsaf","apellidos":"dsaf","Rol":"DIRECTOR","Contraseña":"342432","GradoId":"1","InstitucionId":"1","Seccion":"","IdUsuario":"3"}

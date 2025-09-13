@@ -107,6 +107,11 @@ class UsuariosController
         header('Content-Type: application/json');
         $usuario = new Usuarios_model();
 
+        // DEBUG: registrar raw POST de actualizaciones para diagnosticar problemas
+        $debugPathUpd = __DIR__ . '/../res/logs/post_debug_update.txt';
+        @mkdir(dirname($debugPathUpd), 0777, true);
+        file_put_contents($debugPathUpd, date('c') . ' ' . json_encode($_POST, JSON_UNESCAPED_UNICODE) . PHP_EOL, FILE_APPEND);
+
         // Obtener el ID del usuario que se está actualizando
         $usuario->setId($_POST['IdUsuario']);
         
@@ -124,14 +129,20 @@ class UsuariosController
             $a = isset($_POST['apellidos']) ? $_POST['apellidos'] : $_POST['Apellidos'];
             $usuario->setApellidos(trim($a));
         }
+
+        // Si el cliente envía GradoId / InstitucionId, respetarlos (no los sobreescribiremos luego)
+        if (isset($_POST['GradoId'])) {
+            $usuario->setGradoId($_POST['GradoId']);
+        }
+        if (isset($_POST['InstitucionId'])) {
+            $usuario->setInstitucionId($_POST['InstitucionId']);
+        }
         
         if (isset($_POST['Rol'])) {
             $usuario->setRol($_POST['Rol']);
             
-            // Actualizar grado e institución solo si es estudiante
+            // Actualizar sección solo si es estudiante; los IDs ya fueron leídos si vinieron
                 if ($_POST['Rol'] === 'ALUMNO') {
-                $usuario->setGradoId(isset($_POST['GradoId']) ? $_POST['GradoId'] : null);
-                $usuario->setInstitucionId(isset($_POST['InstitucionId']) ? $_POST['InstitucionId'] : null);
                 // Actualizar sección si es proporcionada
                 if (isset($_POST['Seccion'])) {
                     if ($_POST['Seccion'] === '' || $_POST['Seccion'] === null) {
@@ -144,9 +155,7 @@ class UsuariosController
                     }
                 }
             } else {
-                // Limpiar grado e institución si no es estudiante
-                $usuario->setGradoId(null);
-                $usuario->setInstitucionId(null);
+                // No cambiar GradoId/InstitucionId aquí: respetar valores ya establecidos
                 // Usar 0 para seccion en roles no alumno
                 $usuario->setSeccion(0);
             }
