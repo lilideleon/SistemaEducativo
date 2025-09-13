@@ -18,41 +18,72 @@ class UsuariosController
 
     public function Agregar()
     {
-        $usuario = new Usuarios_model();
-
-        // Seteamos todos los campos basados en los datos que vienen por POST
-        $usuario->setCodigo($_POST['Codigo']);
-        $usuario->setNombres(trim($_POST['PrimerNombre'] . ' ' . $_POST['SegundoNombre']));
-        $usuario->setApellidos(trim($_POST['PrimerApellido'] . ' ' . $_POST['SegundoApellido']));
-        $usuario->setRol($_POST['Rol']);
-        
-        // Si es estudiante, establecer grado e institución
-        if ($_POST['Rol'] === 'ALUMNO') {
-            $usuario->setGradoId($_POST['GradoId']);
-            $usuario->setInstitucionId($_POST['InstitucionId']);
-            // Sección obligatoria y numérica para alumnos
-            if (isset($_POST['Seccion']) && $_POST['Seccion'] !== '') {
-                if (!ctype_digit((string)$_POST['Seccion'])) {
-                    throw new Exception('La sección debe ser numérica');
-                }
-                $usuario->setSeccion($_POST['Seccion']);
-            } else {
-                throw new Exception('La sección es requerida para alumnos');
-            }
-        }
-        else {
-            // Para roles no alumno, limpiar sección
-            $usuario->setSeccion(null);
-        }
-        
-        // Establecer contraseña (el modelo se encarga de hashearla)
-        if (!empty($_POST['Contraseña'])) {
-            $usuario->setPassword($_POST['Contraseña']);
-        }
-
+        header('Content-Type: application/json');
         $json = array();
 
         try {
+            // --- DEBUG: registrar raw POST para diagnosticar campos faltantes ---
+            $debugPath = __DIR__ . '/../res/logs/post_debug.txt';
+            @mkdir(dirname($debugPath), 0777, true);
+            file_put_contents($debugPath, date('c') . ' ' . json_encode($_POST, JSON_UNESCAPED_UNICODE) . PHP_EOL, FILE_APPEND);
+
+            // Función auxiliar para leer posibles variantes de nombres de campo
+            $get = function ($keys, $default = null) {
+                foreach ((array)$keys as $k) {
+                    if (isset($_POST[$k])) return $_POST[$k];
+                }
+                return $default;
+            };
+
+            $usuario = new Usuarios_model();
+
+            // Leer exactamente los campos que espera el procedimiento almacenado
+            $codigo = $get(array('Codigo', 'codigo'), '');
+            $nombres = $get(array('nombres', 'Nombres'), '');
+            $apellidos = $get(array('apellidos', 'Apellidos'), '');
+
+            $rol = $get(array('Rol', 'rol'), 'ALUMNO');
+            $rol = $rol === '' ? 'ALUMNO' : $rol;
+
+            $gradoId = $get(array('GradoId', 'grado_id', 'Grado', 'grado'), '');
+            $institucionId = $get(array('InstitucionId', 'institucion_id', 'Instituto', 'instituto'), null);
+            $seccion = $get(array('Seccion', 'seccion'), '');
+            $password = $get(array('password', 'contraseña', 'Contraseña', 'password_plain'), '');
+
+            // Asignar al modelo (usar exactamente nombres/apellidos como en el SP)
+            $usuario->setCodigo($codigo);
+            $usuario->setNombres(trim($nombres));
+            $usuario->setApellidos(trim($apellidos));
+            $usuario->setRol($rol);
+
+                if (strtoupper($rol) === 'ALUMNO') {
+                    // Validaciones para alumno
+                    if ($seccion === '' || $seccion === null) {
+                        throw new Exception('La sección es requerida para alumnos');
+                    }
+                    if (!ctype_digit((string)$seccion)) {
+                        throw new Exception('La sección debe ser numérica');
+                    }
+                    $usuario->setGradoId($gradoId);
+                    $usuario->setInstitucionId($institucionId !== null ? $institucionId : 1);
+                    $usuario->setSeccion($seccion);
+                } else {
+                    // Para otros roles, respetar valores enviados (si vienen vacíos, el modelo los convertirá a NULL)
+                    $usuario->setGradoId($gradoId);
+                    $usuario->setInstitucionId($institucionId);
+                    // La columna seccion en la tabla es NOT NULL, usar 0 cuando no aplique
+                    $usuario->setSeccion(0);
+            }
+
+            // Contraseña (el modelo la hashea)
+            if (!empty($password)) {
+                $usuario->setPassword($password);
+            } else {
+                // Si no viene, usar código como contraseña por defecto
+                $usuario->setPassword($codigo);
+            }
+
+            // Ejecutar inserción
             $usuario->InsertarUsuario();
 
             $json['name'] = 'position';
@@ -60,46 +91,52 @@ class UsuariosController
             $json['msj'] = '<font color="#ffffff"><i class="fa fa-check"></i> Usuario registrado correctamente</font>';
             $json['success'] = true;
         } catch (Exception $e) {
+            // Asegurar que cualquier excepción devuelva JSON válido al cliente
             $json['name'] = 'position';
             $json['defaultValue'] = 'top-right';
             $json['msj'] = '<font color="#ffffff"><i class="fa fa-exclamation-triangle"></i> Error al registrar: ' . $e->getMessage() . '</font>';
             $json['success'] = false;
         }
 
-        echo json_encode($json);
+    if (ob_get_length()) ob_clean();
+    echo json_encode($json);
     }
 
     public function Actualizar()
     {
+        header('Content-Type: application/json');
         $usuario = new Usuarios_model();
 
         // Obtener el ID del usuario que se está actualizando
         $usuario->setId($_POST['IdUsuario']);
         
-        // Actualizar solo los campos que se envían
+        // Actualizar solo los campos que se envían (usar 'nombres' y 'apellidos' como en el SP)
         if (isset($_POST['Codigo'])) {
             $usuario->setCodigo($_POST['Codigo']);
         }
-        
-        if (isset($_POST['PrimerNombre']) && isset($_POST['SegundoNombre'])) {
-            $usuario->setNombres(trim($_POST['PrimerNombre'] . ' ' . $_POST['SegundoNombre']));
+
+        if (isset($_POST['nombres']) || isset($_POST['Nombres'])) {
+            $n = isset($_POST['nombres']) ? $_POST['nombres'] : $_POST['Nombres'];
+            $usuario->setNombres(trim($n));
         }
-        
-        if (isset($_POST['PrimerApellido']) && isset($_POST['SegundoApellido'])) {
-            $usuario->setApellidos(trim($_POST['PrimerApellido'] . ' ' . $_POST['SegundoApellido']));
+
+        if (isset($_POST['apellidos']) || isset($_POST['Apellidos'])) {
+            $a = isset($_POST['apellidos']) ? $_POST['apellidos'] : $_POST['Apellidos'];
+            $usuario->setApellidos(trim($a));
         }
         
         if (isset($_POST['Rol'])) {
             $usuario->setRol($_POST['Rol']);
             
             // Actualizar grado e institución solo si es estudiante
-            if ($_POST['Rol'] === 'ALUMNO') {
+                if ($_POST['Rol'] === 'ALUMNO') {
                 $usuario->setGradoId(isset($_POST['GradoId']) ? $_POST['GradoId'] : null);
                 $usuario->setInstitucionId(isset($_POST['InstitucionId']) ? $_POST['InstitucionId'] : null);
                 // Actualizar sección si es proporcionada
                 if (isset($_POST['Seccion'])) {
                     if ($_POST['Seccion'] === '' || $_POST['Seccion'] === null) {
-                        $usuario->setSeccion(null);
+                        // No permitir NULL en seccion, usar 0 por compatibilidad
+                        $usuario->setSeccion(0);
                     } else if (!ctype_digit((string)$_POST['Seccion'])) {
                         throw new Exception('La sección debe ser numérica');
                     } else {
@@ -110,13 +147,15 @@ class UsuariosController
                 // Limpiar grado e institución si no es estudiante
                 $usuario->setGradoId(null);
                 $usuario->setInstitucionId(null);
-                $usuario->setSeccion(null);
+                // Usar 0 para seccion en roles no alumno
+                $usuario->setSeccion(0);
             }
         }
         // Si no viene Rol pero sí Seccion, permitir actualización directa de sección manteniendo rol actual
         elseif (isset($_POST['Seccion'])) {
             if ($_POST['Seccion'] === '' || $_POST['Seccion'] === null) {
-                $usuario->setSeccion(null);
+                // No permitir NULL en seccion
+                $usuario->setSeccion(0);
             } else if (!ctype_digit((string)$_POST['Seccion'])) {
                 throw new Exception('La sección debe ser numérica');
             } else {
@@ -145,11 +184,13 @@ class UsuariosController
             $json['success'] = false;
         }
 
-        echo json_encode($json);
+    if (ob_get_length()) ob_clean();
+    echo json_encode($json);
     }
 
     public function Desactivar()
     {
+        header('Content-Type: application/json');
         $usuario = new Usuarios_model();
         $usuario->setId($_POST['IdUsuario']);
 
@@ -171,11 +212,13 @@ class UsuariosController
             $json['success'] = false;
         }
 
-        echo json_encode($json);
+    if (ob_get_length()) ob_clean();
+    echo json_encode($json);
     }
 
     public function Eliminar()
     {
+        header('Content-Type: application/json');
         $usuario = new Usuarios_model();
         $usuario->setId($_POST['IdUsuario']);
 
@@ -197,7 +240,8 @@ class UsuariosController
             $json['success'] = false;
         }
 
-        echo json_encode($json);
+    if (ob_get_length()) ob_clean();
+    echo json_encode($json);
     }
 
     // Endpoints de datos para poblar selects

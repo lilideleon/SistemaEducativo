@@ -643,16 +643,16 @@
         const gradoIdSafe = /^\d+$/.test(grado) ? grado : '';
         const institucionIdSafe = /^\d+$/.test(instituto) ? instituto : '';
 
+        // Enviar los campos que el backend espera (nombres/apellidos sin dividir)
         const payload = {
           Codigo: codigo,
-          PrimerNombre,
-          SegundoNombre,
-          PrimerApellido,
-          SegundoApellido,
+          nombres: nombresStr,
+          apellidos: apellidosStr,
           Rol,
           'Contraseña': password,
-          GradoId: Rol === 'ALUMNO' ? gradoIdSafe : '',
-          InstitucionId: Rol === 'ALUMNO' ? institucionIdSafe : '',
+          // Enviar siempre los IDs; el backend decidirá si aplicarlos o no
+          GradoId: gradoIdSafe,
+          InstitucionId: institucionIdSafe,
           Seccion: Rol === 'ALUMNO' ? seccionSafe : ''
         };
 

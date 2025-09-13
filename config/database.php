@@ -19,9 +19,9 @@
 		{
 		    $this->Usuario = 'system';
 			$this->Contraseña = '31107449';
-			$this->DataBase = 'dbname=educativo;';
+			$this->DataBase = 'dbname=educativo';
 			$this->Servidor = 'mysql:host=localhost;';
-			$this->JuegoCaract = 'charset=utf8';
+			$this->JuegoCaracteres = 'charset=utf8';
 		}
 
 		//METODO PARA CREAR LA CONEXION A LA BASE DE DATOS
@@ -31,7 +31,7 @@
             try
             {
                 $this->ConexionSql = new PDO(
-                    $this->Servidor.$this->DataBase.$this->JuegoCaract,
+                    $this->Servidor.$this->DataBase.';'.$this->JuegoCaracteres,
                     $this->Usuario,
                     $this->Contraseña,
                     array(
@@ -40,10 +40,11 @@
                     )
                 );
             }
-            catch (PDOException $e)
-            {
-                echo "Error al crear la conexion ".$e->getMessage();
-            }
+			catch (PDOException $e)
+			{
+				// No imprimir directamente: lanzar excepción para que el caller la maneje
+				throw new Exception("Error al crear la conexion: " . $e->getMessage());
+			}
             return $this->ConexionSql;
         }
 
@@ -58,7 +59,8 @@
 			}
 			catch (Exception $e)
 			{
-				echo "Error al cerrar la conexion".$e->getMessage();
+				// Registrar en log en lugar de imprimir
+				error_log("Error al cerrar la conexion: " . $e->getMessage());
 			}
 		}
 

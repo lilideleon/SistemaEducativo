@@ -56,14 +56,25 @@ class Usuarios_model
             $this->SentenciaSql = "CALL sp_usuarios_insert_min(?, ?, ?, ?, ?, ?, ?, ?, @id)";
             $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
 
-            $this->Procedure->bindParam(1, $this->getCodigo(), PDO::PARAM_STR);
-            $this->Procedure->bindParam(2, $this->getNombres(), PDO::PARAM_STR);
-            $this->Procedure->bindParam(3, $this->getApellidos(), PDO::PARAM_STR);
-            $this->Procedure->bindParam(4, $this->getGradoId(), PDO::PARAM_INT);
-            $this->Procedure->bindParam(5, $this->getInstitucionId(), PDO::PARAM_INT);
-            $this->Procedure->bindParam(6, $this->getRol(), PDO::PARAM_STR);
-            $this->Procedure->bindParam(7, $this->getPasswordHash(), PDO::PARAM_STR);
-            $this->Procedure->bindParam(8, $this->getSeccion(), PDO::PARAM_INT);
+            $this->Procedure->bindValue(1, $this->getCodigo(), PDO::PARAM_STR);
+            $this->Procedure->bindValue(2, $this->getNombres(), PDO::PARAM_STR);
+            $this->Procedure->bindValue(3, $this->getApellidos(), PDO::PARAM_STR);
+                // grado_id puede ser NULL (si no aplica); enlazar correctamente como NULL o INT
+                if ($this->getGradoId() === null) {
+                    $this->Procedure->bindValue(4, null, PDO::PARAM_NULL);
+                } else {
+                    $this->Procedure->bindValue(4, (int)$this->getGradoId(), PDO::PARAM_INT);
+                }
+
+                // institucion_id puede ser NULL (si no aplica); enlazar correctamente como NULL o INT
+                if ($this->getInstitucionId() === null) {
+                    $this->Procedure->bindValue(5, null, PDO::PARAM_NULL);
+                } else {
+                    $this->Procedure->bindValue(5, (int)$this->getInstitucionId(), PDO::PARAM_INT);
+                }
+            $this->Procedure->bindValue(6, $this->getRol(), PDO::PARAM_STR);
+            $this->Procedure->bindValue(7, $this->getPasswordHash(), PDO::PARAM_STR);
+            $this->Procedure->bindValue(8, $this->getSeccion(), PDO::PARAM_INT);
 
             $this->Procedure->execute();
             
@@ -87,15 +98,26 @@ class Usuarios_model
             $this->SentenciaSql = "CALL sp_usuarios_update_min(?, ?, ?, ?, ?, ?, ?, ?, ?, @rows_affected)";
             $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
 
-            $this->Procedure->bindParam(1, $this->getId(), PDO::PARAM_INT);
-            $this->Procedure->bindParam(2, $this->getCodigo(), PDO::PARAM_STR);
-            $this->Procedure->bindParam(3, $this->getNombres(), PDO::PARAM_STR);
-            $this->Procedure->bindParam(4, $this->getApellidos(), PDO::PARAM_STR);
-            $this->Procedure->bindParam(5, $this->getGradoId(), PDO::PARAM_INT);
-            $this->Procedure->bindParam(6, $this->getInstitucionId(), PDO::PARAM_INT);
-            $this->Procedure->bindParam(7, $this->getRol(), PDO::PARAM_STR);
-            $this->Procedure->bindParam(8, $this->getPasswordHash(), PDO::PARAM_STR);
-            $this->Procedure->bindParam(9, $this->getSeccion(), PDO::PARAM_INT);
+            $this->Procedure->bindValue(1, $this->getId(), PDO::PARAM_INT);
+            $this->Procedure->bindValue(2, $this->getCodigo(), PDO::PARAM_STR);
+            $this->Procedure->bindValue(3, $this->getNombres(), PDO::PARAM_STR);
+            $this->Procedure->bindValue(4, $this->getApellidos(), PDO::PARAM_STR);
+                // Bind correcto para grado_id en actualización
+                if ($this->getGradoId() === null) {
+                    $this->Procedure->bindValue(5, null, PDO::PARAM_NULL);
+                } else {
+                    $this->Procedure->bindValue(5, (int)$this->getGradoId(), PDO::PARAM_INT);
+                }
+
+                // Bind correcto para institucion_id en actualización
+                if ($this->getInstitucionId() === null) {
+                    $this->Procedure->bindValue(6, null, PDO::PARAM_NULL);
+                } else {
+                    $this->Procedure->bindValue(6, (int)$this->getInstitucionId(), PDO::PARAM_INT);
+                }
+            $this->Procedure->bindValue(7, $this->getRol(), PDO::PARAM_STR);
+            $this->Procedure->bindValue(8, $this->getPasswordHash(), PDO::PARAM_STR);
+            $this->Procedure->bindValue(9, $this->getSeccion(), PDO::PARAM_INT);
 
             $this->Procedure->execute();
             
@@ -118,7 +140,7 @@ class Usuarios_model
             $this->ConexionSql = $this->Conexion->CrearConexion();
             $this->SentenciaSql = "CALL sp_usuarios_delete_logico_min(?, @rows_affected)";
             $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
-            $this->Procedure->bindParam(1, $this->getId(), PDO::PARAM_INT);
+            $this->Procedure->bindValue(1, $this->getId(), PDO::PARAM_INT);
             $this->Procedure->execute();
             
             // Obtener el número de filas afectadas
@@ -345,7 +367,8 @@ class Usuarios_model
     public function setSeccion($seccion)
     {
         if ($seccion === '' || $seccion === null) {
-            $this->seccion = null;
+            // La tabla define `seccion` como NOT NULL, usar 0 cuando no exista
+            $this->seccion = 0;
         } else {
             $this->seccion = (int)$seccion;
         }
