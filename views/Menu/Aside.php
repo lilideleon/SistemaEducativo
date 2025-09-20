@@ -42,11 +42,7 @@
         <a href="?c=Preguntas" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-bar-chart-fill me-2"></i>Preguntas</a>
       <?php endif; ?>
       
-      <!-- Botón de cerrar sesión -->
-      <hr class="my-2" style="border-color: rgba(255,255,255,0.2);">
-      <a href="?c=Login&a=Logout" class="btn btn-glow fs-5 text-decoration-none" style="background: linear-gradient(180deg,#dc3545 0%,#c82333 100%);" title="Cerrar Sesión">
-        <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
-      </a>
+      
     </div>
   </div>
 </aside>
@@ -69,11 +65,7 @@
         <a href="?c=Preguntas" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-bar-chart-fill me-2"></i>Preguntas</a>
       <?php endif; ?>
       
-      <!-- Botón de cerrar sesión -->
-      <hr class="my-2" style="border-color: rgba(255,255,255,0.2);">
-      <a href="?c=Login&a=Logout" class="btn btn-glow fs-5 text-decoration-none" style="background: linear-gradient(180deg,#dc3545 0%,#c82333 100%);" title="Cerrar Sesión">
-        <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
-      </a>
+      
     </div>
   </div>
 </div>
