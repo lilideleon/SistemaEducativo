@@ -69,5 +69,39 @@ class Respuestas_model
             $this->Conexion->CerrarConexion();
         }
     }
+
+    // MODIFICAR respuesta existente
+    public function Modificar($id, $respuesta_texto = null, $respuesta_numero = null, $es_correcta = 0, $activo = 1)
+    {
+        try {
+            $this->ConexionSql = $this->Conexion->CrearConexion();
+            $sql = "UPDATE respuestas
+                       SET respuesta_texto = :texto,
+                           respuesta_numero = :numero,
+                           es_correcta = :correcta,
+                           activo = :activo
+                     WHERE id = :id";
+            $stmt = $this->ConexionSql->prepare($sql);
+            $stmt->bindValue(':id', (int)$id, PDO::PARAM_INT);
+            if ($respuesta_texto === '' || $respuesta_texto === null) {
+                $stmt->bindValue(':texto', null, PDO::PARAM_NULL);
+            } else {
+                $stmt->bindValue(':texto', $respuesta_texto, PDO::PARAM_STR);
+            }
+            if ($respuesta_numero === '' || $respuesta_numero === null) {
+                $stmt->bindValue(':numero', null, PDO::PARAM_NULL);
+            } else {
+                $stmt->bindValue(':numero', $respuesta_numero);
+            }
+            $stmt->bindValue(':correcta', (int)$es_correcta, PDO::PARAM_INT);
+            $stmt->bindValue(':activo', (int)$activo, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->rowCount() > 0;
+        } catch (Exception $e) {
+            throw new Exception('Error al modificar respuesta: ' . $e->getMessage());
+        } finally {
+            $this->Conexion->CerrarConexion();
+        }
+    }
 }
 ?>

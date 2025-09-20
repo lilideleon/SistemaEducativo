@@ -145,18 +145,45 @@ class PreguntasController
     // Listar respuestas de una pregunta
     public function ListarRespuestas()
     {
-        header('Content-Type: application/json');
+        header('Content-Type: application/json; charset=utf-8');
         try {
             $pregunta_id = isset($_GET['pregunta_id']) ? (int)$_GET['pregunta_id'] : 0;
             if ($pregunta_id <= 0) { throw new Exception('pregunta_id inválido'); }
             $soloActivas = !isset($_GET['todas']) || $_GET['todas'] !== '1';
             $model = new Respuestas_model();
             $rows = $model->ListarPorPregunta($pregunta_id, $soloActivas);
-            echo json_encode([ 'success' => true, 'data' => $rows ]);
+            echo json_encode([ 'success' => true, 'data' => $rows ], JSON_UNESCAPED_UNICODE);
         } catch (Exception $e) {
             http_response_code(400);
-            echo json_encode([ 'success' => false, 'data' => [], 'msj' => 'Error: ' . $e->getMessage() ]);
+            echo json_encode([ 'success' => false, 'data' => [], 'msj' => 'Error: ' . $e->getMessage() ], JSON_UNESCAPED_UNICODE);
         }
+    }
+
+    // Modificar respuesta
+    public function ModificarRespuesta()
+    {
+        header('Content-Type: application/json');
+        $json = [];
+        try {
+            $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+            if ($id <= 0) { throw new Exception('id inválido'); }
+
+            $respuesta_texto  = array_key_exists('respuesta_texto', $_POST) ? trim($_POST['respuesta_texto']) : null;
+            $respuesta_numero = array_key_exists('respuesta_numero', $_POST) && $_POST['respuesta_numero'] !== '' ? (float)$_POST['respuesta_numero'] : null;
+            $es_correcta      = array_key_exists('es_correcta', $_POST) ? (int)$_POST['es_correcta'] : 0;
+            $activo           = array_key_exists('activo', $_POST) ? (int)$_POST['activo'] : 1;
+
+            $model = new Respuestas_model();
+            $ok = $model->Modificar($id, $respuesta_texto, $respuesta_numero, $es_correcta, $activo);
+
+            $json['success'] = (bool)$ok;
+            $json['msj'] = $ok ? 'Respuesta modificada' : 'No se pudo modificar';
+        } catch (Exception $e) {
+            http_response_code(400);
+            $json['success'] = false;
+            $json['msj'] = 'Error: ' . $e->getMessage();
+        }
+        echo json_encode($json);
     }
 
     // Listar encuestas para el select (solo activas y estado ACTIVA por defecto)
