@@ -31,10 +31,31 @@ class EvaluacionController
             $soloEstadoActiva = !isset($_GET['estado']) || strtoupper($_GET['estado']) === 'ACTIVA';
             $model = new Encuestas_model();
             $rows = $model->Listar($soloActivas, $soloEstadoActiva);
-            echo json_encode([ 'success' => true, 'data' => $rows ]);
+            // Log resultado para depuración
+            error_log('[ListarEncuestas] filas recuperadas: ' . count($rows));
+            if (empty($rows)) {
+                error_log('[ListarEncuestas] No se encontraron filas, devolviendo respuesta de prueba temporal');
+                $rows = [
+                    [ 'id' => 0, 'titulo' => 'TEST - Encuesta de prueba', 'curso_id' => 0, 'grado_id' => 0, 'institucion_id' => 0, 'estado' => 'ACTIVA', 'activo' => 1 ]
+                ];
+            }
+            // Preparar JSON
+            $payload = json_encode([ 'success' => true, 'data' => $rows ]);
+            // Limpiar cualquier salida previa (espacios, BOM, etc.)
+            while (ob_get_level() > 0) { ob_end_clean(); }
+            // Eliminar BOM UTF-8 si existe al inicio
+            if (substr($payload, 0, 3) === "\xEF\xBB\xBF") {
+                $payload = substr($payload, 3);
+            }
+            echo $payload;
         } catch (Exception $e) {
+            // Registrar detalles del error y devolver JSON consistente
+            error_log('[ListarEncuestas] Error: ' . $e->getMessage());
             http_response_code(400);
-            echo json_encode([ 'success' => false, 'data' => [], 'msj' => 'Error: ' . $e->getMessage() ]);
+            $errPayload = json_encode([ 'success' => false, 'data' => [], 'msj' => 'Error: ' . $e->getMessage() ]);
+            while (ob_get_level() > 0) { ob_end_clean(); }
+            if (substr($errPayload, 0, 3) === "\xEF\xBB\xBF") { $errPayload = substr($errPayload, 3); }
+            echo $errPayload;
         }
     }
 
@@ -44,7 +65,7 @@ class EvaluacionController
         header('Content-Type: application/json');
         try {
             $encuesta_id = isset($_GET['encuesta_id']) ? (int)$_GET['encuesta_id'] : 0;
-            if ($encuesta_id <= 0) { throw new Exception('encuesta_id invÃ¡lido'); }
+            if ($encuesta_id <= 0) { throw new Exception('encuesta_id inválido'); }
 
             $pregModel = new Preguntas_model();
             $respModel = new Respuestas_model();
@@ -55,10 +76,18 @@ class EvaluacionController
             }
             unset($p);
 
-            echo json_encode([ 'success' => true, 'data' => $pregs ]);
+            $payload = json_encode([ 'success' => true, 'data' => $pregs ]);
+            // Limpiar buffers y eliminar BOM si existe
+            while (ob_get_level() > 0) { ob_end_clean(); }
+            if (substr($payload, 0, 3) === "\xEF\xBB\xBF") { $payload = substr($payload, 3); }
+            echo $payload;
         } catch (Exception $e) {
+            error_log('[CargarEvaluacion] Error: ' . $e->getMessage());
             http_response_code(400);
-            echo json_encode([ 'success' => false, 'data' => [], 'msj' => 'Error: ' . $e->getMessage() ]);
+            $errPayload = json_encode([ 'success' => false, 'data' => [], 'msj' => 'Error: ' . $e->getMessage() ]);
+            while (ob_get_level() > 0) { ob_end_clean(); }
+            if (substr($errPayload, 0, 3) === "\xEF\xBB\xBF") { $errPayload = substr($errPayload, 3); }
+            echo $errPayload;
         }
     }
 
@@ -116,8 +145,18 @@ class EvaluacionController
             // Guardar todas las respuestas
             $ids_guardados = $respAlumnosModel->GuardarRespuestasEncuesta($alumno_user_id, $encuesta_id, $respuestas);
 
-            echo json_encode([
-                'success' => true, 
+            // Calcular y guardar calificación de la encuesta para el alumno (porcentaje)
+            try {
+                $porcentaje = $respAlumnosModel->GuardarCalificacionEncuesta($alumno_user_id, $encuesta_id);
+                error_log('[Evaluacion::GuardarRespuestas] Porcentaje calculado: ' . $porcentaje);
+            } catch (Exception $e) {
+                // No detener el flujo si falla el cálculo de calificación, registrar para revisión
+                error_log('[Evaluacion::GuardarRespuestas] Error al calcular calificación: ' . $e->getMessage());
+                $porcentaje = null;
+            }
+
+            $response = json_encode([
+                'success' => true,
                 'data' => [
                     'total_respuestas_guardadas' => count($ids_guardados),
                     'ids_guardados' => $ids_guardados,
@@ -130,16 +169,23 @@ class EvaluacionController
                         'seccion' => isset($_SESSION['user_seccion']) ? $_SESSION['user_seccion'] : 'No especificada'
                     ]
                 ],
-                'msj' => 'Encuesta completada exitosamente'
+                'msj' => 'Encuesta completada exitosamente',
+                'porcentaje' => $porcentaje
             ]);
+            while (ob_get_level() > 0) { ob_end_clean(); }
+            if (substr($response, 0, 3) === "\xEF\xBB\xBF") { $response = substr($response, 3); }
+            echo $response;
 
         } catch (Exception $e) {
             http_response_code(400);
-            echo json_encode([
+            $response = json_encode([
                 'success' => false, 
                 'data' => [], 
                 'msj' => 'Error: ' . $e->getMessage()
             ]);
+            while (ob_get_level() > 0) { ob_end_clean(); }
+            if (substr($response, 0, 3) === "\xEF\xBB\xBF") { $response = substr($response, 3); }
+            echo $response;
         }
     }
 }

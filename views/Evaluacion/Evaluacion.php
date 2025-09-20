@@ -191,17 +191,32 @@
     function loadEncuestas(){
       selEncuesta.innerHTML = '<option value="">Cargando evaluaciones...</option>';
       fetch('?c=Evaluacion&a=ListarEncuestas')
-        .then(r => r.json())
-        .then(json => {
-          if(json && json.success){
-            const opts = ['<option value="">Seleccione evaluación...</option>']
-              .concat(json.data.map(e => `<option value="${e.id}" data-title="${e.titulo?.replaceAll('"','&quot;')}">${e.titulo} (ID: ${e.id})</option>`));
-            selEncuesta.innerHTML = opts.join('');
-          } else {
-            selEncuesta.innerHTML = '<option value="">No se pudo cargar</option>';
-          }
-        })
-        .catch(() => selEncuesta.innerHTML = '<option value="">Error al cargar</option>');
+        fetch('?c=Evaluacion&a=ListarEncuestas', { credentials: 'same-origin' })
+          .then(r => {
+            // Registrar status y texto crudo para diagnóstico
+            return r.text().then(text => ({ status: r.status, ok: r.ok, text }));
+          })
+          .then(obj => {
+            console.log('[ListarEncuestas] status=', obj.status, ' ok=', obj.ok, ' raw=', obj.text);
+            // Intentar parsear JSON, si falla mostrar texto crudo en el select
+            try {
+              const json = JSON.parse(obj.text);
+              if (json && json.success) {
+                const opts = ['<option value="">Seleccione evaluación...</option>']
+                  .concat(json.data.map(e => `<option value="${e.id}" data-title="${(e.titulo||'').replace(/"/g,'&quot;')}">${e.titulo} (ID: ${e.id})</option>`));
+                selEncuesta.innerHTML = opts.join('');
+                return;
+              }
+              selEncuesta.innerHTML = '<option value="">No se pudo cargar</option>';
+            } catch (err) {
+              console.error('[ListarEncuestas] JSON parse error:', err);
+              selEncuesta.innerHTML = `<option value="">Error al cargar: ${obj.status} - ${obj.text.replace(/"/g,'&quot;').slice(0,200)}</option>`;
+            }
+          })
+          .catch((err) => {
+            console.error('[ListarEncuestas] fetch error:', err);
+            selEncuesta.innerHTML = '<option value="">Error al cargar</option>';
+          });
     }
 
     function renderPregunta(){
@@ -265,19 +280,28 @@
       btnNext.classList.remove('disabled');
       respuestasGuardadas = []; // Limpiar respuestas anteriores
       fetch(`?c=Evaluacion&a=CargarEvaluacion&encuesta_id=${encodeURIComponent(encuestaId)}`)
-        .then(r=>r.json())
-        .then(json=>{
-          try { console.log('Evaluacion data:', json); } catch(_){ }
-          if(json && json.success){
-            preguntas = json.data || [];
-            idx = 0;
-            renderPregunta();
-          } else {
+        .then(r => r.text().then(t => ({ status: r.status, ok: r.ok, text: t })))
+        .then(obj => {
+          console.log('[CargarEvaluacion] status=', obj.status, ' ok=', obj.ok, ' raw=', obj.text);
+          try {
+            const json = JSON.parse(obj.text);
+            try { console.log('Evaluacion data:', json); } catch(_){ }
+            if(json && json.success){
+              preguntas = json.data || [];
+              idx = 0;
+              renderPregunta();
+            } else {
+              preguntas = []; idx = -1;
+              qContainer.innerHTML = '<div class="alert alert-warning">No hay preguntas disponibles.</div>';
+            }
+          } catch (err) {
+            console.error('[CargarEvaluacion] JSON parse error:', err);
             preguntas = []; idx = -1;
-            qContainer.innerHTML = '<div class="alert alert-warning">No hay preguntas disponibles.</div>';
+            qContainer.innerHTML = `<div class="alert alert-danger">Error cargando la evaluación: ${obj.status} - ${obj.text.replace(/"/g,'&quot;').slice(0,200)}</div>`;
           }
         })
-        .catch(()=>{
+        .catch((err) => {
+          console.error('[CargarEvaluacion] fetch error:', err);
           preguntas = []; idx = -1;
           qContainer.innerHTML = '<div class="alert alert-danger">Error cargando la evaluación.</div>';
         });

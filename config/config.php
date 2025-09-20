@@ -1,6 +1,6 @@
-<?
-	
-	define("CONTROLADOR_PRINCIPAL", "Inicio");
-	define("ACCION_PRINCIPAL", "index");
-	
+<?php
+
+define("CONTROLADOR_PRINCIPAL", "Inicio");
+define("ACCION_PRINCIPAL", "index");
+
 ?>

@@ -31,6 +31,7 @@ class Encuestas_model
             $stmt->closeCursor();
             return $rows;
         } catch (Exception $e) {
+            error_log('Error al listar encuestas: ' . $e->getMessage());
             throw new Exception('Error al listar encuestas: ' . $e->getMessage());
         } finally {
             $this->Conexion->CerrarConexion();
