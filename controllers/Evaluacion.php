@@ -5,13 +5,14 @@ class EvaluacionController
     public function __construct()
     {
         require_once "core/AuthMiddleware.php";
+        require_once "core/AuthValidation.php";
         require_once "models/Encuestas.php";
         require_once "models/Preguntas.php";
         require_once "models/Respuestas.php";
         require_once "models/RespuestasAlumnos.php";
         
         // Verificar autenticación
-        AuthMiddleware::requireAuth();
+        validarRol(['ALUMNO']);
         
         $data["titulo"] = "Evaluacion";
     }

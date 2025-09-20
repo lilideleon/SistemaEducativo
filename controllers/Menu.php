@@ -3,6 +3,8 @@
 		
 		public function __construct(){
 			require_once "models/Menu.php";
+			require_once "core/AuthValidation.php";
+			validarRol(['ADMIN','DIRECTOR']);
 			@session_start();
 			$data["titulo"] = "Menu";
 		}

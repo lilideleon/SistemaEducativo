@@ -5,6 +5,8 @@ class PreguntasController
     public function __construct()
     {
         @session_start();
+        require_once "core/AuthValidation.php";
+        validarRol(['ADMIN']);
         require_once "models/Preguntas.php";
         require_once "models/Respuestas.php";
         require_once "models/Encuestas.php";

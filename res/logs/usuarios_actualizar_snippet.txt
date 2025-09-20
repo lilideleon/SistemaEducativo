@@ -1,0 +1,19 @@
+                $usuario->setSeccion($_POST['Seccion']);
+            }
+        }
+        // Actualizar contraseña si viene en el POST (aceptar variantes)
+        \ = array('Contraseña','contraseña','password','Password');
+        foreach (\ as \) {
+            if (isset(\[\]) && \[\] !== '') {
+                \->setPassword(\[\]);
+                break;
+            }
+        }
+
+        try {
+            $usuario->ActualizarUsuario();
+
+            $json['name'] = 'position';
+            $json['defaultValue'] = 'top-right';
+            $json['msj'] = '<font color="#ffffff"><i class="fa fa-check"></i> Usuario actualizado correctamente</font>';
+            $json['success'] = true;

@@ -5,6 +5,8 @@ class UsuariosController
     public function __construct()
     {
         @session_start();
+        require_once "core/AuthValidation.php";
+        validarRol(['ADMIN','DIRECTOR']);
         require_once "models/Usuarios.php";
         $data["titulo"] = "Usuarios";
     }
@@ -27,7 +29,7 @@ class UsuariosController
             @mkdir(dirname($debugPath), 0777, true);
             file_put_contents($debugPath, date('c') . ' ' . json_encode($_POST, JSON_UNESCAPED_UNICODE) . PHP_EOL, FILE_APPEND);
 
-            // Función auxiliar para leer posibles variantes de nombres de campo
+            // FunciÃƒÆ’Ã‚Â³n auxiliar para leer posibles variantes de nombres de campo
             $get = function ($keys, $default = null) {
                 foreach ((array)$keys as $k) {
                     if (isset($_POST[$k])) return $_POST[$k];
@@ -48,7 +50,7 @@ class UsuariosController
             $gradoId = $get(array('GradoId', 'grado_id', 'Grado', 'grado'), '');
             $institucionId = $get(array('InstitucionId', 'institucion_id', 'Instituto', 'instituto'), null);
             $seccion = $get(array('Seccion', 'seccion'), '');
-            $password = $get(array('password', 'contraseña', 'Contraseña', 'password_plain'), '');
+            $password = $get(array('password', 'contraseÃƒÆ’Ã‚Â±a', 'ContraseÃƒÆ’Ã‚Â±a', 'password_plain'), '');
 
             // Asignar al modelo (usar exactamente nombres/apellidos como en el SP)
             $usuario->setCodigo($codigo);
@@ -59,31 +61,31 @@ class UsuariosController
                 if (strtoupper($rol) === 'ALUMNO') {
                     // Validaciones para alumno
                     if ($seccion === '' || $seccion === null) {
-                        throw new Exception('La sección es requerida para alumnos');
+                        throw new Exception('La secciÃƒÆ’Ã‚Â³n es requerida para alumnos');
                     }
                     if (!ctype_digit((string)$seccion)) {
-                        throw new Exception('La sección debe ser numérica');
+                        throw new Exception('La secciÃƒÆ’Ã‚Â³n debe ser numÃƒÆ’Ã‚Â©rica');
                     }
                     $usuario->setGradoId($gradoId);
                     $usuario->setInstitucionId($institucionId !== null ? $institucionId : 1);
                     $usuario->setSeccion($seccion);
                 } else {
-                    // Para otros roles, respetar valores enviados (si vienen vacíos, el modelo los convertirá a NULL)
+                    // Para otros roles, respetar valores enviados (si vienen vacÃƒÆ’Ã‚Â­os, el modelo los convertirÃƒÆ’Ã‚Â¡ a NULL)
                     $usuario->setGradoId($gradoId);
                     $usuario->setInstitucionId($institucionId);
                     // La columna seccion en la tabla es NOT NULL, usar 0 cuando no aplique
                     $usuario->setSeccion(0);
             }
 
-            // Contraseña (el modelo la hashea)
+            // ContraseÃƒÆ’Ã‚Â±a (el modelo la hashea)
             if (!empty($password)) {
                 $usuario->setPassword($password);
             } else {
-                // Si no viene, usar código como contraseña por defecto
+                // Si no viene, usar cÃƒÆ’Ã‚Â³digo como contraseÃƒÆ’Ã‚Â±a por defecto
                 $usuario->setPassword($codigo);
             }
 
-            // Ejecutar inserción
+            // Ejecutar inserciÃƒÆ’Ã‚Â³n
             $usuario->InsertarUsuario();
 
             $json['name'] = 'position';
@@ -91,7 +93,7 @@ class UsuariosController
             $json['msj'] = '<font color="#ffffff"><i class="fa fa-check"></i> Usuario registrado correctamente</font>';
             $json['success'] = true;
         } catch (Exception $e) {
-            // Asegurar que cualquier excepción devuelva JSON válido al cliente
+            // Asegurar que cualquier excepciÃƒÆ’Ã‚Â³n devuelva JSON vÃƒÆ’Ã‚Â¡lido al cliente
             $json['name'] = 'position';
             $json['defaultValue'] = 'top-right';
             $json['msj'] = '<font color="#ffffff"><i class="fa fa-exclamation-triangle"></i> Error al registrar: ' . $e->getMessage() . '</font>';
@@ -112,10 +114,10 @@ class UsuariosController
         @mkdir(dirname($debugPathUpd), 0777, true);
         file_put_contents($debugPathUpd, date('c') . ' ' . json_encode($_POST, JSON_UNESCAPED_UNICODE) . PHP_EOL, FILE_APPEND);
 
-        // Obtener el ID del usuario que se está actualizando
+        // Obtener el ID del usuario que se estÃƒÆ’Ã‚Â¡ actualizando
         $usuario->setId($_POST['IdUsuario']);
         
-        // Actualizar solo los campos que se envían (usar 'nombres' y 'apellidos' como en el SP)
+        // Actualizar solo los campos que se envÃƒÆ’Ã‚Â­an (usar 'nombres' y 'apellidos' como en el SP)
         if (isset($_POST['Codigo'])) {
             $usuario->setCodigo($_POST['Codigo']);
         }
@@ -130,7 +132,7 @@ class UsuariosController
             $usuario->setApellidos(trim($a));
         }
 
-        // Si el cliente envía GradoId / InstitucionId, respetarlos (no los sobreescribiremos luego)
+        // Si el cliente envÃƒÆ’Ã‚Â­a GradoId / InstitucionId, respetarlos (no los sobreescribiremos luego)
         if (isset($_POST['GradoId'])) {
             $usuario->setGradoId($_POST['GradoId']);
         }
@@ -141,44 +143,46 @@ class UsuariosController
         if (isset($_POST['Rol'])) {
             $usuario->setRol($_POST['Rol']);
             
-            // Actualizar sección solo si es estudiante; los IDs ya fueron leídos si vinieron
+            // Actualizar secciÃƒÆ’Ã‚Â³n solo si es estudiante; los IDs ya fueron leÃƒÆ’Ã‚Â­dos si vinieron
                 if ($_POST['Rol'] === 'ALUMNO') {
-                // Actualizar sección si es proporcionada
+                // Actualizar secciÃƒÆ’Ã‚Â³n si es proporcionada
                 if (isset($_POST['Seccion'])) {
                     if ($_POST['Seccion'] === '' || $_POST['Seccion'] === null) {
                         // No permitir NULL en seccion, usar 0 por compatibilidad
                         $usuario->setSeccion(0);
                     } else if (!ctype_digit((string)$_POST['Seccion'])) {
-                        throw new Exception('La sección debe ser numérica');
+                        throw new Exception('La secciÃƒÆ’Ã‚Â³n debe ser numÃƒÆ’Ã‚Â©rica');
                     } else {
                         $usuario->setSeccion($_POST['Seccion']);
                     }
                 }
             } else {
-                // No cambiar GradoId/InstitucionId aquí: respetar valores ya establecidos
+                // No cambiar GradoId/InstitucionId aquÃƒÆ’Ã‚Â­: respetar valores ya establecidos
                 // Usar 0 para seccion en roles no alumno
                 $usuario->setSeccion(0);
             }
         }
-        // Si no viene Rol pero sí Seccion, permitir actualización directa de sección manteniendo rol actual
+        // Si no viene Rol pero sÃƒÆ’Ã‚Â­ Seccion, permitir actualizaciÃƒÆ’Ã‚Â³n directa de secciÃƒÆ’Ã‚Â³n manteniendo rol actual
         elseif (isset($_POST['Seccion'])) {
             if ($_POST['Seccion'] === '' || $_POST['Seccion'] === null) {
                 // No permitir NULL en seccion
                 $usuario->setSeccion(0);
             } else if (!ctype_digit((string)$_POST['Seccion'])) {
-                throw new Exception('La sección debe ser numérica');
+                throw new Exception('La secciÃƒÆ’Ã‚Â³n debe ser numÃƒÆ’Ã‚Â©rica');
             } else {
                 $usuario->setSeccion($_POST['Seccion']);
             }
         }
-        
-        // Actualizar contraseña solo si se proporciona una nueva (el modelo la hashea)
-        if (!empty($_POST['Contraseña'])) {
-            $usuario->setPassword($_POST['Contraseña']);
+        // Actualizar contraseña si viene en el POST (aceptar variantes)
+        $pwdKeys = array('Contraseña','contraseña','password','Password');
+        foreach ($pwdKeys as $k) {
+            if (isset($_POST[$k]) && $_POST[$k] !== '') {
+                $usuario->setPassword($_POST[$k]);
+                break;
+            }
         }
 
         $json = array();
-
         try {
             $usuario->ActualizarUsuario();
 
@@ -206,7 +210,7 @@ class UsuariosController
         $json = array();
 
         try {
-            if ($usuario->EliminarUsuario()) { // eliminación lógica (activo=0)
+            if ($usuario->EliminarUsuario()) { // eliminaciÃƒÆ’Ã‚Â³n lÃƒÆ’Ã‚Â³gica (activo=0)
                 $json['name'] = 'position';
                 $json['defaultValue'] = 'top-right';
                 $json['msj'] = '<font color="#ffffff"><i class="fa fa-check"></i> Usuario desactivado correctamente</font>';
@@ -313,7 +317,7 @@ class UsuariosController
     {
         header('Content-Type: application/json');
         try {
-            // Mantener estilo de conexión del ejemplo
+            // Mantener estilo de conexiÃƒÆ’Ã‚Â³n del ejemplo
             $Conexion = new ClaseConexion();
             $ConexionSql = $Conexion->CrearConexion();
 
@@ -322,7 +326,7 @@ class UsuariosController
                        LEFT JOIN grados g ON g.id = u.grado_id AND g.activo = 1
                        LEFT JOIN instituciones i ON i.id = u.institucion_id AND i.activo = 1";
 
-            // Columnas para ORDER y SEARCH (coinciden con índices de la DataTable)
+            // Columnas para ORDER y SEARCH (coinciden con ÃƒÆ’Ã‚Â­ndices de la DataTable)
             $aColumnas = array(
                 "u.id",        // 0 id
                 "u.codigo",    // 1 codigo
@@ -346,7 +350,7 @@ class UsuariosController
 
             $sIndexColumn = "u.id";
 
-            // Paginación
+            // PaginaciÃƒÆ’Ã‚Â³n
             $sLimit = "";
             if (isset($_GET['iDisplayStart']) && $_GET['iDisplayLength'] != '-1') {
                 $start  = (int)$_GET['iDisplayStart'];
@@ -378,7 +382,7 @@ class UsuariosController
                 foreach ($aColumnas as $col) {
                     $sWhere .= $col . " LIKE '%" . str_replace("'", "''", $term) . "%' OR ";
                 }
-                $sWhere = substr_replace($sWhere, "", -4); // quitar último OR
+                $sWhere = substr_replace($sWhere, "", -4); // quitar ÃƒÆ’Ã‚Âºltimo OR
                 $sWhere .= ") AND u.activo = 1";
             }
 
@@ -418,7 +422,7 @@ class UsuariosController
 
             while ($aRow = $rResult->fetch(PDO::FETCH_ASSOC)) {
                 $row = array();
-                // Orden de presentación según aliases en $aSelect
+                // Orden de presentaciÃƒÆ’Ã‚Â³n segÃƒÆ’Ã‚Âºn aliases en $aSelect
                 $row[] = htmlspecialchars(isset($aRow['Id']) ? $aRow['Id'] : '');
                 $row[] = htmlspecialchars(isset($aRow['Codigo']) ? $aRow['Codigo'] : '');
                 $row[] = htmlspecialchars(isset($aRow['Instituto']) ? $aRow['Instituto'] : '');

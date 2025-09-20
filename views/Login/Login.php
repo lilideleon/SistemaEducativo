@@ -192,7 +192,8 @@
               
               // Redirigir después de un breve delay
               setTimeout(() => {
-                window.location.href = '?c=Menu';
+                const target = (data && data.redirect) ? data.redirect : '?c=Menu';
+                window.location.href = target;
               }, 1500);
             } else {
               // Mostrar mensaje de error
@@ -224,3 +225,5 @@
   </script>
 </body>
 </html>
+
+

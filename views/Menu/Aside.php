@@ -1,20 +1,21 @@
 <!-- sidebar.html -->
-<!-- Botón menú móvil -->
+<!-- BotÃƒÆ’Ã‚Â³n menÃƒÆ’Ã‚Âº mÃƒÆ’Ã‚Â³vil -->
 <div class="container d-md-none mb-2">
   <button class="btn btn-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar">
-    <i class="bi bi-list"></i> Menú
+    <i class="bi bi-list"></i> MenÃƒÆ’Ã‚Âº
   </button>
 </div>
 
 
 <?php
-    // Incluir el middleware de autenticación
+    // Incluir el middleware de autenticaciÃƒÆ’Ã‚Â³n
     require_once "core/AuthMiddleware.php";
     
-    // Obtener información del usuario actual
+    // Obtener informaciÃƒÆ’Ã‚Â³n del usuario actual
     $usuario = AuthMiddleware::getCurrentUser();
+    $rol = $usuario && isset($usuario['rol']) ? strtoupper($usuario['rol']) : '';
     
-    // Verificar si el usuario está autenticado y tiene ID 1 (administrador)
+    // Verificar si el usuario estÃƒÆ’Ã‚Â¡ autenticado y tiene ID 1 (administrador)
     $esAdmin = ($usuario && $usuario['id'] == 1);
 ?>
 
@@ -32,22 +33,29 @@
       <div class="sidebar-header">Principal</div>
     <?php endif; ?>
     <div class="d-grid gap-3">
-      <a href="?c=Menu" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-grid-fill me-2"></i>Menú</a>
-      <a href="?c=Usuarios" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-people-fill me-2"></i>Usuarios</a>
-      <a href="?c=Evaluacion" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</a>
-      <a href="?c=Reportes" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</a>
-      <a href="?c=Material" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-folder2-open me-2"></i>Material</a>
-      <a href="?c=Contenido" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-bar-chart-fill me-2"></i>Contenido</a>
-      <?php if ($esAdmin): ?>
+      <?php if ($rol === 'ADMIN'): ?>
+        <a href="?c=Menu" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-grid-fill me-2"></i>Menú</a>
+        <a href="?c=Usuarios" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-people-fill me-2"></i>Usuarios</a>
+        <a href="?c=Evaluacion" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</a>
+        <a href="?c=Reportes" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</a>
+        <a href="?c=Material" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-folder2-open me-2"></i>Material</a>
+        <a href="?c=Contenido" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-bar-chart-fill me-2"></i>Contenido</a>
         <a href="?c=Preguntas" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-bar-chart-fill me-2"></i>Preguntas</a>
+      <?php elseif ($rol === 'ALUMNO'): ?>
+        <a href="?c=Evaluacion" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</a>
+      <?php elseif ($rol === 'DIRECTOR'): ?>
+        <a href="?c=Menu" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-grid-fill me-2"></i>Menú</a>
+        <a href="?c=Usuarios" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-people-fill me-2"></i>Usuarios</a>
+        <a href="?c=Reportes" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</a>
+        <a href="?c=Material" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-folder2-open me-2"></i>Material</a>
+      <?php elseif ($rol === 'DOCENTE'): ?>
+        <a href="?c=Material" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-folder2-open me-2"></i>Material</a>
       <?php endif; ?>
-      
-      
     </div>
   </div>
 </aside>
 
-<!-- Offcanvas móvil -->
+<!-- Offcanvas mÃƒÆ’Ã‚Â³vil -->
 <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasSidebar">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title">Principal</h5>
@@ -55,17 +63,24 @@
   </div>
   <div class="offcanvas-body">
     <div class="d-grid gap-3">
-      <a href="?c=Menu" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-grid-fill me-2"></i>Menú</a>
-      <a href="?c=Usuarios" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-people-fill me-2"></i>Usuarios</a>
-      <a href="?c=Evaluacion" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</a>
-      <a href="?c=Reportes" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</a>
-      <a href="?c=Material" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-folder2-open me-2"></i>Material</a>
-      <a href="?c=Contenido" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-bar-chart-fill me-2"></i>Contenido</a>
-      <?php if ($esAdmin): ?>
+      <?php if ($rol === 'ADMIN'): ?>
+        <a href="?c=Menu" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-grid-fill me-2"></i>Menú</a>
+        <a href="?c=Usuarios" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-people-fill me-2"></i>Usuarios</a>
+        <a href="?c=Evaluacion" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</a>
+        <a href="?c=Reportes" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</a>
+        <a href="?c=Material" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-folder2-open me-2"></i>Material</a>
+        <a href="?c=Contenido" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-bar-chart-fill me-2"></i>Contenido</a>
         <a href="?c=Preguntas" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-bar-chart-fill me-2"></i>Preguntas</a>
+      <?php elseif ($rol === 'ALUMNO'): ?>
+        <a href="?c=Evaluacion" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</a>
+      <?php elseif ($rol === 'DIRECTOR'): ?>
+        <a href="?c=Menu" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-grid-fill me-2"></i>Menú</a>
+        <a href="?c=Usuarios" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-people-fill me-2"></i>Usuarios</a>
+        <a href="?c=Reportes" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</a>
+        <a href="?c=Material" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-folder2-open me-2"></i>Material</a>
+      <?php elseif ($rol === 'DOCENTE'): ?>
+        <a href="?c=Material" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-folder2-open me-2"></i>Material</a>
       <?php endif; ?>
-      
-      
     </div>
   </div>
 </div>
