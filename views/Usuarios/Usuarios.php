@@ -449,6 +449,38 @@
             { extend: 'pdf', text: 'PDF' },
             { extend: 'print', text: 'Imprimir' }
           ],
+          language: {
+            decimal: ',',
+            thousands: '.',
+            processing: 'Procesando...',
+            search: 'Buscar:',
+            lengthMenu: 'Mostrar _MENU_ registros',
+            info: 'Mostrando de _START_ a _END_ de _TOTAL_ registros',
+            infoEmpty: 'Mostrando 0 a 0 de 0 registros',
+            infoFiltered: '(filtrado de _MAX_ registros totales)',
+            infoPostFix: '',
+            loadingRecords: 'Cargando...',
+            zeroRecords: 'No se encontraron resultados',
+            emptyTable: 'Ningún dato disponible en esta tabla',
+            paginate: {
+              first: 'Primero',
+              previous: 'Anterior',
+              next: 'Siguiente',
+              last: 'Último'
+            },
+            aria: {
+              sortAscending: ': activar para ordenar la columna de manera ascendente',
+              sortDescending: ': activar para ordenar la columna de manera descendente'
+            },
+            buttons: {
+              copy: 'Copiar',
+              csv: 'CSV',
+              excel: 'Excel',
+              pdf: 'PDF',
+              print: 'Imprimir',
+              colvis: 'Visibilidad'
+            }
+          },
           ajax: {
             url: urlTabla,
             type: 'GET',
