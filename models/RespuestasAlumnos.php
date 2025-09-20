@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 class RespuestasAlumnos_model
 {
@@ -14,7 +14,7 @@ class RespuestasAlumnos_model
     public function GuardarRespuesta($alumno_user_id, $encuesta_id, $pregunta_id, $respuesta_id = null, $respuesta_texto = null, $respuesta_numero = null, $conexion = null)
     {
         try {
-            // Usar la conexión proporcionada o crear una nueva
+            // Usar la conexiÃ³n proporcionada o crear una nueva
             $usarConexionExterna = ($conexion !== null);
             if (!$usarConexionExterna) {
                 $this->ConexionSql = $this->Conexion->CrearConexion();
@@ -24,7 +24,7 @@ class RespuestasAlumnos_model
 
             $stmt = $this->ConexionSql->prepare("CALL sp_respuestas_alumnos_agregar(?, ?, ?, ?, ?, ?, @p_id_nuevo)");
             
-            // Parámetros de entrada
+            // ParÃ¡metros de entrada
             $stmt->bindValue(1, (int)$alumno_user_id, PDO::PARAM_INT);
             $stmt->bindValue(2, (int)$encuesta_id, PDO::PARAM_INT);
             $stmt->bindValue(3, (int)$pregunta_id, PDO::PARAM_INT);
@@ -52,7 +52,7 @@ class RespuestasAlumnos_model
             
             $stmt->execute();
             
-            // Vaciar más resultados si el driver lo requiere
+            // Vaciar mÃ¡s resultados si el driver lo requiere
             while ($stmt->nextRowset()) { /* no-op */ }
             $stmt->closeCursor();
 
@@ -64,14 +64,14 @@ class RespuestasAlumnos_model
         } catch (Exception $e) {
             throw new Exception('Error al guardar respuesta del alumno: ' . $e->getMessage());
         } finally {
-            // Solo cerrar la conexión si no es externa
+            // Solo cerrar la conexiÃ³n si no es externa
             if (!$usarConexionExterna) {
                 $this->Conexion->CerrarConexion();
             }
         }
     }
 
-    // Guardar múltiples respuestas de una encuesta
+    // Guardar mÃºltiples respuestas de una encuesta
     public function GuardarRespuestasEncuesta($alumno_user_id, $encuesta_id, $respuestas)
     {
         try {
@@ -86,7 +86,7 @@ class RespuestasAlumnos_model
                 $respuesta_texto = isset($respuesta['respuesta_texto']) ? $respuesta['respuesta_texto'] : null;
                 $respuesta_numero = isset($respuesta['respuesta_numero']) ? $respuesta['respuesta_numero'] : null;
                 
-                // Manejar preguntas de opción múltiple (array de respuesta_id)
+                // Manejar preguntas de opciÃ³n mÃºltiple (array de respuesta_id)
                 if (is_array($respuesta_id)) {
                     foreach ($respuesta_id as $rid) {
                         $id_nuevo = $this->GuardarRespuesta(
@@ -96,7 +96,7 @@ class RespuestasAlumnos_model
                             $rid, 
                             null, 
                             null,
-                            $this->ConexionSql  // Pasar la conexión activa
+                            $this->ConexionSql  // Pasar la conexiÃ³n activa
                         );
                         
                         if ($id_nuevo) {
@@ -104,7 +104,7 @@ class RespuestasAlumnos_model
                         }
                     }
                 } else {
-                    // Pregunta de opción única, abierta o numérica
+                    // Pregunta de opciÃ³n Ãºnica, abierta o numÃ©rica
                     $id_nuevo = $this->GuardarRespuesta(
                         $alumno_user_id, 
                         $encuesta_id, 
@@ -112,7 +112,7 @@ class RespuestasAlumnos_model
                         $respuesta_id, 
                         $respuesta_texto, 
                         $respuesta_numero,
-                        $this->ConexionSql  // Pasar la conexión activa
+                        $this->ConexionSql  // Pasar la conexiÃ³n activa
                     );
                     
                     if ($id_nuevo) {
@@ -134,7 +134,7 @@ class RespuestasAlumnos_model
         }
     }
 
-    // Verificar si un alumno ya respondió una encuesta
+    // Verificar si un alumno ya respondiÃ³ una encuesta
     public function AlumnoYaRespondio($alumno_user_id, $encuesta_id)
     {
         try {
@@ -153,14 +153,33 @@ class RespuestasAlumnos_model
             return isset($row['total']) && (int)$row['total'] > 0;
             
         } catch (Exception $e) {
-            throw new Exception('Error al verificar si el alumno ya respondió: ' . $e->getMessage());
+            throw new Exception('Error al verificar si el alumno ya respondiÃ³: ' . $e->getMessage());
         } finally {
             $this->Conexion->CerrarConexion();
         }
     }
 
     // Obtener respuestas de un alumno para una encuesta
-    public function ObtenerRespuestasAlumno($alumno_user_id, $encuesta_id)
+    // Calcular y registrar calificación de una encuesta para el alumno
+    public function GuardarCalificacionEncuesta($idAlumno, $idEncuesta)
+    {
+        try {
+            $this->ConexionSql = $this->Conexion->CrearConexion();
+            $stmt = $this->ConexionSql->prepare("CALL sp_guardar_calificacion_encuesta(?, ?, @p_porcentaje)");
+            $stmt->bindValue(1, (int)$idAlumno, PDO::PARAM_INT);
+            $stmt->bindValue(2, (int)$idEncuesta, PDO::PARAM_INT);
+            $stmt->execute();
+            while ($stmt->nextRowset()) { /* limpiar resultados */ }
+            $stmt->closeCursor();
+            $result = $this->ConexionSql->query("SELECT @p_porcentaje AS porcentaje");
+            $data = $result->fetch(PDO::FETCH_ASSOC);
+            return isset($data['porcentaje']) ? (float)$data['porcentaje'] : 0.0;
+        } catch (Exception $e) {
+            throw new Exception('Error al guardar calificación: ' . $e->getMessage());
+        } finally {
+            $this->Conexion->CerrarConexion();
+        }
+    }    public function ObtenerRespuestasAlumno($alumno_user_id, $encuesta_id)
     {
         try {
             $this->ConexionSql = $this->Conexion->CrearConexion();
@@ -192,3 +211,4 @@ class RespuestasAlumnos_model
     }
 }
 ?>
+

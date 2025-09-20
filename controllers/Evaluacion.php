@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 class EvaluacionController
 {
@@ -11,7 +11,7 @@ class EvaluacionController
         require_once "models/Respuestas.php";
         require_once "models/RespuestasAlumnos.php";
         
-        // Verificar autenticación
+        // Verificar autenticaciÃ³n
         validarRol(['ALUMNO']);
         
         $data["titulo"] = "Evaluacion";
@@ -38,13 +38,13 @@ class EvaluacionController
         }
     }
 
-    // Cargar evaluación: preguntas aleatorias con sus respuestas por encuesta
+    // Cargar evaluaciÃ³n: preguntas aleatorias con sus respuestas por encuesta
     public function CargarEvaluacion()
     {
         header('Content-Type: application/json');
         try {
             $encuesta_id = isset($_GET['encuesta_id']) ? (int)$_GET['encuesta_id'] : 0;
-            if ($encuesta_id <= 0) { throw new Exception('encuesta_id inválido'); }
+            if ($encuesta_id <= 0) { throw new Exception('encuesta_id invÃ¡lido'); }
 
             $pregModel = new Preguntas_model();
             $respModel = new Respuestas_model();
@@ -67,29 +67,29 @@ class EvaluacionController
     {
         header('Content-Type: application/json');
         try {
-            // Verificar que sea una petición POST
+            // Verificar que sea una peticiÃ³n POST
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                throw new Exception('Método no permitido');
+                throw new Exception('MÃ©todo no permitido');
             }
 
             // Obtener datos del POST
             $input = json_decode(file_get_contents('php://input'), true);
             if (!$input) {
-                throw new Exception('Datos JSON inválidos');
+                throw new Exception('Datos JSON invÃ¡lidos');
             }
 
             $encuesta_id = isset($input['encuesta_id']) ? (int)$input['encuesta_id'] : 0;
             $respuestas = isset($input['respuestas']) ? $input['respuestas'] : [];
             
             if ($encuesta_id <= 0) {
-                throw new Exception('encuesta_id inválido');
+                throw new Exception('encuesta_id invÃ¡lido');
             }
 
             if (empty($respuestas)) {
                 throw new Exception('No hay respuestas para guardar');
             }
 
-            // Obtener información del usuario desde la sesión
+            // Obtener informaciÃ³n del usuario desde la sesiÃ³n
             if (!isset($_SESSION['authenticated']) || !$_SESSION['authenticated']) {
                 throw new Exception('Usuario no autenticado');
             }
@@ -98,16 +98,16 @@ class EvaluacionController
             $user_rol = $_SESSION['user_rol'];
             $user_nombre = $_SESSION['user_nombre_completo'];
             
-            // Verificar que el usuario sea un alumno (opcional, puedes ajustar según tus necesidades)
+            // Verificar que el usuario sea un alumno (opcional, puedes ajustar segÃºn tus necesidades)
             if ($user_rol !== 'ALUMNO') {
                 throw new Exception('Solo los alumnos pueden responder evaluaciones');
             }
             
             if ($alumno_user_id <= 0) {
-                throw new Exception('ID de usuario inválido');
+                throw new Exception('ID de usuario invÃ¡lido');
             }
 
-            // Verificar si el alumno ya respondió esta encuesta
+            // Verificar si el alumno ya respondiÃ³ esta encuesta
             $respAlumnosModel = new RespuestasAlumnos_model();
             if ($respAlumnosModel->AlumnoYaRespondio($alumno_user_id, $encuesta_id)) {
                 throw new Exception('Ya has respondido esta encuesta anteriormente');
@@ -144,3 +144,4 @@ class EvaluacionController
     }
 }
 ?>
+
