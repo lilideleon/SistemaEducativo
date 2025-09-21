@@ -96,9 +96,54 @@ class Respuestas_model
             $stmt->bindValue(':correcta', (int)$es_correcta, PDO::PARAM_INT);
             $stmt->bindValue(':activo', (int)$activo, PDO::PARAM_INT);
             $stmt->execute();
-            return $stmt->rowCount() > 0;
+            $rc = $stmt->rowCount();
+            error_log('[Respuestas_model::Modificar] id='.(int)$id.' correcta='.(int)$es_correcta.' activo='.(int)$activo.' rowCount='.$rc);
+            return $rc >= 0; // true incluso si los valores no cambian
         } catch (Exception $e) {
             throw new Exception('Error al modificar respuesta: ' . $e->getMessage());
+        } finally {
+            $this->Conexion->CerrarConexion();
+        }
+    }
+
+    // Establecer es_correcta y, si se marca como 1, desmarcar otras respuestas de la misma pregunta
+    public function SetCorrecta($id, $valor)
+    {
+        try {
+            $this->ConexionSql = $this->Conexion->CrearConexion();
+            $this->ConexionSql->beginTransaction();
+
+            // Obtener pregunta_id de esta respuesta
+            $stmt = $this->ConexionSql->prepare("SELECT pregunta_id FROM respuestas WHERE id = :id LIMIT 1");
+            $stmt->bindValue(':id', (int)$id, PDO::PARAM_INT);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$row || !isset($row['pregunta_id'])) {
+                throw new Exception('Respuesta no encontrada');
+            }
+            $pregunta_id = (int)$row['pregunta_id'];
+
+            // Si valor = 1, desmarcar todas las otras respuestas de la misma pregunta
+            if ((int)$valor === 1) {
+                $stmtOff = $this->ConexionSql->prepare("UPDATE respuestas SET es_correcta = 0 WHERE pregunta_id = :pid");
+                $stmtOff->bindValue(':pid', $pregunta_id, PDO::PARAM_INT);
+                $stmtOff->execute();
+            }
+
+            // Marcar esta respuesta con el valor especificado (0 o 1)
+            $stmtOn = $this->ConexionSql->prepare("UPDATE respuestas SET es_correcta = :val WHERE id = :id");
+            $stmtOn->bindValue(':val', (int)$valor, PDO::PARAM_INT);
+            $stmtOn->bindValue(':id', (int)$id, PDO::PARAM_INT);
+            $stmtOn->execute();
+
+            $this->ConexionSql->commit();
+            error_log('[Respuestas_model::SetCorrecta] id='.(int)$id.' -> correcta='.(int)$valor.' (pregunta_id='.$pregunta_id.')');
+            return true;
+        } catch (Exception $e) {
+            if ($this->ConexionSql && $this->ConexionSql->inTransaction()) {
+                $this->ConexionSql->rollBack();
+            }
+            throw new Exception('Error al actualizar correcta: ' . $e->getMessage());
         } finally {
             $this->Conexion->CerrarConexion();
         }

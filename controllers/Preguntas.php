@@ -174,7 +174,17 @@ class PreguntasController
             $activo           = array_key_exists('activo', $_POST) ? (int)$_POST['activo'] : 1;
 
             $model = new Respuestas_model();
+            // Modificar campos de la respuesta
             $ok = $model->Modificar($id, $respuesta_texto, $respuesta_numero, $es_correcta, $activo);
+            // Si se marca como correcta, asegurar que sea la única correcta para la pregunta
+            if ($ok) {
+                if ((int)$es_correcta === 1) {
+                    $model->SetCorrecta($id, 1);
+                } else {
+                    // Si explícitamente se marcó como NO correcta, garantizar que quede en 0
+                    $model->SetCorrecta($id, 0);
+                }
+            }
 
             $json['success'] = (bool)$ok;
             $json['msj'] = $ok ? 'Respuesta modificada' : 'No se pudo modificar';

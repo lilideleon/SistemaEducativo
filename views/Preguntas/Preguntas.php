@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 header('Content-Type: text/html; charset=utf-8');
 require_once 'core/AuthValidation.php';
 validarAdmin();
@@ -83,6 +83,42 @@ include 'views/Menu/Aside.php';
     <a href="#" class="btn btn-light" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar">
       <i class="bi bi-list"></i> Menú
     </a>
+  </div>
+
+  <!-- Modal: Editar Respuesta -->
+  <div class="modal fade" id="editRespuestaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar respuesta</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <form id="frmEditResp">
+            <div class="mb-3">
+              <label class="form-label">Texto</label>
+              <input type="text" id="edit_resp_texto" class="form-control form-control-sm" placeholder="Texto de la respuesta" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Número</label>
+              <input type="number" step="0.0001" id="edit_resp_numero" class="form-control form-control-sm" placeholder="Ej.: 10.50" />
+            </div>
+            <div class="form-check form-switch mb-2">
+              <input class="form-check-input" type="checkbox" id="edit_resp_correcta">
+              <label class="form-check-label" for="edit_resp_correcta">Correcta</label>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="edit_resp_activa">
+              <label class="form-check-label" for="edit_resp_activa">Activa</label>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btnSaveRespEdit">Guardar cambios</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="modal fade" id="confirmDelModal" tabindex="-1" aria-hidden="true">
@@ -258,8 +294,10 @@ include 'views/Menu/Aside.php';
     let delId = null;
     let editId = null;
     let modalRes = null;
+    let modalEditResp = null;
     let modalDel = null;
     let currentPreguntaId = null;
+    let currentRespEditId = null;
 
     const modalResEl = document.getElementById('respuestasModal');
     const modalDelEl = document.getElementById('confirmDelModal');
@@ -506,8 +544,8 @@ include 'views/Menu/Aside.php';
                 <td>${idx + 1}</td>
                 <td>${escapeHtml(r.respuesta_texto ?? '')}</td>
                 <td>${r.respuesta_numero ?? ''}</td>
-                <td>${r.es_correcta ? 'Sí' : 'No'}</td>
-                <td>${r.activo ? 'Sí' : 'No'}</td>
+                <td>${(Number(r.es_correcta) === 1) ? 'Sí' : 'No'}</td>
+                <td>${(Number(r.activo) === 1) ? 'Sí' : 'No'}</td>
                 <td class="text-nowrap">
                   <button class="btn btn-sm btn-outline-secondary" data-action="edit-resp" data-id="${r.id}">Editar</button>
                 </td>
@@ -529,35 +567,23 @@ include 'views/Menu/Aside.php';
     function handleEditRespuesta(id) {
       const info = respCache.find(r => Number(r.id) === Number(id));
       if (!info) { alert('No se encontró la respuesta'); return; }
-
-      const nuevoTexto = window.prompt('Texto de la respuesta (dejar vacío para NULL):', info.respuesta_texto ?? '');
-      if (nuevoTexto === null) return;
-      const nuevoNumeroStr = window.prompt('Número (dejar vacío para NULL):', info.respuesta_numero ?? '');
-      if (nuevoNumeroStr === null) return;
-      const esCorrecta = window.confirm('¿Marcar como correcta? (Aceptar = Sí)') ? 1 : 0;
-      const activo = window.confirm('¿Marcar como activa? (Aceptar = Sí)') ? 1 : 0;
-
-      $.ajax({
-        url: '?c=Preguntas&a=ModificarRespuesta',
-        method: 'POST',
-        dataType: 'json',
-        data: {
-          id,
-          respuesta_texto: nuevoTexto === '' ? '' : nuevoTexto,
-          respuesta_numero: nuevoNumeroStr === '' ? '' : nuevoNumeroStr,
-          es_correcta: esCorrecta,
-          activo
-        }
-      }).done(resp => {
-        if (resp && resp.success) {
-          if (currentPreguntaId) loadRespuestas(currentPreguntaId);
-        } else {
-          alert((resp && resp.msj) || 'No se pudo modificar');
-        }
-      }).fail(xhr => {
-        const err = (xhr.responseJSON && xhr.responseJSON.msj) || xhr.responseText || 'Error al modificar';
-        alert(err);
-      });
+      currentRespEditId = id;
+      // Poblar campos del modal
+      const $txt = $('#edit_resp_texto');
+      const $num = $('#edit_resp_numero');
+      const $chkC = $('#edit_resp_correcta');
+      const $chkA = $('#edit_resp_activa');
+      $txt.val(info.respuesta_texto ?? '');
+      $num.val(info.respuesta_numero ?? '');
+      $chkC.prop('checked', Number(info.es_correcta) === 1);
+      $chkA.prop('checked', Number(info.activo) === 1);
+      if (!modalEditResp) {
+        const el = document.getElementById('editRespuestaModal');
+        if (el) modalEditResp = new bootstrap.Modal(el);
+      }
+      // Cerrar el modal de respuestas al abrir el de edición
+      if (modalRes) modalRes.hide();
+      if (modalEditResp) modalEditResp.show();
     }
 
     $('#btnAddResp').on('click', e => { e.preventDefault(); addRespuesta(); });
@@ -632,10 +658,45 @@ include 'views/Menu/Aside.php';
 
     $(document).ready(() => {
       if (modalResEl) modalRes = new bootstrap.Modal(modalResEl);
+      const modalEditRespEl = document.getElementById('editRespuestaModal');
+      if (modalEditRespEl) modalEditResp = new bootstrap.Modal(modalEditRespEl);
       if (modalDelEl) modalDel = new bootstrap.Modal(modalDelEl);
       loadEncuestas();
       initDataTablePreguntas();
       renderRespuestas();
+    });
+
+    // Guardar cambios desde el modal de edición de respuesta
+    $('#btnSaveRespEdit').on('click', function(){
+      if (!currentRespEditId) return;
+      const nuevoTexto = $('#edit_resp_texto').val().trim();
+      const nuevoNumeroStr = $('#edit_resp_numero').val().trim();
+      const esCorrecta = $('#edit_resp_correcta').is(':checked') ? 1 : 0;
+      const activo = $('#edit_resp_activa').is(':checked') ? 1 : 0;
+
+      $.ajax({
+        url: '?c=Preguntas&a=ModificarRespuesta',
+        method: 'POST',
+        dataType: 'json',
+        data: {
+          id: currentRespEditId,
+          respuesta_texto: nuevoTexto === '' ? '' : nuevoTexto,
+          respuesta_numero: nuevoNumeroStr === '' ? '' : nuevoNumeroStr,
+          es_correcta: esCorrecta,
+          activo
+        }
+      }).done(resp => {
+        if (resp && resp.success) {
+          if (modalEditResp) modalEditResp.hide();
+          currentRespEditId = null;
+          if (currentPreguntaId) loadRespuestas(currentPreguntaId);
+        } else {
+          alert((resp && resp.msj) || 'No se pudo modificar');
+        }
+      }).fail(xhr => {
+        const err = (xhr.responseJSON && xhr.responseJSON.msj) || xhr.responseText || 'Error al modificar';
+        alert(err);
+      });
     });
 
   })();
