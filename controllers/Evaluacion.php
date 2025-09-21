@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 class EvaluacionController
 {
@@ -73,6 +73,29 @@ class EvaluacionController
             // Adjuntar respuestas activas
             foreach ($pregs as &$p) {
                 $p['respuestas'] = $respModel->ListarPorPregunta($p['id'], true);
+                // Deduplicar por etiqueta visible (texto si existe, si no número)
+                if (is_array($p['respuestas']) && !empty($p['respuestas'])) {
+                    $seen = [];
+                    $dedup = [];
+                    foreach ($p['respuestas'] as $r) {
+                        $label = null;
+                        if (isset($r['respuesta_texto']) && $r['respuesta_texto'] !== null && $r['respuesta_texto'] !== '') {
+                            // Normalizar para evitar duplicados por espacios/caso
+                            $norm = function_exists('mb_strtolower') ? mb_strtolower($r['respuesta_texto'], 'UTF-8') : strtolower($r['respuesta_texto']);
+                            $label = 'T|' . trim($norm);
+                        } elseif (isset($r['respuesta_numero']) && $r['respuesta_numero'] !== null && $r['respuesta_numero'] !== '') {
+                            $label = 'N|' . (string)$r['respuesta_numero'];
+                        } else {
+                            // Si no hay texto ni número, usar el id como fallback
+                            $label = 'I|' . (isset($r['id']) ? (string)$r['id'] : uniqid('r_', true));
+                        }
+                        if (!isset($seen[$label])) {
+                            $seen[$label] = true;
+                            $dedup[] = $r;
+                        }
+                    }
+                    $p['respuestas'] = $dedup;
+                }
             }
             unset($p);
 
@@ -145,14 +168,14 @@ class EvaluacionController
             // Guardar todas las respuestas
             $ids_guardados = $respAlumnosModel->GuardarRespuestasEncuesta($alumno_user_id, $encuesta_id, $respuestas);
 
-            // Calcular y guardar calificación de la encuesta para el alumno (porcentaje)
+            // Calcular y guardar calificación de la encuesta para el alumno (nota 0..100)
             try {
-                $porcentaje = $respAlumnosModel->GuardarCalificacionEncuesta($alumno_user_id, $encuesta_id);
-                error_log('[Evaluacion::GuardarRespuestas] Porcentaje calculado: ' . $porcentaje);
+                $nota = $respAlumnosModel->GuardarCalificacionEncuesta($alumno_user_id, $encuesta_id);
+                error_log('[Evaluacion::GuardarRespuestas] Nota calculada: ' . $nota);
             } catch (Exception $e) {
                 // No detener el flujo si falla el cálculo de calificación, registrar para revisión
                 error_log('[Evaluacion::GuardarRespuestas] Error al calcular calificación: ' . $e->getMessage());
-                $porcentaje = null;
+                $nota = null;
             }
 
             $response = json_encode([
@@ -170,7 +193,7 @@ class EvaluacionController
                     ]
                 ],
                 'msj' => 'Encuesta completada exitosamente',
-                'porcentaje' => $porcentaje
+                'nota' => $nota
             ]);
             while (ob_get_level() > 0) { ob_end_clean(); }
             if (substr($response, 0, 3) === "\xEF\xBB\xBF") { $response = substr($response, 3); }

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 class RespuestasAlumnos_model
 {
@@ -167,24 +167,26 @@ class RespuestasAlumnos_model
             $this->ConexionSql = $this->Conexion->CrearConexion();
             // Registrar parámetros para depuración
             error_log('[GuardarCalificacionEncuesta] Ejecutando SP con alumno=' . intval($idAlumno) . ' encuesta=' . intval($idEncuesta));
-            $stmt = $this->ConexionSql->prepare("CALL sp_guardar_calificacion_encuesta(?, ?, @p_porcentaje)");
+            $stmt = $this->ConexionSql->prepare("CALL sp_guardar_calificacion_encuesta(?, ?, @p_nota)");
             $stmt->bindValue(1, (int)$idAlumno, PDO::PARAM_INT);
             $stmt->bindValue(2, (int)$idEncuesta, PDO::PARAM_INT);
             $stmt->execute();
             while ($stmt->nextRowset()) { /* limpiar resultados */ }
             $stmt->closeCursor();
-            $result = $this->ConexionSql->query("SELECT @p_porcentaje AS porcentaje");
+            $result = $this->ConexionSql->query("SELECT @p_nota AS nota");
             $data = $result->fetch(PDO::FETCH_ASSOC);
-            $porc = isset($data['porcentaje']) ? (float)$data['porcentaje'] : 0.0;
-            error_log('[GuardarCalificacionEncuesta] SP retornó porcentaje=' . $porc);
-            return $porc;
+            $nota = isset($data['nota']) ? (float)$data['nota'] : 0.0;
+            error_log('[GuardarCalificacionEncuesta] SP retornó nota=' . $nota);
+            return $nota;
         } catch (Exception $e) {
             error_log('[GuardarCalificacionEncuesta] Error: ' . $e->getMessage());
             throw new Exception('Error al guardar calificación: ' . $e->getMessage());
         } finally {
             $this->Conexion->CerrarConexion();
         }
-    }    public function ObtenerRespuestasAlumno($alumno_user_id, $encuesta_id)
+    }
+
+    public function ObtenerRespuestasAlumno($alumno_user_id, $encuesta_id)
     {
         try {
             $this->ConexionSql = $this->Conexion->CrearConexion();

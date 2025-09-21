@@ -190,8 +190,7 @@
     // Cargar encuestas para el combo
     function loadEncuestas(){
       selEncuesta.innerHTML = '<option value="">Cargando evaluaciones...</option>';
-      fetch('?c=Evaluacion&a=ListarEncuestas')
-        fetch('?c=Evaluacion&a=ListarEncuestas', { credentials: 'same-origin' })
+      fetch('?c=Evaluacion&a=ListarEncuestas', { credentials: 'same-origin' })
           .then(r => {
             // Registrar status y texto crudo para diagnóstico
             return r.text().then(text => ({ status: r.status, ok: r.ok, text }));
@@ -439,6 +438,7 @@
                 </div>
                 <div class="col-md-6">
                   <p><strong>Total de respuestas:</strong> ${result.data.total_respuestas_guardadas}</p>
+                  <p><strong>Nota (0..100):</strong> ${typeof result.nota !== 'undefined' && result.nota !== null ? result.nota : 'N/D'}</p>
                   <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-ES')}</p>
                 </div>
               </div>
