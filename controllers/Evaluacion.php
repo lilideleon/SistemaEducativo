@@ -30,7 +30,8 @@ class EvaluacionController
             $soloActivas = !isset($_GET['todas']) || $_GET['todas'] !== '1';
             $soloEstadoActiva = !isset($_GET['estado']) || strtoupper($_GET['estado']) === 'ACTIVA';
             $model = new Encuestas_model();
-            $rows = $model->Listar($soloActivas, $soloEstadoActiva);
+            // Solo listar encuestas vigentes por fecha
+            $rows = $model->Listar($soloActivas, $soloEstadoActiva, /*soloVigentes*/ true);
             // Log resultado para depuración
             error_log('[ListarEncuestas] filas recuperadas: ' . count($rows));
             if (empty($rows)) {
@@ -66,6 +67,11 @@ class EvaluacionController
         try {
             $encuesta_id = isset($_GET['encuesta_id']) ? (int)$_GET['encuesta_id'] : 0;
             if ($encuesta_id <= 0) { throw new Exception('encuesta_id inválido'); }
+
+            // Validar que la encuesta esté vigente por fecha y activa
+            $encModel = new Encuestas_model();
+            $vigente = $encModel->ObtenerVigentePorId($encuesta_id, /*requireActiva*/ true, /*requireActivo*/ true);
+            if (!$vigente) { throw new Exception('La evaluación no está vigente'); }
 
             $pregModel = new Preguntas_model();
             $respModel = new Respuestas_model();
@@ -159,7 +165,14 @@ class EvaluacionController
                 throw new Exception('ID de usuario invÃ¡lido');
             }
 
-            // Verificar si el alumno ya respondiÃ³ esta encuesta
+            // Validar que la encuesta esté vigente por fecha y activa
+            $encModel = new Encuestas_model();
+            $vigente = $encModel->ObtenerVigentePorId($encuesta_id, /*requireActiva*/ true, /*requireActivo*/ true);
+            if (!$vigente) {
+                throw new Exception('La evaluación no está vigente');
+            }
+
+            // Verificar si el alumno ya respondió esta encuesta
             $respAlumnosModel = new RespuestasAlumnos_model();
             if ($respAlumnosModel->AlumnoYaRespondio($alumno_user_id, $encuesta_id)) {
                 throw new Exception('Ya has respondido esta encuesta anteriormente');
