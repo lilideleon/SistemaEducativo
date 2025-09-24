@@ -607,10 +607,21 @@
       btnEnviar.disabled = true;
       btnEnviar.innerHTML = '<i class="bi bi-hourglass-split"></i> Enviando...';
       
+      // Calcular puntaje final
+      const resultadoFinal = evaluarLocalmente();
+      const puntajeCalculado = resultadoFinal.puntaje;
+      
+      // Validar que el puntaje sea un número válido entre 0 y 100
+      if (typeof puntajeCalculado !== 'number' || isNaN(puntajeCalculado) || puntajeCalculado < 0 || puntajeCalculado > 100) {
+        console.error('Puntaje inválido:', puntajeCalculado);
+        throw new Error('Error al calcular el puntaje de la evaluación');
+      }
+      
       // Preparar datos para enviar
       const data = {
         encuesta_id: parseInt(encuestaId),
-        respuestas: respuestasGuardadas
+        respuestas: respuestasGuardadas,
+        puntaje: puntajeCalculado // Incluir puntaje validado
       };
       
       fetch('?c=Evaluacion&a=GuardarRespuestas', {

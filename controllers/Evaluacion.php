@@ -138,10 +138,13 @@ class EvaluacionController
 
             $encuesta_id = isset($input['encuesta_id']) ? (int)$input['encuesta_id'] : 0;
             $respuestas = isset($input['respuestas']) ? $input['respuestas'] : [];
+            $puntaje_modal = isset($input['puntaje']) ? (float)$input['puntaje'] : null;
             
             if ($encuesta_id <= 0) {
                 throw new Exception('encuesta_id invÃ¡lido');
             }
+            
+            error_log('[Evaluacion::GuardarRespuestas] Puntaje recibido del modal: ' . ($puntaje_modal !== null ? $puntaje_modal : 'no enviado'));
 
             if (empty($respuestas)) {
                 throw new Exception('No hay respuestas para guardar');
@@ -181,14 +184,195 @@ class EvaluacionController
             // Guardar todas las respuestas
             $ids_guardados = $respAlumnosModel->GuardarRespuestasEncuesta($alumno_user_id, $encuesta_id, $respuestas);
 
-            // Calcular y guardar calificación de la encuesta para el alumno (nota 0..100)
+            // Usar el puntaje del modal si está disponible, si no calcular uno nuevo
             try {
-                $nota = $respAlumnosModel->GuardarCalificacionEncuesta($alumno_user_id, $encuesta_id);
-                error_log('[Evaluacion::GuardarRespuestas] Nota calculada: ' . $nota);
+                if ($puntaje_modal !== null && $puntaje_modal >= 0 && $puntaje_modal <= 100) {
+                    $nota = $puntaje_modal;
+                    error_log('[Evaluacion::GuardarRespuestas] Usando puntaje del modal: ' . $nota);
+                } else {
+                    $nota = $respAlumnosModel->GuardarCalificacionEncuesta($alumno_user_id, $encuesta_id);
+                    if ($nota === null || !is_numeric($nota)) {
+                        error_log('[Evaluacion::GuardarRespuestas] Nota inválida calculada: ' . var_export($nota, true));
+                        $nota = 0; // Valor por defecto si no se puede calcular
+                    }
+                    error_log('[Evaluacion::GuardarRespuestas] Nota calculada por el sistema: ' . $nota);
+                }
             } catch (Exception $e) {
                 // No detener el flujo si falla el cálculo de calificación, registrar para revisión
                 error_log('[Evaluacion::GuardarRespuestas] Error al calcular calificación: ' . $e->getMessage());
-                $nota = null;
+                $nota = 0; // Valor por defecto en caso de error
+            }
+
+            // Obtener institucion_id del usuario si no está disponible en $vigente
+            if (empty($vigente['institucion_id'])) {
+                try {
+                    $conexion = new ClaseConexion();
+                    $conexionSql = $conexion->CrearConexion();
+                    
+                    $stmt = $conexionSql->prepare("SELECT institucion_id FROM usuarios WHERE id = :alumno_user_id");
+                    $stmt->bindValue(':alumno_user_id', $alumno_user_id, PDO::PARAM_INT);
+                    $stmt->execute();
+                    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                    $stmt->closeCursor();
+
+                    if ($result && !empty($result['institucion_id'])) {
+                        $vigente['institucion_id'] = $result['institucion_id'];
+                        error_log('[Evaluacion::GuardarRespuestas] institucion_id obtenido de usuarios: ' . $vigente['institucion_id']);
+                    } else {
+                        error_log('[Evaluacion::GuardarRespuestas] No se encontró institucion_id en usuarios para alumno_user_id: ' . $alumno_user_id);
+                        throw new Exception('No se pudo obtener institucion_id desde la tabla usuarios.');
+                    }
+                } catch (Exception $e) {
+                    error_log('[Evaluacion::GuardarRespuestas] Error al obtener institucion_id: ' . $e->getMessage());
+                    throw new Exception('Error al obtener institucion_id: ' . $e->getMessage());
+                }
+            }
+
+            // Validar que institucion_id sea válido antes de continuar
+            if (empty($vigente['institucion_id'])) {
+                throw new Exception('No se puede guardar la calificación sin un institucion_id válido.');
+            }
+
+            // Insertar calificación en la tabla `calificaciones`
+            try {
+                if (!isset($conexionSql)) {
+                    $conexion = new ClaseConexion();
+                    $conexionSql = $conexion->CrearConexion();
+                }
+
+                // Habilitar el modo estricto en PDO
+                $conexionSql->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+                $sql = "INSERT INTO calificaciones (alumno_user_id, curso_id, institucion_id, grado_id, periodo, puntaje, activo) 
+                        VALUES (:alumno_user_id, :curso_id, :institucion_id, :grado_id, :periodo, :puntaje, :activo)
+                        ON DUPLICATE KEY UPDATE puntaje = :puntaje, activo = :activo";
+
+                $stmt = $conexionSql->prepare($sql);
+                $stmt->bindValue(':alumno_user_id', $alumno_user_id, PDO::PARAM_INT);
+                $stmt->bindValue(':curso_id', $vigente['curso_id'], PDO::PARAM_INT);
+                $stmt->bindValue(':institucion_id', $vigente['institucion_id'], PDO::PARAM_INT);
+                $stmt->bindValue(':grado_id', $vigente['grado_id'], PDO::PARAM_INT);
+                $stmt->bindValue(':periodo', date('Y-m'), PDO::PARAM_STR);
+                $stmt->bindValue(':puntaje', $nota, PDO::PARAM_STR);
+                $stmt->bindValue(':activo', 1, PDO::PARAM_INT);
+
+                $stmt->execute();
+                $stmt->closeCursor();
+
+                error_log('[Evaluacion::GuardarRespuestas] Calificación guardada exitosamente.');
+            } catch (PDOException $e) {
+                // Registrar el error SQL en el archivo de log
+                $logDir = __DIR__ . '/../../logs';
+                $logFile = $logDir . '/evaluacion_log.txt';
+
+                if (!is_dir($logDir)) {
+                    mkdir($logDir, 0777, true);
+                }
+
+                $logMessage = sprintf(
+                    "[%s] Error SQL: %s\nConsulta: %s\nValores: Alumno ID: %d, Curso ID: %d, Institución ID: %d, Grado ID: %d, Periodo: %s, Puntaje: %s\n",
+                    date('Y-m-d H:i:s'),
+                    $e->getMessage(),
+                    $sql,
+                    $alumno_user_id,
+                    $vigente['curso_id'],
+                    $vigente['institucion_id'],
+                    $vigente['grado_id'],
+                    date('Y-m'),
+                    $nota
+                );
+
+                file_put_contents($logFile, $logMessage, FILE_APPEND);
+                error_log('[Evaluacion::GuardarRespuestas] Error al guardar calificación: ' . $e->getMessage());
+            }
+
+            // Registrar en un archivo de log para depuración
+            try {
+                $logDir = __DIR__ . '/../../logs';
+                $logFile = $logDir . '/evaluacion_log.txt';
+
+                // Crear el directorio si no existe
+                if (!is_dir($logDir)) {
+                    mkdir($logDir, 0777, true);
+                }
+
+                $logMessage = sprintf(
+                    "[%s] Alumno ID: %d, Curso ID: %d, Institución ID: %d, Grado ID: %d, Periodo: %s, Puntaje: %s\n",
+                    date('Y-m-d H:i:s'),
+                    $alumno_user_id,
+                    $vigente['curso_id'],
+                    $vigente['institucion_id'],
+                    $vigente['grado_id'],
+                    date('Y-m'),
+                    $nota
+                );
+
+                // Agregar detalles si hubo un error al insertar en la tabla calificaciones
+                if (!isset($stmt) || !$stmt) {
+                    $logMessage .= "Error: No se pudo preparar o ejecutar la consulta para insertar en la tabla calificaciones.\n";
+                }
+
+                file_put_contents($logFile, $logMessage, FILE_APPEND);
+            } catch (Exception $e) {
+                error_log('[Evaluacion::GuardarRespuestas] Error al escribir en el archivo de log: ' . $e->getMessage());
+            }
+
+            // Validar y asignar un valor por defecto a institucion_id si es inválido
+            if ($vigente['institucion_id'] === 0 || $vigente['institucion_id'] === null) {
+                $logDir = __DIR__ . '/../../logs';
+                $logFile = $logDir . '/evaluacion_log.txt';
+
+                if (!is_dir($logDir)) {
+                    mkdir($logDir, 0777, true);
+                }
+
+                $logMessage = sprintf(
+                    "[%s] institucion_id inválido detectado (valor: %s). Asignando valor por defecto.\n",
+                    date('Y-m-d H:i:s'),
+                    $vigente['institucion_id']
+                );
+
+                file_put_contents($logFile, $logMessage, FILE_APPEND);
+                error_log('[Evaluacion::GuardarRespuestas] institucion_id inválido detectado. Asignando valor por defecto.');
+
+                // Asignar un valor por defecto
+                $vigente['institucion_id'] = 1; // Cambiar este valor según corresponda
+            }
+
+            // Obtener institucion_id directamente desde la tabla usuarios si no está disponible en $vigente
+            if (empty($vigente['institucion_id'])) {
+                try {
+                    $stmt = $conexionSql->prepare("SELECT institucion_id FROM usuarios WHERE id = :alumno_user_id");
+                    $stmt->bindValue(':alumno_user_id', $alumno_user_id, PDO::PARAM_INT);
+                    $stmt->execute();
+                    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                    $stmt->closeCursor();
+
+                    if ($result && !empty($result['institucion_id'])) {
+                        $vigente['institucion_id'] = $result['institucion_id'];
+                    } else {
+                        throw new Exception('No se pudo obtener institucion_id desde la tabla usuarios.');
+                    }
+                } catch (Exception $e) {
+                    $logDir = __DIR__ . '/../../logs';
+                    $logFile = $logDir . '/evaluacion_log.txt';
+
+                    if (!is_dir($logDir)) {
+                        mkdir($logDir, 0777, true);
+                    }
+
+                    $logMessage = sprintf(
+                        "[%s] Error al obtener institucion_id: %s\n",
+                        date('Y-m-d H:i:s'),
+                        $e->getMessage()
+                    );
+
+                    file_put_contents($logFile, $logMessage, FILE_APPEND);
+                    error_log('[Evaluacion::GuardarRespuestas] ' . $e->getMessage());
+
+                    // Asignar un valor por defecto si no se puede obtener
+                    $vigente['institucion_id'] = 1; // Cambiar este valor según corresponda
+                }
             }
 
             $response = json_encode([
