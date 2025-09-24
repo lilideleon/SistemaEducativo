@@ -41,9 +41,12 @@ function validarAutenticacion() {
 function validarRol($rolesPermitidos) {
     // Primero validar autenticación
     validarAutenticacion();
-    
-    // Verificar si el usuario tiene el rol permitido
-    if (!isset($_SESSION['user_rol']) || !in_array($_SESSION['user_rol'], $rolesPermitidos)) {
+
+    // Normalizar comparación de roles a mayúsculas para evitar problemas de casing
+    $rolSesion = isset($_SESSION['user_rol']) ? strtoupper($_SESSION['user_rol']) : null;
+    $permitidos = array_map('strtoupper', (array)$rolesPermitidos);
+
+    if (!$rolSesion || !in_array($rolSesion, $permitidos, true)) {
         echo "<script>
             alert('No tiene permisos para acceder a esta página');
             window.location='?c=Menu'; 

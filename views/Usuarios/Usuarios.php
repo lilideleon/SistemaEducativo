@@ -1,15 +1,10 @@
 <?php 
-   // Validación de autenticación y permisos de administrador
+   // Validación de autenticación y permisos para Admin y Director
    require_once 'core/AuthValidation.php';
-   validarAdmin(); // Solo administradores pueden acceder a gestión de usuarios
+   validarRol(['ADMIN','DIRECTOR']); // Admin y Director pueden acceder a gestión de usuarios
    
    include 'views/Menu/Aside.php';
 ?>
-
-
-
-<!DOCTYPE html>
-<html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />

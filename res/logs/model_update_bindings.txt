@@ -9,3 +9,4 @@
 2025-09-20T16:51:51+00:00 {"id":19,"codigo":"1010","nombres":"Seyly","apellidos":"Rodas","grado_id":1,"institucion_id":6,"rol":"ALUMNO","password_hash":"$2y$10$1o4v\/6O801qVGihCKxB7mOzwxQFkNqEkPQSp1xpDTKaBGQe0\/6jv.","seccion":2}
 2025-09-20T16:56:17+00:00 {"id":21,"codigo":"1111","nombres":"Cesr","apellidos":"Test","grado_id":1,"institucion_id":10,"rol":"ALUMNO","password_hash":"$2y$10$HUfvTxYfmyKng2F.Z2MRAOVlCj.KCoWfRU\/65IiVtzeGc\/wRtLE8K","seccion":2}
 2025-09-20T16:57:28+00:00 {"id":19,"codigo":"10101","nombres":"Seyly","apellidos":"Rodas","grado_id":1,"institucion_id":6,"rol":"ALUMNO","password_hash":"$2y$10$W8wnlhwMKjisWY4rF7xWJO.mF8d92mNBv6lsex0O4k.9YbKrcSmCy","seccion":2}
+2025-09-24T00:49:35+00:00 {"id":15,"codigo":"1010","nombres":"Alma Consuelo","apellidos":"Reyes Maldonado","grado_id":2,"institucion_id":9,"rol":"DIRECTOR","password_hash":"$2y$10$BFaKyXLhsWR9oxNiKLZAIeN6\/yoqUkI9PxdPCA1T9K\/IqUrl5ckJW","seccion":0}

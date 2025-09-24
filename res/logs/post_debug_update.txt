@@ -11,3 +11,4 @@
 2025-09-20T16:51:51+00:00 {"Codigo":"1010","nombres":"Seyly","apellidos":"Rodas","Rol":"ALUMNO","Contraseña":"1010","GradoId":"1","InstitucionId":"6","Seccion":"2","IdUsuario":"19"}
 2025-09-20T16:56:17+00:00 {"Codigo":"1111","nombres":"Cesr","apellidos":"Test","Rol":"ALUMNO","Contraseña":"2222","GradoId":"1","InstitucionId":"10","Seccion":"2","IdUsuario":"21"}
 2025-09-20T16:57:28+00:00 {"Codigo":"10101","nombres":"Seyly","apellidos":"Rodas","Rol":"ALUMNO","Contraseña":"10101","GradoId":"1","InstitucionId":"6","Seccion":"2","IdUsuario":"19"}
+2025-09-24T00:49:35+00:00 {"Codigo":"1010","nombres":"Alma Consuelo","apellidos":"Reyes Maldonado","Rol":"DIRECTOR","Contraseña":"2020","GradoId":"2","InstitucionId":"9","Seccion":"","IdUsuario":"15"}
