@@ -145,7 +145,7 @@
             <table class="table table-sm table-bordered mb-0" id="tblPub">
               <thead>
                 <tr>
-                  <th>ID</th><th>Título</th><th>Curso</th><th>Tipo</th><th>Tamaño</th><th>Fecha</th><th>Acciones</th>
+                  <th>ID</th><th>Título</th><th>Curso</th><th>Institución</th><th>Tipo</th><th>Tamaño</th><th>Fecha</th><th>Acciones</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -323,6 +323,7 @@
           <td>${p.id}</td>
           <td>${p.titulo}</td>
           <td>${p.curso_nombre || ''}</td>
+          <td>${p.institucion_nombre || ''}</td>
           <td>${p.tipo || '-'}</td>
           <td>${fmtBytes(p.size || 0)}</td>
           <td>${p.publicado_at ? (new Date(p.publicado_at)).toLocaleString() : ''}</td>

@@ -20,8 +20,9 @@ class Material_model {
     }
     public function ListarMateriales($filtros=[]) {
         $this->ConexionSql = $this->Conexion->CrearConexion();
-        $where = 'm.activo=1';
+        $where = 'm.activo = 1';
         $params = [];
+
         if (!empty($filtros['curso_id'])) {
             $where .= ' AND m.curso_id = :curso_id';
             $params[':curso_id'] = $filtros['curso_id'];
@@ -34,28 +35,50 @@ class Material_model {
             $where .= ' AND m.docente_user_id = :docente_user_id';
             $params[':docente_user_id'] = $filtros['docente_user_id'];
         }
-        $sql = "SELECT m.*, c.nombre as curso_nombre, g.nombre as grado_nombre
+        if (!empty($filtros['institucion_id'])) {
+            $where .= ' AND u.institucion_id = :institucion_id';
+            $params[':institucion_id'] = $filtros['institucion_id'];
+        }
+
+        $sql = "SELECT 
+                    m.*,
+                    c.nombre AS curso_nombre,
+                    g.nombre AS grado_nombre,
+                    CONCAT(u.nombres, ' ', u.apellidos) AS docente_nombre,
+                    i.nombre AS institucion_nombre,
+                    i.tipo   AS institucion_tipo
                 FROM materiales m
-                JOIN cursos c ON c.id = m.curso_id
-                JOIN grados g ON g.id = m.grado_id
-                WHERE $where ORDER BY m.publicado_at DESC";
+                JOIN cursos c  ON c.id = m.curso_id
+                JOIN grados g  ON g.id = m.grado_id
+                JOIN usuarios u ON u.id = m.docente_user_id
+                LEFT JOIN instituciones i ON i.id = u.institucion_id
+                WHERE $where
+                ORDER BY m.publicado_at DESC";
+
         $st = $this->ConexionSql->prepare($sql);
         $st->execute($params);
         $rows = $st->fetchAll(PDO::FETCH_ASSOC);
+
         // Adjuntar archivos
-        foreach($rows as &$mat) {
+        foreach ($rows as &$mat) {
             $mat['archivos'] = $this->ListarArchivos($mat['id']);
         }
         return $rows;
     }
     public function GuardarMaterial($data) {
         $this->ConexionSql = $this->Conexion->CrearConexion();
-        $sql = "INSERT INTO materiales (docente_user_id, curso_id, grado_id, unidad_numero, unidad_titulo, anio_lectivo, titulo, descripcion) VALUES (?,?,?,?,?,?,?,?)";
+        $sql = "INSERT INTO materiales (docente_user_id, curso_id, grado_id, unidad_numero, unidad_titulo, anio_lectivo, titulo, descripcion)
+                VALUES (?,?,?,?,?,?,?,?)";
         $st = $this->ConexionSql->prepare($sql);
         $st->execute([
-            $data['docente_user_id'], $data['curso_id'], $data['grado_id'],
-            $data['unidad_numero'], $data['unidad_titulo'], $data['anio_lectivo'],
-            $data['titulo'], $data['descripcion']
+            $data['docente_user_id'],
+            $data['curso_id'],
+            $data['grado_id'],
+            $data['unidad_numero'],
+            $data['unidad_titulo'],
+            $data['anio_lectivo'],
+            $data['titulo'],
+            $data['descripcion']
         ]);
         return $this->ConexionSql->lastInsertId();
     }
