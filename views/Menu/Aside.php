@@ -44,6 +44,7 @@
         <a href="?c=Preguntas" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-bar-chart-fill me-2"></i>Preguntas</a>
       <?php elseif ($rol === 'ALUMNO'): ?>
         <a href="?c=Evaluacion" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</a>
+        <a href="?c=MaterialAlumno" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-folder2-open me-2"></i>Material</a>
       <?php elseif ($rol === 'DIRECTOR'): ?>
         <a href="?c=Menu" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-grid-fill me-2"></i>Menú</a>
         <a href="?c=Usuarios" class="btn btn-glow fs-5 text-decoration-none"><i class="bi bi-people-fill me-2"></i>Usuarios</a>
@@ -75,6 +76,7 @@
         <a href="?c=Preguntas" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-bar-chart-fill me-2"></i>Preguntas</a>
       <?php elseif ($rol === 'ALUMNO'): ?>
         <a href="?c=Evaluacion" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-clipboard-check-fill me-2"></i>Evaluación</a>
+        <a href="?c=MaterialAlumno" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-folder2-open me-2"></i>Material</a>
       <?php elseif ($rol === 'DIRECTOR'): ?>
         <a href="?c=Menu" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-grid-fill me-2"></i>Menú</a>
         <a href="?c=Usuarios" class="btn btn-glow fs-5 text-decoration-none" data-bs-dismiss="offcanvas"><i class="bi bi-people-fill me-2"></i>Usuarios</a>
