@@ -113,7 +113,9 @@
                 <input id="titulo" class="form-control form-control-sm" placeholder="Ej.: Unidad 2 — Álgebra / Guía y diapositivas">
               </div>
               <div class="col-md-2 text-md-end">
-                <a href="#" id="lnkPublicar" class="link-btn">Publicar</a>
+                <button type="button" id="btnPublicar" class="btn btn-primary">
+                  <i class="bi bi-cloud-upload"></i> Publicar
+                </button>
               </div>
             </div>
 
@@ -122,8 +124,43 @@
               <textarea id="desc" class="form-control" rows="2" placeholder="Breve contexto del material..."></textarea>
             </div>
 
-            
+            <div class="mt-3">
+              <label class="form-label fw-semibold">Archivo de contenido</label>
+              <input type="file" id="archivo" class="form-control" accept=".pdf,.doc,.docx,.txt">
+              <div class="form-text">Formatos aceptados: PDF, Word, TXT</div>
+            </div>
+
           </form>
+
+          <!-- Modal de Proceso IA -->
+          <div class="modal fade" id="iaModal" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Procesamiento de Contenido</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                  <div class="ia-process">
+                    <div class="text-center mb-4">
+                      <i class="bi bi-robot fs-1 text-primary"></i>
+                    </div>
+                    <div id="ia-status" class="alert alert-info">
+                      <h6 class="alert-heading"><i class="bi bi-gear-wide-connected"></i> Procesando contenido...</h6>
+                      <hr>
+                      <p class="mb-0">La IA está analizando el material para generar evaluaciones personalizadas.</p>
+                    </div>
+                    <ul class="list-group mb-3" id="ia-steps">
+                      <li class="list-group-item">✓ Contenido recibido</li>
+                      <li class="list-group-item">✓ Iniciando análisis de material</li>
+                      <li class="list-group-item">⋯ Generando preguntas de evaluación</li>
+                      <li class="list-group-item">⋯ Enviando a revisión del supervisor</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
 
           <!-- Publicados -->
@@ -137,7 +174,7 @@
             <table class="table table-sm table-bordered mb-0" id="tblPub">
               <thead>
                 <tr>
-                  <th>ID</th><th>Título</th><th>Curso</th><th>Grado</th><th>Unidad</th><th>Fecha</th><th>Acciones</th>
+                  <th>ID</th><th>Título</th><th>Curso</th><th>Grado</th><th>Unidad</th><th>Fecha</th><th>Estado</th><th>Acciones</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -150,6 +187,9 @@
     </section>
   </main>
 
+  <!-- Bootstrap Bundle con Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
   <script>
     // ======= Estado =======
     const q = sel => document.querySelector(sel);
@@ -165,24 +205,74 @@
     
 
     // ======= Publicación =======
-    function publish(){
-      const curso = byId('curso').value;
-      const grado = byId('grado').value;
-      const unidad = byId('unidad')?.value || '';
-      const titulo = byId('titulo').value.trim() || 'Material sin título';
-      const desc = byId('desc').value.trim();
+    function simulateIAProcess() {
+      const steps = document.querySelectorAll('#ia-steps li');
+      const modalEl = document.getElementById('iaModal');
+      
+      // Resetear los pasos antes de mostrar el modal
+      steps.forEach((step, index) => {
+        if (index < 2) {
+          step.innerHTML = '✓ ' + step.innerHTML.substring(2);
+        } else {
+          step.innerHTML = '⋯ ' + step.innerHTML.substring(2);
+        }
+      });
 
-      const item = {
-        pid: seq++,
-        titulo,
-        curso,
-        grado,
-        unidad,
-        fecha: new Date(),
-        desc
-      };
-      published.unshift(item);
-      renderPublished();
+      const iaModal = new bootstrap.Modal(modalEl);
+      iaModal.show();
+
+      // Simular progreso
+      setTimeout(() => {
+        steps[2].innerHTML = '✓ Generando preguntas de evaluación';
+        setTimeout(() => {
+          steps[3].innerHTML = '✓ Enviando a revisión del supervisor';
+          document.getElementById('ia-status').innerHTML = `
+            <h6 class="alert-heading"><i class="bi bi-check-circle-fill text-success"></i> Procesamiento completado</h6>
+            <hr>
+            <p class="mb-0">El material ha sido procesado exitosamente. Se han generado preguntas de evaluación basadas en el contenido y se han enviado para revisión del supervisor educativo.</p>
+          `;
+          // Después de 3 segundos, cerrar el modal y agregar a la lista
+          setTimeout(() => {
+            iaModal.hide();
+            const item = {
+              pid: seq++,
+              titulo: byId('titulo').value.trim() || 'Material sin título',
+              curso: byId('curso').value,
+              grado: byId('grado').value,
+              unidad: byId('unidad')?.value || '',
+              fecha: new Date(),
+              desc: byId('desc').value.trim(),
+              estado: 'Pendiente de aprobación'
+            };
+            published.unshift(item);
+            renderPublished();
+            
+            // Limpiar el formulario
+            byId('titulo').value = '';
+            byId('desc').value = '';
+            byId('archivo').value = '';
+          }, 3000);
+        }, 2000);
+      }, 2000);
+    }
+
+    function publish(){
+      const archivo = byId('archivo');
+      const titulo = byId('titulo').value.trim();
+      
+      if (!archivo.files.length) {
+        alert('Por favor, seleccione un archivo para cargar');
+        return;
+      }
+
+      if (!titulo) {
+        alert('Por favor, ingrese un título para el material');
+        byId('titulo').focus();
+        return;
+      }
+
+      console.log('Iniciando simulación del proceso IA...');
+      simulateIAProcess();
     }
 
     function renderPublished(){
@@ -195,6 +285,7 @@
           <td>${p.grado || '-'}</td>
           <td>${p.unidad || '-'}</td>
           <td>${p.fecha.toLocaleString()}</td>
+          <td><span class="badge ${p.estado === 'Pendiente de aprobación' ? 'text-bg-warning' : 'text-bg-success'}">${p.estado || 'Aprobado'}</span></td>
           <td class="text-nowrap">
             <a class="link-danger px-1 py-0" href="#" data-action="del" title="Eliminar"><i class="bi bi-trash"></i></a>
           </td>
@@ -203,8 +294,15 @@
     }
 
     // ======= Eventos =======
-    byId('lnkPublicar').addEventListener('click', e => { e.preventDefault(); publish(); });
-    
+    document.addEventListener('DOMContentLoaded', function() {
+      const btnPublicar = byId('btnPublicar');
+      if (btnPublicar) {
+        btnPublicar.addEventListener('click', function(e) {
+          e.preventDefault();
+          publish();
+        });
+      }
+    });
 
     // Eliminar publicado
     q('#tblPub tbody').addEventListener('click', e => {
