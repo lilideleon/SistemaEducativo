@@ -84,6 +84,10 @@
       background:#fff;color:#235c9c;font-weight:700;border-radius:.25rem;
       display:inline-block;padding:.35rem 1.25rem;box-shadow:0 2px 0 rgba(0,0,0,.25) inset;
     }
+    /* Timers más grandes */
+    .timer-badge{ font-size:1.25rem; padding:.55rem .9rem; border-radius:.6rem; box-shadow:0 2px 6px rgba(0,0,0,.2) }
+    #totalTime{ font-weight:700 }
+    #qTime{ font-weight:600 }
 
     /* Contenedor del test */
     .gform-wrap{
@@ -142,9 +146,49 @@
     <section class="main-content">
       <header class="d-flex align-items-center justify-content-between mb-3">
         <h1 class="page-title">Sistema Educativo</h1>
-        <a href="?c=Login&a=Logout" class="btn btn-outline-light btn-sm" title="Cerrar Sesión">
-          <i class="bi bi-box-arrow-right"></i> Salir
-        </a>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge text-bg-dark timer-badge" title="Tiempo total restante">
+            <i class="bi bi-clock-history"></i> <span id="totalTime">--:--:--</span>
+          </span>
+          <span class="badge text-bg-secondary timer-badge" title="Tiempo para la pregunta actual">
+            <i class="bi bi-stopwatch"></i> <span id="qTime">--:--</span>
+          </span>
+          <a href="?c=Login&a=Logout" class="btn btn-outline-light btn-sm" title="Cerrar Sesión">
+            <i class="bi bi-box-arrow-right"></i> Salir
+          </a>
+        </div>
+
+      <!-- Modal resultados -->
+      <div class="modal fade" id="resultadoModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Resultados de la evaluación</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div id="resumenCalificacion" class="mb-3"></div>
+              <div class="table-responsive">
+                <table class="table table-sm table-bordered mb-0">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Pregunta</th>
+                      <th>Tu respuesta</th>
+                      <th>Correcta</th>
+                      <th>Resultado</th>
+                    </tr>
+                  </thead>
+                  <tbody id="resultadoBody"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
       </header>
 
       <div class="content-panel">
@@ -182,10 +226,42 @@
     const tema  = document.getElementById('tema');
     const qContainer = document.getElementById('qContainer');
     const btnNext = document.getElementById('btnNext');
+    const totalTimeEl = document.getElementById('totalTime');
+    const qTimeEl = document.getElementById('qTime');
 
     let preguntas = [];
     let idx = -1;
     let respuestasGuardadas = []; // Array para almacenar las respuestas temporalmente
+    // Temporizadores
+    const TOTAL_SECONDS = 90 * 60; // 90 minutos
+    let totalRemaining = TOTAL_SECONDS;
+    let perQuestionSeconds = 0;
+    let perRemaining = 0;
+    let totalTimer = null;
+    let perTimer = null;
+    let envioRealizado = false;
+
+    function fmtHMS(sec){
+      const h = Math.floor(sec/3600);
+      const m = Math.floor((sec%3600)/60);
+      const s = sec%60;
+      const pad = n => String(n).padStart(2,'0');
+      return `${pad(h)}:${pad(m)}:${pad(s)}`;
+    }
+    function fmtMS(sec){
+      const m = Math.floor(sec/60);
+      const s = sec%60;
+      const pad = n => String(n).padStart(2,'0');
+      return `${pad(m)}:${pad(s)}`;
+    }
+    function actualizarUIReloj(){
+      totalTimeEl.textContent = fmtHMS(Math.max(0,totalRemaining));
+      qTimeEl.textContent = fmtMS(Math.max(0,perRemaining));
+    }
+    function detenerTimers(){
+      if(totalTimer){ clearInterval(totalTimer); totalTimer = null; }
+      if(perTimer){ clearInterval(perTimer); perTimer = null; }
+    }
 
     // Cargar encuestas para el combo
     function loadEncuestas(){
@@ -230,6 +306,7 @@
             </button>
           </div>`;
         btnNext.classList.add('disabled');
+        btnNext.style.display = 'none';
         
         // Agregar evento al botón de enviar
         document.getElementById('btnEnviarRespuestas').addEventListener('click', enviarRespuestas);
@@ -277,7 +354,13 @@
       tema.textContent = 'Evaluación: ' + (title || ('ID ' + encuestaId));
       qContainer.innerHTML = '<div class="text-center py-3">Cargando preguntas...</div>';
       btnNext.classList.remove('disabled');
+      btnNext.style.display = 'inline-block';
       respuestasGuardadas = []; // Limpiar respuestas anteriores
+      envioRealizado = false;
+      // Reiniciar timers visuales
+      detenerTimers();
+      totalRemaining = TOTAL_SECONDS;
+      actualizarUIReloj();
       fetch(`?c=Evaluacion&a=CargarEvaluacion&encuesta_id=${encodeURIComponent(encuestaId)}`)
         .then(r => r.text().then(t => ({ status: r.status, ok: r.ok, text: t })))
         .then(obj => {
@@ -288,6 +371,32 @@
             if(json && json.success){
               preguntas = json.data || [];
               idx = 0;
+              // Configurar tiempos por pregunta de forma equitativa (1 hora / total de preguntas)
+              const n = Math.max(1, preguntas.length || 1);
+              perQuestionSeconds = Math.floor(TOTAL_SECONDS / n);
+              perRemaining = perQuestionSeconds;
+              // Iniciar timers
+              totalTimer = setInterval(()=>{
+                totalRemaining -= 1;
+                if(totalRemaining <= 0){ totalRemaining = 0; actualizarUIReloj(); onTiempoAgotado(); return; }
+                actualizarUIReloj();
+              }, 1000);
+              perTimer = setInterval(()=>{
+                perRemaining -= 1;
+                if(perRemaining <= 0){
+                  // tiempo de la pregunta agotado: guardar y pasar a la siguiente
+                  guardarRespuestaActual();
+                  idx += 1;
+                  if(idx >= preguntas.length){
+                    renderPregunta();
+                    onTiempoAgotado();
+                    return;
+                  }
+                  perRemaining = perQuestionSeconds;
+                  renderPregunta();
+                }
+                actualizarUIReloj();
+              }, 1000);
               renderPregunta();
             } else {
               preguntas = []; idx = -1;
@@ -333,6 +442,7 @@
       if(!ok){ alert('Responde la pregunta antes de continuar.'); return; }
 
       idx += 1;
+      perRemaining = perQuestionSeconds; // reiniciar tiempo por pregunta al avanzar manualmente
       renderPregunta();
     });
 
@@ -377,7 +487,97 @@
     }
 
     // Función para enviar todas las respuestas al servidor
+    function onTiempoAgotado(){
+      if(envioRealizado) return;
+      btnNext.classList.add('disabled');
+      detenerTimers();
+      enviarRespuestas();
+    }
+
+    function evaluarLocalmente() {
+      // Intenta evaluar usando las respuestas correctas si vienen en el payload de preguntas
+      let correctas = 0;
+      const detalle = [];
+      const mapResp = new Map();
+      respuestasGuardadas.forEach(r => { mapResp.set(r.pregunta_id, r); });
+
+      preguntas.forEach((p, i) => {
+        const r = mapResp.get(p.id);
+        // Obtener texto de tu respuesta
+        let tuTexto = '';
+        if (r) {
+          if (p.tipo === 'opcion_unica') {
+            const opt = (p.respuestas||[]).find(o => o.id == r.respuesta_id);
+            tuTexto = opt ? (opt.respuesta_texto || ('Opción '+opt.id)) : '';
+          } else if (p.tipo === 'opcion_multiple') {
+            const ids = r.respuestas_ids || [];
+            tuTexto = (p.respuestas||[]).filter(o => ids.indexOf(String(o.id))>=0 || ids.indexOf(o.id)>=0).map(o=>o.respuesta_texto).join(', ');
+          } else if (p.tipo === 'abierta') {
+            tuTexto = r.respuesta_texto || '';
+          } else if (p.tipo === 'numerica') {
+            tuTexto = (r.respuesta_numero!=null ? r.respuesta_numero : '');
+          }
+        }
+
+        // Obtener texto de la respuesta correcta (si está disponible)
+        let corrTexto = '';
+        let esCorrecto = false;
+        const correctasArr = (p.respuestas||[]).filter(o => String(o.es_correcta)==='1');
+        if (p.tipo === 'opcion_unica') {
+          const corr = correctasArr[0];
+          if (corr) corrTexto = corr.respuesta_texto || '';
+          esCorrecto = !!(r && r.respuesta_id && corr && String(r.respuesta_id) === String(corr.id));
+        } else if (p.tipo === 'opcion_multiple') {
+          const corrIds = new Set(correctasArr.map(o=>String(o.id)));
+          corrTexto = correctasArr.map(o=>o.respuesta_texto).join(', ');
+          const marcadas = new Set((r && r.respuestas_ids ? r.respuestas_ids.map(x=>String(x)) : []));
+          if (corrIds.size>0) {
+            esCorrecto = (corrIds.size === marcadas.size) && Array.from(corrIds).every(id => marcadas.has(id));
+          }
+        } else if (p.tipo === 'abierta' || p.tipo === 'numerica') {
+          // Sin regla local fiable: marcar como no evaluable si no hay bandera es_correcta
+          if (correctasArr.length>0) {
+            corrTexto = correctasArr.map(o=> o.respuesta_texto || o.respuesta_numero || '').join(', ');
+            // Comparación exacta simple
+            if (p.tipo === 'abierta') esCorrecto = (tuTexto.trim().toLowerCase() === (corrTexto||'').trim().toLowerCase());
+            if (p.tipo === 'numerica') esCorrecto = (String(tuTexto) === String(corrTexto));
+          } else {
+            corrTexto = '(No disponible)';
+            esCorrecto = false;
+          }
+        }
+
+        if (esCorrecto) correctas += 1;
+        detalle.push({ idx:i+1, enunciado:p.enunciado, tuTexto, corrTexto, esCorrecto });
+      });
+
+      // 5 puntos por acierto, 20 preguntas = 100
+      const puntaje = correctas * 5;
+      return { correctas, puntaje, detalle };
+    }
+
+    function mostrarResultados(){
+      const r = evaluarLocalmente();
+      const resumen = `<div class="alert alert-info">
+        <strong>Correctas:</strong> ${r.correctas} / ${preguntas.length} • <strong>Puntaje:</strong> ${r.puntaje} / 100
+      </div>`;
+      document.getElementById('resumenCalificacion').innerHTML = resumen;
+      const tbody = document.getElementById('resultadoBody');
+      tbody.innerHTML = r.detalle.map(d=>`
+        <tr>
+          <td>${d.idx}</td>
+          <td>${d.enunciado}</td>
+          <td>${d.tuTexto || '<em>Sin respuesta</em>'}</td>
+          <td>${d.corrTexto}</td>
+          <td>${d.esCorrecto ? '<span class="badge text-bg-success">Correcta</span>' : '<span class="badge text-bg-danger">Incorrecta</span>'}</td>
+        </tr>
+      `).join('');
+      const modal = new bootstrap.Modal(document.getElementById('resultadoModal'));
+      modal.show();
+    }
+
     function enviarRespuestas() {
+      if(envioRealizado) return;
       const encuestaId = selEncuesta.value;
       if(!encuestaId) {
         alert('No hay encuesta seleccionada');
@@ -423,7 +623,11 @@
       .then(response => response.json())
       .then(result => {
         if(result.success) {
+          envioRealizado = true;
+          detenerTimers();
           const usuario = result.data.usuario;
+          // Deshabilitar el botón Siguiente
+          btnNext.classList.add('disabled');
           qContainer.innerHTML = `
             <div class="alert alert-success">
               <h4>¡Encuesta enviada exitosamente!</h4>
@@ -433,22 +637,18 @@
                 <div class="col-md-6">
                   <p><strong>Estudiante:</strong> ${usuario.nombre}</p>
                   <p><strong>Institución:</strong> ${usuario.institucion}</p>
-                  <p><strong>Grado:</strong> ${usuario.grado}</p>
-                  <p><strong>Sección:</strong> ${usuario.seccion}</p>
                 </div>
-                <div class="col-md-6">
-                  <p><strong>Total de respuestas:</strong> ${result.data.total_respuestas_guardadas}</p>
-                  <p><strong>Nota (0..100):</strong> ${typeof result.nota !== 'undefined' && result.nota !== null ? result.nota : 'N/D'}</p>
-                  <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-ES')}</p>
+                <div class="col-md-6 text-end">
+                  <button class="btn btn-outline-primary" onclick="mostrarResultados()"><i class="bi bi-bar-chart-fill"></i> Ver resultados</button>
                 </div>
               </div>
-              <hr>
-              <button type="button" class="btn btn-secondary" onclick="location.reload()">
-                <i class="bi bi-arrow-clockwise"></i> Iniciar Nueva Evaluación
-              </button>
             </div>`;
+          // Ocultar botón Siguiente
+          btnNext.style.display = 'none';
+          // Abrir modal de resultados automáticamente
+          setTimeout(mostrarResultados, 200);
         } else {
-          throw new Error(result.msj || 'Error al enviar respuestas');
+          throw new Error(result.msj || 'Error desconocido');
         }
       })
       .catch(error => {
