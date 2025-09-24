@@ -278,7 +278,7 @@
               const json = JSON.parse(obj.text);
               if (json && json.success) {
                 const opts = ['<option value="">Seleccione evaluación...</option>']
-                  .concat(json.data.map(e => `<option value="${e.id}" data-title="${(e.titulo||'').replace(/"/g,'&quot;')}">${e.titulo} (ID: ${e.id})</option>`));
+                  .concat(json.data.map(e => `<option value="${e.id}" data-title="${(e.titulo||'').replace(/"/g,'&quot;')}">${e.titulo}</option>`));
                 selEncuesta.innerHTML = opts.join('');
                 return;
               }
