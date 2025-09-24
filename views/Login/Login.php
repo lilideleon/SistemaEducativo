@@ -104,7 +104,7 @@
             <input class="form-check-input" type="checkbox" value="1" id="rememberMe" />
             <label class="form-check-label" for="rememberMe">Recordarme</label>
           </div>
-          <a href="#" class="small">Olvidé mi contraseña</a>
+          <a href="?c=Login&a=recoverPassword" class="small">Olvidé mi contraseña</a>
         </div>
 
         <div class="d-grid gap-2">

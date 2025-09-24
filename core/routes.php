@@ -27,4 +27,9 @@
 			$controller->ACCION_PRINCIPAL();
 		}	
 	}
-?>
+// Add route for password recovery
+if (isset($_GET['c']) && $_GET['c'] === 'Login' && isset($_GET['a']) && $_GET['a'] === 'recoverPassword') {
+    $controller = cargarControlador('Login');
+    cargarAccion($controller, 'recoverPassword');
+    exit;
+}
