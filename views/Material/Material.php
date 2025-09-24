@@ -64,7 +64,9 @@
     <section class="main-content">
       <header class="d-flex align-items-center justify-content-between mb-3">
         <h1 class="page-title">Sistema Educativo</h1>
-        <i class="bi bi-arrow-right-square-fill fs-2 text-light d-none d-md-inline"></i>
+        <a href="?c=Login&a=Logout" class="btn btn-outline-light btn-sm" title="Cerrar Sesión">
+          <i class="bi bi-box-arrow-right"></i> Salir
+        </a>
       </header>
 
       <div class="content-panel">
@@ -98,8 +100,14 @@
                 <input id="titulo" class="form-control form-control-sm" placeholder="Ej.: Unidad 2 — Álgebra / Guía y diapositivas">
               </div>
               <div class="col-md-4 text-md-end">
-                <a href="#" id="lnkPublicar" class="link-btn">Publicar <span id="qtySel">0</span> archivo(s)</a>
-                <a href="#" id="lnkLimpiar" class="link-btn link-ghost ms-2">Limpiar selección</a>
+                <a href="#" id="lnkPublicar" class="btn btn-primary btn-sm">
+                  <i class="bi bi-cloud-upload me-1"></i>
+                  Publicar <span id="qtySel">0</span> archivo(s)
+                </a>
+                <a href="#" id="lnkLimpiar" class="btn btn-outline-secondary btn-sm ms-2">
+                  <i class="bi bi-x-circle me-1"></i>
+                  Limpiar selección
+                </a>
               </div>
             </div>
 
@@ -116,7 +124,7 @@
                 <i class="bi bi-cloud-arrow-up-fill me-1"></i>
                 Arrastra y suelta archivos aquí
               </div>
-              <div class="dz-hint">o <a href="#" id="lnkElegir">haz clic para seleccionarlos</a></div>
+              <div class="dz-hint">o <a href="#" id="lnkElegir" class="btn btn-outline-primary btn-sm ms-1"><i class="bi bi-folder2-open me-1"></i> Elegir archivos</a></div>
             </div>
           </form>
 
@@ -150,6 +158,8 @@
     </section>
   </main>
 
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     // ======= Estado =======
     const q = sel => document.querySelector(sel);
