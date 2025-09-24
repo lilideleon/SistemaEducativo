@@ -11,8 +11,8 @@ class EvaluacionController
         require_once "models/Respuestas.php";
         require_once "models/RespuestasAlumnos.php";
         
-        // Verificar autenticaciÃ³n
-        validarRol(['ALUMNO']);
+        // Verificar autenticación: permitir ALUMNO y ADMIN (Admin en modo lectura)
+        validarRol(['ALUMNO','ADMIN']);
         
         $data["titulo"] = "Evaluacion";
     }

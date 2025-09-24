@@ -1,7 +1,7 @@
 <?php 
-   // Validación de autenticación y permisos de alumno
+   // Validación de autenticación y permisos de alumno y admin
    require_once 'core/AuthValidation.php';
-   validarRol(['ALUMNO']); // Solo alumnos pueden acceder a evaluaciones
+   validarRol(['ALUMNO','ADMIN']); // Alumnos y Admin pueden acceder a evaluaciones (Admin en modo visualización)
    
    include 'views/Menu/Aside.php';
 ?>
