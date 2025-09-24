@@ -650,7 +650,7 @@
                   <p><strong>Institución:</strong> ${usuario.institucion}</p>
                 </div>
                 <div class="col-md-6 text-end">
-                  <button class="btn btn-outline-primary" onclick="mostrarResultados()"><i class="bi bi-bar-chart-fill"></i> Ver resultados</button>
+                  <button type="button" class="btn btn-outline-primary" onclick="event.preventDefault(); mostrarResultados();"><i class="bi bi-bar-chart-fill"></i> Ver resultados</button>
                 </div>
               </div>
             </div>`;
