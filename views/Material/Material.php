@@ -20,6 +20,9 @@
   <!-- Bootstrap 5 + Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <!-- DataTables -->
+  <link href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+  <link href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css" rel="stylesheet" />
 
   <style>
     :root{ --bg-teal:#4f8f8a; --sidebar-header:#a8c0bb; }
@@ -145,7 +148,16 @@
             <table class="table table-sm table-bordered mb-0" id="tblPub">
               <thead>
                 <tr>
-                  <th>ID</th><th>Título</th><th>Curso</th><th>Institución</th><th>Tipo</th><th>Tamaño</th><th>Fecha</th><th>Acciones</th>
+                  <th>ID</th>
+                  <th>Título</th>
+                  <th>Curso</th>
+                  <th>Grado</th>
+                  <th>Unidad</th>
+                  <th>Institución</th>
+                  <th>Tipo</th>
+                  <th>Tamaño</th>
+                  <th>Fecha</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -160,6 +172,18 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+  <!-- DataTables -->
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
   <script>
     // ======= Estado =======
     const q = sel => document.querySelector(sel);
@@ -314,15 +338,24 @@
       }
     }
 
-    // Modificar renderPublished para aceptar lista
+    let dataTable;
+
+    // Modificar renderPublished para aceptar lista y usar DataTables
     function renderPublished(lista){
-      const tbody = q('#tblPub tbody');
       if(!lista) lista = [];
+      
+      if(dataTable) {
+        dataTable.destroy();
+      }
+
+      const tbody = q('#tblPub tbody');
       tbody.innerHTML = lista.map(p => `
         <tr data-id="${p.id}">
           <td>${p.id}</td>
           <td>${p.titulo}</td>
           <td>${p.curso_nombre || ''}</td>
+          <td>${p.grado_nombre || ''}</td>
+          <td>Unidad ${p.unidad_numero || '-'}</td>
           <td>${p.institucion_nombre || ''}</td>
           <td>${p.tipo || '-'}</td>
           <td>${fmtBytes(p.size || 0)}</td>
@@ -333,6 +366,20 @@
           </td>
         </tr>
       `).join('');
+
+      // Inicializar DataTable con opciones avanzadas
+      dataTable = $('#tblPub').DataTable({
+        language: {
+          url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
+        },
+        dom: 'Bfrtip',
+        buttons: [
+          'copy', 'csv', 'excel', 'pdf', 'print'
+        ],
+        order: [[0, 'desc']], // Ordenar por ID descendente por defecto
+        pageLength: 10,
+        responsive: true
+      });
     }
 
     // ======= Eventos =======

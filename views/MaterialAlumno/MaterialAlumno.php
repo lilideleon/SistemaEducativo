@@ -13,6 +13,8 @@
   <title>Material - Alumno</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <!-- DataTables -->
+  <link href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
   <style>
     :root{ --bg-teal:#4f8f8a; --sidebar-header:#a8c0bb; }
     html,body{height:100%;margin:0}
@@ -70,6 +72,8 @@
                 <th>ID</th>
                 <th>Título</th>
                 <th>Curso</th>
+                <th>Grado</th>
+                <th>Unidad</th>
                 <th>Institución</th>
                 <th>Fecha</th>
                 <th>Archivos</th>
@@ -83,8 +87,13 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- jQuery y DataTables -->
+  <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
   <script>
-    const $ = s => document.querySelector(s);
+    // Variable para la instancia de DataTable
+    let dataTable;
 
     async function api(url){
       const r = await fetch(url);
@@ -95,31 +104,54 @@
       try{
         const res = await api('?c=MaterialAlumno&a=ListarCursos');
         if(res.success && Array.isArray(res.data)){
-          const sel = $('#cursoFiltro');
+          const sel = document.querySelector('#cursoFiltro');
           sel.innerHTML = '<option value="">Todos los cursos</option>' + res.data.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');
         }
       }catch(e){}
     }
 
     async function listar(){
-      const curso = $('#cursoFiltro').value;
+      const curso = document.querySelector('#cursoFiltro').value;
       const url = curso ? `?c=MaterialAlumno&a=Listar&curso_id=${encodeURIComponent(curso)}` : '?c=MaterialAlumno&a=Listar';
       const res = await api(url);
-      const tbody = $('#tblPubAlu tbody');
-      if(!res.success){ tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error</td></tr>'; return; }
+      
+      // Destruir DataTable existente si hay uno
+      if(dataTable) {
+        dataTable.destroy();
+      }
+
+      const tbody = document.querySelector('#tblPubAlu tbody');
+      if(!res.success){ 
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Error</td></tr>'; 
+        return; 
+      }
+      
       const rows = res.data || [];
       tbody.innerHTML = rows.map(p=>`
         <tr>
           <td>${p.id}</td>
           <td>${p.titulo}</td>
           <td>${p.curso_nombre||''}</td>
+          <td>${p.grado_nombre||''}</td>
+          <td>Unidad ${p.unidad_numero||'-'}</td>
           <td>${p.institucion_nombre||''}</td>
           <td>${p.publicado_at ? new Date(p.publicado_at).toLocaleString() : ''}</td>
           <td>${(p.archivos||[]).map(a=>`<a class='me-2' href='${a.url}' target='_blank' title='Ver'><i class='bi bi-eye'></i></a><a class='me-2' href='${a.url}' download='${a.nombre_archivo}' title='Descargar'><i class='bi bi-download'></i></a>`).join('')}</td>
         </tr>`).join('');
+
+      // Inicializar DataTable
+      dataTable = $('#tblPubAlu').DataTable({
+        language: {
+          url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
+        },
+        order: [[0, 'desc']], // Ordenar por ID descendente por defecto
+        pageLength: 10,
+        responsive: true,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]]
+      });
     }
 
-    $('#btnFiltrar').addEventListener('click', listar);
+    document.querySelector('#btnFiltrar').addEventListener('click', listar);
 
     cargarCursos().then(listar);
   </script>

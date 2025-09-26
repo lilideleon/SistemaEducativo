@@ -233,7 +233,7 @@
     let idx = -1;
     let respuestasGuardadas = []; // Array para almacenar las respuestas temporalmente
     // Temporizadores
-    const TOTAL_SECONDS = 90 * 60; // 90 minutos
+    const TOTAL_SECONDS = 60 * 60; // 60 minutos (1 hora)
     let totalRemaining = TOTAL_SECONDS;
     let perQuestionSeconds = 0;
     let perRemaining = 0;
@@ -372,8 +372,8 @@
               preguntas = json.data || [];
               idx = 0;
               // Configurar tiempos por pregunta de forma equitativa (1 hora / total de preguntas)
-              const n = Math.max(1, preguntas.length || 1);
-              perQuestionSeconds = Math.floor(TOTAL_SECONDS / n);
+              // Tiempo fijo por pregunta: 5 minutos = 300 segundos
+              perQuestionSeconds = 300;
               perRemaining = perQuestionSeconds;
               // Iniciar timers
               totalTimer = setInterval(()=>{
