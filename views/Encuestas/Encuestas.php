@@ -78,6 +78,15 @@
             <label class="form-label">Grado</label>
             <select id="grado_id" class="form-select form-select-sm" required></select>
           </div>
+          <div class="col-md-2">
+            <label class="form-label">Unidad</label>
+            <select id="unidad_numero" class="form-select form-select-sm" required>
+              <option value="1">Primera unidad</option>
+              <option value="2">Segunda unidad</option>
+              <option value="3">Tercera unidad</option>
+              <option value="4">Cuarta unidad</option>
+            </select>
+          </div>
           <div class="col-md-3">
             <label class="form-label">Institución (opcional)</label>
             <select id="institucion_id" class="form-select form-select-sm"></select>
@@ -115,6 +124,7 @@
                 <th>Título</th>
                 <th>Curso</th>
                 <th>Grado</th>
+                <th>Unidad</th>
                 <th>Institución</th>
                 <th>Estado</th>
                 <th>Inicio</th>
@@ -169,6 +179,7 @@
           <td>${r.titulo||''}</td>
           <td>${r.curso||''}</td>
           <td>${r.grado||''}</td>
+          <td>Unidad ${r.unidad_numero || 1}</td>
           <td>${r.institucion||''}</td>
           <td>${r.estado||''}</td>
           <td>${r.inicio||''}</td>
@@ -187,6 +198,7 @@
       $('#titulo').value = res.data.titulo||'';
       $('#curso_id').value = res.data.curso_id||'';
       $('#grado_id').value = res.data.grado_id||'';
+      $('#unidad_numero').value = res.data.unidad_numero || '1';
       $('#institucion_id').value = res.data.institucion_id||'';
       $('#descripcion').value = res.data.descripcion||'';
       if(res.data.fecha_inicio) $('#fecha_inicio').value = res.data.fecha_inicio.replace(' ','T').slice(0,16);
@@ -210,6 +222,7 @@
       data.append('titulo', $('#titulo').value.trim());
       data.append('curso_id', $('#curso_id').value);
       data.append('grado_id', $('#grado_id').value);
+      data.append('unidad_numero', $('#unidad_numero').value);
       data.append('institucion_id', $('#institucion_id').value);
       data.append('descripcion', $('#descripcion').value.trim());
       data.append('fecha_inicio', $('#fecha_inicio').value);

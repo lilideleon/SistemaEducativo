@@ -20,6 +20,7 @@ class Encuestas_model
                         e.titulo,
                         c.nombre AS curso,
                         g.nombre AS grado,
+                        COALESCE(e.unidad_numero, 1) as unidad_numero,
                         i.nombre AS institucion,
                         e.estado,
                         e.fecha_inicio AS inicio,
@@ -57,7 +58,7 @@ class Encuestas_model
     {
         try {
             $this->ConexionSql = $this->Conexion->CrearConexion();
-            $sql = "SELECT id, titulo, curso_id, grado_id, institucion_id, descripcion, fecha_inicio, fecha_fin, estado, creado_por, activo
+            $sql = "SELECT id, titulo, curso_id, grado_id, COALESCE(unidad_numero, 1) as unidad_numero, institucion_id, descripcion, fecha_inicio, fecha_fin, estado, creado_por, activo
                       FROM encuestas
                      WHERE id = :id
                      LIMIT 1";
@@ -78,26 +79,45 @@ class Encuestas_model
     public function Agregar($data)
     {
         try {
+            error_log('Datos recibidos en Agregar: ' . print_r($data, true));
             $this->ConexionSql = $this->Conexion->CrearConexion();
-            $sql = "INSERT INTO encuestas (titulo, curso_id, grado_id, institucion_id, descripcion, fecha_inicio, fecha_fin, estado, creado_por, activo)
-                    VALUES (:titulo, :curso_id, :grado_id, :institucion_id, :descripcion, :fecha_inicio, :fecha_fin, :estado, :creado_por, 1)";
+            $sql = "INSERT INTO encuestas (titulo, curso_id, grado_id, unidad_numero, institucion_id, descripcion, fecha_inicio, fecha_fin, estado, creado_por, activo)
+                    VALUES (:titulo, :curso_id, :grado_id, :unidad_numero, :institucion_id, :descripcion, :fecha_inicio, :fecha_fin, :estado, :creado_por, 1)";
             $st = $this->ConexionSql->prepare($sql);
+            
+            // Asignar valores
             $st->bindValue(':titulo', $data['titulo']);
             $st->bindValue(':curso_id', (int)$data['curso_id'], PDO::PARAM_INT);
             $st->bindValue(':grado_id', (int)$data['grado_id'], PDO::PARAM_INT);
-            if ($data['institucion_id'] === null) {
+            
+            // Manejo seguro de unidad_numero
+            $unidad_numero = 1; // valor por defecto
+            if (isset($data['unidad_numero'])) {
+                $unidad_numero = (int)$data['unidad_numero'];
+                // Asegurar que está entre 1 y 4
+                if ($unidad_numero < 1 || $unidad_numero > 4) {
+                    $unidad_numero = 1;
+                }
+            }
+            $st->bindValue(':unidad_numero', $unidad_numero, PDO::PARAM_INT);
+            
+            // Manejo de institución
+            if (isset($data['institucion_id']) && $data['institucion_id'] === null) {
                 $st->bindValue(':institucion_id', null, PDO::PARAM_NULL);
             } else {
-                $st->bindValue(':institucion_id', (int)$data['institucion_id'], PDO::PARAM_INT);
+                $st->bindValue(':institucion_id', isset($data['institucion_id']) ? (int)$data['institucion_id'] : null, PDO::PARAM_INT);
             }
+            
             $st->bindValue(':descripcion', $data['descripcion']);
             $st->bindValue(':fecha_inicio', $data['fecha_inicio']);
             $st->bindValue(':fecha_fin', $data['fecha_fin']);
             $st->bindValue(':estado', strtoupper($data['estado']));
             $st->bindValue(':creado_por', (int)$data['creado_por'], PDO::PARAM_INT);
+            
             $st->execute();
             return $this->ConexionSql->lastInsertId();
         } catch (Exception $e) {
+            error_log('Error al agregar encuesta: ' . $e->getMessage());
             throw new Exception('Error al agregar encuesta: ' . $e->getMessage());
         } finally {
             $this->Conexion->CerrarConexion();
@@ -113,6 +133,7 @@ class Encuestas_model
                        SET titulo = :titulo,
                            curso_id = :curso_id,
                            grado_id = :grado_id,
+                           unidad_numero = :unidad_numero,
                            institucion_id = :institucion_id,
                            descripcion = :descripcion,
                            fecha_inicio = :fecha_inicio,
@@ -120,19 +141,37 @@ class Encuestas_model
                            estado = :estado
                      WHERE id = :id";
             $st = $this->ConexionSql->prepare($sql);
+            
+            // Valores básicos
             $st->bindValue(':titulo', $data['titulo']);
             $st->bindValue(':curso_id', (int)$data['curso_id'], PDO::PARAM_INT);
             $st->bindValue(':grado_id', (int)$data['grado_id'], PDO::PARAM_INT);
-            if ($data['institucion_id'] === null) {
+            
+            // Manejo seguro de unidad_numero
+            $unidad_numero = 1; // valor por defecto
+            if (isset($data['unidad_numero'])) {
+                $unidad_numero = (int)$data['unidad_numero'];
+                // Asegurar que está entre 1 y 4
+                if ($unidad_numero < 1 || $unidad_numero > 4) {
+                    $unidad_numero = 1;
+                }
+            }
+            $st->bindValue(':unidad_numero', $unidad_numero, PDO::PARAM_INT);
+            
+            // Manejo de institución
+            if (isset($data['institucion_id']) && $data['institucion_id'] === null) {
                 $st->bindValue(':institucion_id', null, PDO::PARAM_NULL);
             } else {
-                $st->bindValue(':institucion_id', (int)$data['institucion_id'], PDO::PARAM_INT);
+                $st->bindValue(':institucion_id', isset($data['institucion_id']) ? (int)$data['institucion_id'] : null, PDO::PARAM_INT);
             }
+            
+            // Otros valores
             $st->bindValue(':descripcion', $data['descripcion']);
             $st->bindValue(':fecha_inicio', $data['fecha_inicio']);
             $st->bindValue(':fecha_fin', $data['fecha_fin']);
             $st->bindValue(':estado', strtoupper($data['estado']));
             $st->bindValue(':id', (int)$id, PDO::PARAM_INT);
+            
             $st->execute();
             return true;
         } catch (Exception $e) {

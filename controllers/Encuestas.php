@@ -77,10 +77,19 @@ class EncuestasController
             $creado_por = 0;
             if (isset($_SESSION['user_id'])) { $creado_por = (int)$_SESSION['user_id']; }
 
+            $unidad_numero = 1;
+            if (isset($_POST['unidad_numero'])) { 
+                $unidad_numero = (int)$_POST['unidad_numero']; 
+                if ($unidad_numero < 1 || $unidad_numero > 4) { 
+                    $unidad_numero = 1; 
+                }
+            }
+
             $data = [
                 'titulo' => $titulo,
                 'curso_id' => $curso_id,
                 'grado_id' => $grado_id,
+                'unidad_numero' => $unidad_numero,
                 'institucion_id' => $institucion_id,
                 'descripcion' => $descripcion,
                 'fecha_inicio' => $fecha_inicio,
@@ -134,10 +143,19 @@ class EncuestasController
             $estado = 'ACTIVA';
             if (isset($_POST['estado'])) { $estado = strtoupper($_POST['estado']); }
 
+            $unidad_numero = 1;
+            if (isset($_POST['unidad_numero'])) { 
+                $unidad_numero = (int)$_POST['unidad_numero']; 
+                if ($unidad_numero < 1 || $unidad_numero > 4) { 
+                    $unidad_numero = 1; 
+                }
+            }
+
             $data = [
                 'titulo' => $titulo,
                 'curso_id' => $curso_id,
                 'grado_id' => $grado_id,
+                'unidad_numero' => $unidad_numero,
                 'institucion_id' => $institucion_id,
                 'descripcion' => $descripcion,
                 'fecha_inicio' => $fecha_inicio,
