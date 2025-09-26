@@ -384,7 +384,7 @@ include 'views/Menu/Aside.php';
       $.getJSON('?c=Preguntas&a=ListarEncuestas')
         .done(json => {
           if (json && json.success && Array.isArray(json.data)) {
-            const opts = json.data.map(e => `<option value="${e.id}">${escapeHtml(e.titulo)} (ID: ${e.id})</option>`);
+            const opts = json.data.map(e => `<option value="${e.id}">${escapeHtml(e.titulo)}</option>`);
             $sel.html(['<option value="">Seleccione una encuesta...</option>', ...opts].join(''));
           } else {
             $sel.html('<option value="">No se pudieron cargar</option>');
