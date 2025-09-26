@@ -1,4 +1,44 @@
-<!-- sidebar.html -->
+<!-- Estilos del menú responsivo -->
+<style>
+.menu-button {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1030;
+    padding: 0.5rem 1rem;
+    background-color: var(--bg-teal, #4f8f8a);
+    color: white;
+    border: none;
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.menu-button:hover {
+    background-color: var(--line, #2e655f);
+}
+
+.offcanvas {
+    max-width: 280px;
+}
+
+.offcanvas-backdrop.show {
+    opacity: 0.5;
+}
+
+@media (max-width: 767.98px) {
+    .main-content {
+        margin-left: 0 !important;
+        padding-top: 4rem;
+    }
+}
+</style>
+
+<!-- Botón menú móvil -->
+<div class="d-md-none">
+    <button class="menu-button" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-label="Abrir menú">
+        <i class="bi bi-list"></i> Menú
+    </button>
+</div>debar.html -->
 <!-- BotÃƒÆ’Ã‚Â³n menÃƒÆ’Ã‚Âº mÃƒÆ’Ã‚Â³vil -->
 <div class="container d-md-none mb-2">
   <button class="btn btn-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar">
@@ -58,7 +98,7 @@
 </aside>
 
 <!-- Offcanvas mÃƒÆ’Ã‚Â³vil -->
-<div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasSidebar">
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasSidebar" style="background-color: var(--bg-teal, #4f8f8a);">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title">Principal</h5>
     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
