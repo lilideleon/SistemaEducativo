@@ -31,7 +31,7 @@ include 'views/Menu/Aside.php';
       padding:.5rem .75rem; border-radius:.35rem; margin-bottom:.75rem; }
 
     section.main-content { margin-left:260px; width:calc(100% - 260px); padding:2rem; min-height:100vh; display:flex; flex-direction:column; }
-    .content-panel { flex:1; display:flex; flex-direction:column; min-height:0; background:#fff; border-radius:.5rem; padding:1.25rem; box-shadow:0 .125rem .25rem rgba(0,0,0,.075); }
+    .content-panel { flex:1; display:flex; flex-direction:column; min-height:0; background:#fff; border-radius:.5rem; padding:1.5rem; box-shadow:0 .125rem .25rem rgba(0,0,0,.075); }
     .page-title { background:#fff; color:var(--title); font-weight:700; border-radius:.25rem; display:inline-block; padding:.35rem 1.25rem; box-shadow:0 2px 0 rgba(0,0,0,.25) inset; }
 
     .wrap { border:2px solid var(--line); border-radius:.5rem; background:rgba(79,143,138,.15); padding:1rem; }
@@ -45,36 +45,16 @@ include 'views/Menu/Aside.php';
 
     .table-wrap { max-height:260px; overflow:auto; border:1px solid #e8eef0; border-radius:.5rem; }
 
-    @media (max-width: 767.98px) {
-      .sidebar { display:none; }
-      section.main-content { margin-left:0 !important; width:100% !important; padding:1rem !important; }
-    }
-  </style>
-
-    <style>
-    :root{ --bg-teal:#4f8f8a; --sidebar-header:#a8c0bb; }
-    html,body{height:100%;margin:0}
-    body{background-color:var(--bg-teal);display:flex;flex-direction:column}
-    .app-wrapper{display:flex;flex:1;height:100vh}
-    .sidebar{width:260px;height:100vh;position:fixed;left:0;top:0;overflow-y:auto;background:#50938a;padding:1rem;box-shadow:2px 0 5px rgba(0,0,0,.1);z-index:1000}
-    .sidebar-box{background:rgba(255,255,255,.1);border-radius:.5rem;padding:.75rem}
-    .sidebar-header{background:var(--sidebar-header);color:#1f2937;font-weight:600;padding:.5rem .75rem;border-radius:.35rem;margin-bottom:.75rem}
     .btn-glow{border:0;border-radius:1rem;padding:.9rem 1.1rem;color:#fff;font-weight:700;background:
       radial-gradient(140% 120% at 50% 40%, rgba(255,255,255,.28) 0%, rgba(255,255,255,.08) 42%, rgba(0,0,0,.22) 75%),
       linear-gradient(180deg,#0f1c2e 0%,#1f3554 100%);box-shadow:0 8px 18px rgba(0,0,0,.25), inset 0 -2px 0 rgba(255,255,255,.1);
       transition:transform .12s ease, filter .12s ease; text-align:left}
     .btn-glow.active{outline:2px solid rgba(255,255,255,.35)}
 
-    /* contenido */
-    section.main-content{margin-left:260px;width:calc(100% - 260px);padding:2rem;min-height:100vh;display:flex;flex-direction:column}
-    .content-panel{flex:1;background:#fff;border-radius:.5rem;padding:1.5rem;box-shadow:0 .125rem .25rem rgba(0,0,0,.075)}
-
-    /* móvil: sin sidebar fijo */
-    @media (max-width:767.98px){
-      section.main-content{margin-left:0 !important;width:100% !important;padding:1rem !important;min-height:calc(100vh - 56px)}
+    @media (max-width: 767.98px) {
+      .sidebar { display:none; }
+      section.main-content { margin-left:0 !important; width:100% !important; padding:1rem !important; min-height:calc(100vh - 56px); }
     }
-
-    /* Si NO quieres sidebar en alguna página, añade class="no-sidebar" al body */
     body.no-sidebar section.main-content{margin-left:0;width:100%}
   </style>
 </head>
