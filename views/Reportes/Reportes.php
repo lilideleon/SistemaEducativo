@@ -145,10 +145,37 @@
 
       <div class="content-panel">
         <div class="gwrap">
-   
-        
-
-
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                  <div class="mb-3">
+                    <i class="bi bi-speedometer2 text-primary" style="font-size: 3rem;"></i>
+                  </div>
+                  <h5 class="card-title text-dark mb-2">Dashboard</h5>
+                  <p class="card-text text-muted mb-3">Visualiza métricas y estadísticas en tiempo real del sistema educativo</p>
+                  <a href="?c=Reportes&a=dashboard" class="btn btn-primary btn-lg w-100">
+                    <i class="bi bi-bar-chart-line me-2"></i>Ver Dashboard
+                  </a>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                  <div class="mb-3">
+                    <i class="bi bi-printer text-success" style="font-size: 3rem;"></i>
+                  </div>
+                  <h5 class="card-title text-dark mb-2">Reportes Impresos</h5>
+                  <p class="card-text text-muted mb-3">Genera y descarga reportes en formato PDF para impresión</p>
+                  <a href="?c=Reportes&a=impresos" class="btn btn-success btn-lg w-100">
+                    <i class="bi bi-file-earmark-pdf me-2"></i>Ver Reportes
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div class="divider-foot mt-3"></div>
         </div>

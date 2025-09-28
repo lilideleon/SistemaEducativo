@@ -183,4 +183,41 @@ class ReportesController {
         echo '</table>';
         exit;
     }
+
+    public function dashboard() {
+        try {
+            error_log("=== CONTROLADOR: Dashboard iniciado ===");
+            $cursosGrados = $this->modelo->obtenerCursosYGrados();
+            
+            // Obtener mejoresAlumnos con debugging
+            error_log("CONTROLADOR: Obteniendo mejores alumnos...");
+            $mejoresAlumnos = $this->modelo->obtenerMejoresAlumnos();
+            error_log("CONTROLADOR: Mejores alumnos obtenidos: " . json_encode($mejoresAlumnos));
+            
+            $data = [
+                'totalUsuarios' => $this->modelo->contarUsuarios(),
+                'totalInstituciones' => $this->modelo->contarInstituciones(),
+                'totalEncuestas' => $this->modelo->contarEncuestas(),
+                'totalCalificaciones' => $this->modelo->contarCalificaciones(),
+                'usuariosPorRol' => $this->modelo->obtenerUsuariosPorRol(),
+                'institucionesPorDistrito' => $this->modelo->obtenerInstitucionesPorDistrito(),
+                'encuestasPorEstado' => $this->modelo->obtenerEncuestasPorEstado(),
+                'promedioCalificaciones' => $this->modelo->obtenerPromedioCalificaciones(),
+                'promediosPorInstitucion' => $this->modelo->obtenerPromediosPorInstitucion(),
+                'mejoresAlumnos' => $mejoresAlumnos,
+                'cursos' => $cursosGrados['cursos'],
+                'grados' => $cursosGrados['grados'],
+                'actividadReciente' => $this->modelo->obtenerActividadReciente()
+            ];
+            
+            error_log("CONTROLADOR: Data completa preparada, mejoresAlumnos count: " . count($mejoresAlumnos));
+            
+            // Extraer variables para la vista
+            extract($data);
+            require_once "views/Reportes/Dashboard.php";
+        } catch (Exception $e) {
+            error_log("ERROR en dashboard: " . $e->getMessage());
+            echo "Error: " . $e->getMessage();
+        }
+    }
 }
