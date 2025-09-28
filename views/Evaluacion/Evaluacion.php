@@ -372,8 +372,8 @@
               preguntas = json.data || [];
               idx = 0;
               // Configurar tiempos por pregunta de forma equitativa (1 hora / total de preguntas)
-              // Tiempo fijo por pregunta: 5 minutos = 300 segundos
-              perQuestionSeconds = 300;
+              // Tiempo fijo por pregunta: 3 minutos = 180 segundos
+              perQuestionSeconds = 180;
               perRemaining = perQuestionSeconds;
               // Iniciar timers
               totalTimer = setInterval(()=>{
