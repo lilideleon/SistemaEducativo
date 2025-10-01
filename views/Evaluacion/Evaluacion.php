@@ -128,6 +128,59 @@
       section.main-content{margin-left:0 !important;width:100% !important;padding:1rem !important}
       .gform-card{margin:.5rem auto}
     }
+
+    /* ================= UI enhancements for encuestas (scoped) ================= */
+    /* Toolbar select */
+    .gform-toolbar label{ color:#0d3b35 }
+    #encuesta_id.form-select{
+      border-radius:10px; border-color:rgba(0,0,0,.15);
+      transition: box-shadow .15s ease, border-color .15s ease;
+    }
+    #encuesta_id.form-select:focus{
+      border-color:#15a085; box-shadow:0 0 0 .2rem rgba(21,160,133,.15)
+    }
+
+    /* Card */
+    .gform-card{
+      border:1px solid rgba(17,120,103,.10);
+      background: linear-gradient(180deg,#ffffff 0%, #fbfefe 100%);
+    }
+    .gform-title{
+      color:#0f2f2c; text-decoration:none; letter-spacing:.2px;
+    }
+    .gform-subtle{ color:#2c5a56 }
+
+    /* Question block */
+    .gq{ gap:1rem; padding:1rem .5rem; border-top: none; border-bottom:1px dashed #e1efed }
+    .gq:last-child{ border-bottom:0 }
+    .gq-number{
+      width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+      color:#0b4f44;background:rgba(17,120,103,.08);font-weight:700
+    }
+    .gq-statement{ color:#0e2d2b; font-weight:600 }
+
+    /* Options */
+    .gq .form-check{ padding:.35rem .5rem; border-radius:8px; transition: background-color .12s ease }
+    .gq .form-check:hover{ background:#f6fbfa }
+    .gq .form-check-input{ width:1.1em;height:1.1em; margin-top:.25em; accent-color:#117867 }
+    .gq .form-check-label{ margin-left:.25rem }
+    .gq textarea.form-control, .gq input[type="number"].form-control{ border-radius:10px }
+    .gq textarea.form-control:focus, .gq input[type="number"].form-control:focus{ border-color:#15a085; box-shadow:0 0 0 .2rem rgba(21,160,133,.12) }
+
+    /* Next button */
+    .link-next{
+      background: linear-gradient(135deg,#117867,#15a085);
+      border:0; color:#fff; font-weight:700; border-radius:10px;
+      box-shadow:0 8px 18px rgba(17,120,103,.25);
+    }
+    .link-next:hover{ filter:brightness(1.03); transform: translateY(-1px) }
+
+    /* Timers */
+    .timer-badge{ background: linear-gradient(180deg,#102536,#1f3b58) !important }
+
+    /* Modal result table */
+    #resultadoModal .table thead th{ background:#0f1c2e; color:#fff; border-color:#14253f }
+    #resultadoModal .table tbody tr:hover{ background:#f7fbfa }
   </style>
 </head>
 <body>
