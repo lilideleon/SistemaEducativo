@@ -34,6 +34,29 @@
     section.main-content{margin-left:260px;width:calc(100% - 260px);padding:2rem;min-height:100vh;display:flex;flex-direction:column}
     .content-panel{flex:1;background:#fff;border-radius:.5rem;padding:1.5rem;box-shadow:0 .125rem .25rem rgba(0,0,0,.075)}
     .table-wrap{background:#fff;border-radius:.5rem;border:1px solid rgba(0,0,0,.1)}
+    /* ===== Enhancements (scoped to this page) ===== */
+    #cursoFiltro.form-select{ border-radius:.5rem; border-color:rgba(0,0,0,.15) }
+    #cursoFiltro.form-select:focus{ border-color:#0f766e; box-shadow:0 0 0 .2rem rgba(15,118,110,.15) }
+    #btnFiltrar.btn{ border-radius:.5rem }
+
+    #tblPubAlu thead th{
+      background: linear-gradient(180deg,#0f1c2e,#1f3554);
+      color:#fff; border-color:#14253f;
+    }
+    #tblPubAlu tbody tr:hover{ background:#f6fbfa }
+    #tblPubAlu td:nth-child(3), /* Curso */
+    #tblPubAlu td:nth-child(4), /* Grado */
+    #tblPubAlu td:nth-child(5){ /* Unidad */
+      white-space: nowrap;
+    }
+    .badge-soft{ display:inline-block; padding:.2rem .45rem; border-radius:999px; font-size:.8rem; font-weight:600 }
+    .badge-soft-green{ background:rgba(17,120,103,.10); color:#0b4f44 }
+    .badge-soft-blue{ background:#eef5ff; color:#204a7a }
+    .badge-soft-gray{ background:#f4f6f8; color:#374151 }
+
+    /* Acciones de archivos */
+    .action-icon{ display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:8px; color:#1f3554; text-decoration:none; transition:background-color .12s ease }
+    .action-icon:hover{ background:#eef5fb }
   </style>
 </head>
 <body>
@@ -66,7 +89,7 @@
         </div>
 
         <div class="table-wrap">
-          <table class="table table-sm table-bordered mb-0" id="tblPubAlu">
+          <table class="table table-sm table-bordered table-striped table-hover align-middle mb-0" id="tblPubAlu">
             <thead>
               <tr>
                 <th>ID</th>
@@ -131,12 +154,19 @@
         <tr>
           <td>${p.id}</td>
           <td>${p.titulo}</td>
-          <td>${p.curso_nombre||''}</td>
-          <td>${p.grado_nombre||''}</td>
-          <td>Unidad ${p.unidad_numero||'-'}</td>
+          <td>${p.curso_nombre ? `<span class="badge-soft badge-soft-blue">${p.curso_nombre}</span>` : ''}</td>
+          <td>${p.grado_nombre ? `<span class="badge-soft badge-soft-gray">${p.grado_nombre}</span>` : ''}</td>
+          <td>${p.unidad_numero ? `<span class=\"badge-soft badge-soft-green\">Unidad ${p.unidad_numero}</span>` : '-'}</td>
           <td>${p.institucion_nombre||''}</td>
           <td>${p.publicado_at ? new Date(p.publicado_at).toLocaleString() : ''}</td>
-          <td>${(p.archivos||[]).map(a=>`<a class='me-2' href='${a.url}' target='_blank' title='Ver'><i class='bi bi-eye'></i></a><a class='me-2' href='${a.url}' download='${a.nombre_archivo}' title='Descargar'><i class='bi bi-download'></i></a>`).join('')}</td>
+          <td>${(p.archivos||[]).map(a=>`
+              <a class='action-icon me-1' href='${a.url}' target='_blank' title='Ver' aria-label='Ver'>
+                <i class='bi bi-eye'></i>
+              </a>
+              <a class='action-icon me-1' href='${a.url}' download='${a.nombre_archivo}' title='Descargar' aria-label='Descargar'>
+                <i class='bi bi-download'></i>
+              </a>`).join('')}
+          </td>
         </tr>`).join('');
 
       // Inicializar DataTable
