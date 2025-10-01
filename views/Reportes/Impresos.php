@@ -114,6 +114,63 @@
       z-index: 10;
     }
 
+    /* Stats cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-icon i {
+      font-size: 1.75rem;
+      color: white;
+    }
+
+    .stat-info {
+      flex: 1;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #2d3748;
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: #718096;
+      margin-top: 0.25rem;
+    }
+
     /* Cards de reportes */
     .reports-grid {
       display: grid;
@@ -212,10 +269,11 @@
 
     .report-actions {
       display: flex;
-      gap: 0.75rem;
+      gap: 0.5rem;
+      flex-direction: column;
     }
 
-    .btn-generate {
+    .btn-generate, .btn-excel {
       flex: 1;
       padding: 0.875rem 1.5rem;
       border: none;
@@ -228,10 +286,13 @@
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      background: var(--card-gradient, var(--primary-gradient));
-      color: white;
       text-decoration: none;
       box-shadow: var(--shadow-sm);
+    }
+
+    .btn-generate {
+      background: var(--card-gradient, var(--primary-gradient));
+      color: white;
     }
 
     .btn-generate:hover {
@@ -240,23 +301,16 @@
       color: white;
     }
 
-    .btn-preview {
-      padding: 0.875rem;
-      border: 2px solid #e2e8f0;
-      border-radius: 12px;
-      background: white;
-      color: #718096;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+    .btn-excel {
+      background: linear-gradient(135deg, #1D6F42 0%, #165C36 100%);
+      color: white;
     }
 
-    .btn-preview:hover {
-      background: #f7fafc;
-      border-color: #cbd5e0;
-      color: #2d3748;
+    .btn-excel:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      color: white;
+      background: linear-gradient(135deg, #165C36 0%, #0F4527 100%);
     }
 
     /* Sección de filtros rápidos */
@@ -471,7 +525,10 @@
       <h1 class="page-title">
         <i class="bi bi-file-earmark-text me-3"></i>Reportes Impresos
       </h1>
-      
+      <p class="page-subtitle">
+        <i class="bi bi-info-circle me-2"></i>
+        Genera y descarga reportes en PDF o Excel con información actualizada del sistema
+      </p>
     </div>
   </div>
 
@@ -480,7 +537,45 @@
     
     <!-- Stats Cards -->
     <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #117867 0%, #0d5d52 100%);">
+          <i class="bi bi-file-earmark-text"></i>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">5</div>
+          <div class="stat-label">Tipos de Reportes</div>
+        </div>
+      </div>
       
+      <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);">
+          <i class="bi bi-download"></i>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">PDF & Excel</div>
+          <div class="stat-label">Formatos Disponibles</div>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);">
+          <i class="bi bi-lightning"></i>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">Rápido</div>
+          <div class="stat-label">Generación Instantánea</div>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #48c9b0 0%, #1abc9c 100%);">
+          <i class="bi bi-shield-check"></i>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">Seguro</div>
+          <div class="stat-label">Datos Protegidos</div>
+        </div>
+      </div>
     </div>
 
     <!-- Filtros Rápidos -->
@@ -518,11 +613,10 @@
         </div>
 
         <div class="filter-item">
-          <label class="filter-label">Formato</label>
-          <select class="filter-select">
-            <option>PDF (Recomendado)</option>
-            <option>Excel (.xlsx)</option>
-            <option>CSV</option>
+          <label class="filter-label">Formato de Exportación</label>
+          <select class="filter-select" id="filtroFormato">
+            <option value="pdf">PDF (Recomendado)</option>
+            <option value="excel">Excel (.xls)</option>
           </select>
         </div>
 
@@ -564,12 +658,13 @@
         </div>
         <div class="report-actions">
           <a href="?c=Reportes&a=generarPDFUsuarios" class="btn-generate" target="_blank">
-            <i class="bi bi-download"></i>
-            Generar Reporte
+            <i class="bi bi-file-pdf"></i>
+            Descargar PDF
           </a>
-          <button class="btn-preview" title="Vista previa">
-            <i class="bi bi-eye"></i>
-          </button>
+          <a href="?c=Reportes&a=generarExcelUsuarios" class="btn-excel" target="_blank">
+            <i class="bi bi-file-excel"></i>
+            Descargar Excel
+          </a>
         </div>
       </div>
 
@@ -599,12 +694,13 @@
         </div>
         <div class="report-actions">
           <a href="?c=Reportes&a=generarPDFInstituciones" class="btn-generate" target="_blank">
-            <i class="bi bi-download"></i>
-            Generar Reporte
+            <i class="bi bi-file-pdf"></i>
+            Descargar PDF
           </a>
-          <button class="btn-preview" title="Vista previa">
-            <i class="bi bi-eye"></i>
-          </button>
+          <a href="?c=Reportes&a=generarExcelInstituciones" class="btn-excel" target="_blank">
+            <i class="bi bi-file-excel"></i>
+            Descargar Excel
+          </a>
         </div>
       </div>
 
@@ -634,12 +730,13 @@
         </div>
         <div class="report-actions">
           <a href="?c=Reportes&a=generarPDFCalificaciones" class="btn-generate" target="_blank">
-            <i class="bi bi-download"></i>
-            Generar Reporte
+            <i class="bi bi-file-pdf"></i>
+            Descargar PDF
           </a>
-          <button class="btn-preview" title="Vista previa">
-            <i class="bi bi-eye"></i>
-          </button>
+          <a href="?c=Reportes&a=generarExcelCalificaciones" class="btn-excel" target="_blank">
+            <i class="bi bi-file-excel"></i>
+            Descargar Excel
+          </a>
         </div>
       </div>
 
@@ -669,12 +766,13 @@
         </div>
         <div class="report-actions">
           <a href="?c=Reportes&a=generarPDFDistritos" class="btn-generate" target="_blank">
-            <i class="bi bi-download"></i>
-            Generar Reporte
+            <i class="bi bi-file-pdf"></i>
+            Descargar PDF
           </a>
-          <button class="btn-preview" title="Vista previa">
-            <i class="bi bi-eye"></i>
-          </button>
+          <a href="?c=Reportes&a=generarExcelDistritos" class="btn-excel" target="_blank">
+            <i class="bi bi-file-excel"></i>
+            Descargar Excel
+          </a>
         </div>
       </div>
 
@@ -704,12 +802,13 @@
         </div>
         <div class="report-actions">
           <a href="?c=Reportes&a=generarPDFResumenAcademico" class="btn-generate" target="_blank">
-            <i class="bi bi-download"></i>
-            Generar Reporte
+            <i class="bi bi-file-pdf"></i>
+            Descargar PDF
           </a>
-          <button class="btn-preview" title="Vista previa">
-            <i class="bi bi-eye"></i>
-          </button>
+          <a href="?c=Reportes&a=generarExcelResumenAcademico" class="btn-excel" target="_blank">
+            <i class="bi bi-file-excel"></i>
+            Descargar Excel
+          </a>
         </div>
       </div>
 

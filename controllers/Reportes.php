@@ -661,6 +661,334 @@ class ReportesController {
             echo "Error al generar PDF: " . $e->getMessage();
         }
     }
+
+    // ==================== MÉTODOS PARA GENERAR EXCEL ====================
+
+    public function generarExcelUsuarios() {
+        try {
+            $filtros = [
+                'rol' => isset($_GET['rol']) ? $_GET['rol'] : '',
+                'institucion_id' => isset($_GET['institucion_id']) ? $_GET['institucion_id'] : '',
+                'activo' => isset($_GET['activo']) ? $_GET['activo'] : ''
+            ];
+
+            $usuarios = $this->modelo->obtenerUsuarios($filtros);
+
+            header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
+            header("Content-Disposition: attachment; filename=Reporte_Usuarios_" . date('Ymd_His') . ".xls");
+            header("Pragma: no-cache");
+            header("Expires: 0");
+
+            echo "\xEF\xBB\xBF"; // UTF-8 BOM
+
+            echo '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
+            echo '<head>';
+            echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">';
+            echo '<xml>';
+            echo '<x:ExcelWorkbook>';
+            echo '<x:ExcelWorksheets>';
+            echo '<x:ExcelWorksheet>';
+            echo '<x:Name>Usuarios</x:Name>';
+            echo '<x:WorksheetOptions>';
+            echo '<x:Print><x:ValidPrinterInfo/></x:Print>';
+            echo '</x:WorksheetOptions>';
+            echo '</x:ExcelWorksheet>';
+            echo '</x:ExcelWorksheets>';
+            echo '</x:ExcelWorkbook>';
+            echo '</xml>';
+            echo '</head>';
+            echo '<body>';
+            echo '<table border="1">';
+            echo '<tr style="background-color: #117867; color: white; font-weight: bold;">';
+            echo '<td colspan="8" style="text-align: center; font-size: 16px; padding: 10px;">REPORTE DE USUARIOS</td>';
+            echo '</tr>';
+            echo '<tr style="background-color: #117867; color: white; font-weight: bold;">';
+            echo '<td>Código</td>';
+            echo '<td>Nombre Completo</td>';
+            echo '<td>Email</td>';
+            echo '<td>Rol</td>';
+            echo '<td>Institución</td>';
+            echo '<td>Grado</td>';
+            echo '<td>Estado</td>';
+            echo '<td>Fecha Registro</td>';
+            echo '</tr>';
+
+            foreach($usuarios as $usuario) {
+                echo '<tr>';
+                echo '<td>' . htmlspecialchars($usuario->codigo) . '</td>';
+                echo '<td>' . htmlspecialchars($usuario->nombre_completo) . '</td>';
+                echo '<td>' . htmlspecialchars($usuario->email) . '</td>';
+                echo '<td>' . htmlspecialchars($usuario->rol) . '</td>';
+                echo '<td>' . htmlspecialchars($usuario->institucion) . '</td>';
+                echo '<td>' . htmlspecialchars($usuario->grado) . '</td>';
+                echo '<td>' . ($usuario->activo == 1 ? 'Activo' : 'Inactivo') . '</td>';
+                echo '<td>' . date('d/m/Y', strtotime($usuario->fecha_registro)) . '</td>';
+                echo '</tr>';
+            }
+
+            echo '<tr style="background-color: #f0f0f0; font-weight: bold;">';
+            echo '<td colspan="8">Total de registros: ' . count($usuarios) . '</td>';
+            echo '</tr>';
+            echo '</table>';
+            echo '</body>';
+            echo '</html>';
+            exit;
+
+        } catch (Exception $e) {
+            echo "Error al generar Excel: " . $e->getMessage();
+        }
+    }
+
+    public function generarExcelInstituciones() {
+        try {
+            $instituciones = $this->modelo->obtenerInstituciones();
+
+            header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
+            header("Content-Disposition: attachment; filename=Reporte_Instituciones_" . date('Ymd_His') . ".xls");
+            header("Pragma: no-cache");
+            header("Expires: 0");
+
+            echo "\xEF\xBB\xBF";
+
+            echo '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
+            echo '<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head>';
+            echo '<body>';
+            echo '<table border="1">';
+            echo '<tr style="background-color: #15a085; color: white; font-weight: bold;">';
+            echo '<td colspan="6" style="text-align: center; font-size: 16px; padding: 10px;">REPORTE DE INSTITUCIONES</td>';
+            echo '</tr>';
+            echo '<tr style="background-color: #15a085; color: white; font-weight: bold;">';
+            echo '<td>ID</td>';
+            echo '<td>Nombre</td>';
+            echo '<td>Dirección</td>';
+            echo '<td>Teléfono</td>';
+            echo '<td>Email</td>';
+            echo '<td>Tipo</td>';
+            echo '</tr>';
+
+            foreach($instituciones as $inst) {
+                echo '<tr>';
+                echo '<td>' . $inst->id . '</td>';
+                echo '<td>' . htmlspecialchars($inst->nombre) . '</td>';
+                echo '<td>' . htmlspecialchars($inst->direccion) . '</td>';
+                echo '<td>' . htmlspecialchars($inst->telefono) . '</td>';
+                echo '<td>' . htmlspecialchars($inst->email) . '</td>';
+                echo '<td>' . htmlspecialchars($inst->tipo) . '</td>';
+                echo '</tr>';
+            }
+
+            echo '<tr style="background-color: #f0f0f0; font-weight: bold;">';
+            echo '<td colspan="6">Total de instituciones: ' . count($instituciones) . '</td>';
+            echo '</tr>';
+            echo '</table>';
+            echo '</body>';
+            echo '</html>';
+            exit;
+
+        } catch (Exception $e) {
+            echo "Error al generar Excel: " . $e->getMessage();
+        }
+    }
+
+    public function generarExcelCalificaciones() {
+        try {
+            $filtros = [
+                'institucion_id' => isset($_GET['institucion_id']) ? $_GET['institucion_id'] : '',
+                'curso_id' => isset($_GET['curso_id']) ? $_GET['curso_id'] : '',
+                'grado_id' => isset($_GET['grado_id']) ? $_GET['grado_id'] : ''
+            ];
+
+            $calificaciones = $this->modelo->obtenerCalificaciones($filtros);
+
+            header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
+            header("Content-Disposition: attachment; filename=Reporte_Calificaciones_" . date('Ymd_His') . ".xls");
+            header("Pragma: no-cache");
+            header("Expires: 0");
+
+            echo "\xEF\xBB\xBF";
+
+            echo '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
+            echo '<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head>';
+            echo '<body>';
+            echo '<table border="1">';
+            echo '<tr style="background-color: #1abc9c; color: white; font-weight: bold;">';
+            echo '<td colspan="7" style="text-align: center; font-size: 16px; padding: 10px;">REPORTE DE CALIFICACIONES</td>';
+            echo '</tr>';
+            echo '<tr style="background-color: #1abc9c; color: white; font-weight: bold;">';
+            echo '<td>Alumno</td>';
+            echo '<td>Curso</td>';
+            echo '<td>Grado</td>';
+            echo '<td>Institución</td>';
+            echo '<td>Puntaje</td>';
+            echo '<td>Nota</td>';
+            echo '<td>Fecha</td>';
+            echo '</tr>';
+
+            foreach($calificaciones as $calif) {
+                echo '<tr>';
+                echo '<td>' . htmlspecialchars($calif->alumno) . '</td>';
+                echo '<td>' . htmlspecialchars($calif->curso) . '</td>';
+                echo '<td>' . htmlspecialchars($calif->grado) . '</td>';
+                echo '<td>' . htmlspecialchars($calif->institucion) . '</td>';
+                echo '<td>' . number_format($calif->puntaje, 2) . '</td>';
+                echo '<td>' . number_format($calif->nota, 2) . '</td>';
+                echo '<td>' . date('d/m/Y', strtotime($calif->fecha_registro)) . '</td>';
+                echo '</tr>';
+            }
+
+            echo '<tr style="background-color: #f0f0f0; font-weight: bold;">';
+            echo '<td colspan="7">Total de calificaciones: ' . count($calificaciones) . '</td>';
+            echo '</tr>';
+            echo '</table>';
+            echo '</body>';
+            echo '</html>';
+            exit;
+
+        } catch (Exception $e) {
+            echo "Error al generar Excel: " . $e->getMessage();
+        }
+    }
+
+    public function generarExcelDistritos() {
+        try {
+            $filtros = ['distrito_id' => isset($_GET['distrito_id']) ? $_GET['distrito_id'] : ''];
+            $datos = $this->modelo->obtenerInstitucionesPorDistritoDetallado($filtros);
+
+            header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
+            header("Content-Disposition: attachment; filename=Reporte_Distritos_" . date('Ymd_His') . ".xls");
+            header("Pragma: no-cache");
+            header("Expires: 0");
+
+            echo "\xEF\xBB\xBF";
+
+            echo '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
+            echo '<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head>';
+            echo '<body>';
+            echo '<table border="1">';
+            echo '<tr style="background-color: #0b4f44; color: white; font-weight: bold;">';
+            echo '<td colspan="7" style="text-align: center; font-size: 16px; padding: 10px;">REPORTE POR DISTRITO</td>';
+            echo '</tr>';
+            echo '<tr style="background-color: #0b4f44; color: white; font-weight: bold;">';
+            echo '<td>Distrito</td>';
+            echo '<td>Institución</td>';
+            echo '<td>Tipo</td>';
+            echo '<td>Total Usuarios</td>';
+            echo '<td>Total Alumnos</td>';
+            echo '<td>Total Docentes</td>';
+            echo '<td>Promedio</td>';
+            echo '</tr>';
+
+            foreach($datos as $dato) {
+                echo '<tr>';
+                echo '<td>' . htmlspecialchars($dato->distrito) . '</td>';
+                echo '<td>' . htmlspecialchars($dato->institucion) . '</td>';
+                $tipo_value = isset($dato->tipo) ? $dato->tipo : 'N/D';
+                echo '<td>' . htmlspecialchars($tipo_value) . '</td>';
+                echo '<td>' . $dato->total_usuarios . '</td>';
+                echo '<td>' . $dato->total_alumnos . '</td>';
+                echo '<td>' . $dato->total_docentes . '</td>';
+                $promedio = $dato->promedio_institucion > 0 ? number_format($dato->promedio_institucion, 2) : 'N/D';
+                echo '<td>' . $promedio . '</td>';
+                echo '</tr>';
+            }
+
+            echo '<tr style="background-color: #f0f0f0; font-weight: bold;">';
+            echo '<td colspan="7">Total de registros: ' . count($datos) . '</td>';
+            echo '</tr>';
+            echo '</table>';
+            echo '</body>';
+            echo '</html>';
+            exit;
+
+        } catch (Exception $e) {
+            echo "Error al generar Excel: " . $e->getMessage();
+        }
+    }
+
+    public function generarExcelResumenAcademico() {
+        try {
+            $filtros = [
+                'institucion_id' => isset($_GET['institucion_id']) ? $_GET['institucion_id'] : '',
+                'distrito_id' => isset($_GET['distrito_id']) ? $_GET['distrito_id'] : ''
+            ];
+            $resumen = $this->modelo->obtenerResumenAcademicoDetallado($filtros);
+
+            header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
+            header("Content-Disposition: attachment; filename=Reporte_Resumen_Academico_" . date('Ymd_His') . ".xls");
+            header("Pragma: no-cache");
+            header("Expires: 0");
+
+            echo "\xEF\xBB\xBF";
+
+            echo '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
+            echo '<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head>';
+            echo '<body>';
+            echo '<table border="1">';
+            echo '<tr style="background-color: #48c9b0; color: white; font-weight: bold;">';
+            echo '<td colspan="9" style="text-align: center; font-size: 16px; padding: 10px;">RESUMEN ACADÉMICO</td>';
+            echo '</tr>';
+            echo '<tr style="background-color: #48c9b0; color: white; font-weight: bold;">';
+            echo '<td>Institución</td>';
+            echo '<td>Distrito</td>';
+            echo '<td>Alumnos</td>';
+            echo '<td>Docentes</td>';
+            echo '<td>Directores</td>';
+            echo '<td>Total Usuarios</td>';
+            echo '<td>Calificaciones</td>';
+            echo '<td>Promedio</td>';
+            echo '<td>Encuestas</td>';
+            echo '</tr>';
+
+            $totales = [
+                'alumnos' => 0,
+                'docentes' => 0,
+                'directores' => 0,
+                'usuarios' => 0,
+                'calificaciones' => 0,
+                'encuestas' => 0
+            ];
+
+            foreach($resumen as $res) {
+                echo '<tr>';
+                echo '<td>' . htmlspecialchars($res->institucion) . '</td>';
+                $distrito_value = isset($res->distrito) ? $res->distrito : 'N/D';
+                echo '<td>' . htmlspecialchars($distrito_value) . '</td>';
+                echo '<td>' . $res->total_alumnos . '</td>';
+                echo '<td>' . $res->total_docentes . '</td>';
+                echo '<td>' . $res->total_directores . '</td>';
+                echo '<td>' . $res->total_usuarios . '</td>';
+                echo '<td>' . $res->total_calificaciones . '</td>';
+                echo '<td>' . number_format($res->promedio_general, 2) . '</td>';
+                echo '<td>' . $res->total_encuestas . '</td>';
+                echo '</tr>';
+
+                $totales['alumnos'] += $res->total_alumnos;
+                $totales['docentes'] += $res->total_docentes;
+                $totales['directores'] += $res->total_directores;
+                $totales['usuarios'] += $res->total_usuarios;
+                $totales['calificaciones'] += $res->total_calificaciones;
+                $totales['encuestas'] += $res->total_encuestas;
+            }
+
+            echo '<tr style="background-color: #48c9b0; color: white; font-weight: bold;">';
+            echo '<td colspan="2">TOTALES</td>';
+            echo '<td>' . $totales['alumnos'] . '</td>';
+            echo '<td>' . $totales['docentes'] . '</td>';
+            echo '<td>' . $totales['directores'] . '</td>';
+            echo '<td>' . $totales['usuarios'] . '</td>';
+            echo '<td>' . $totales['calificaciones'] . '</td>';
+            echo '<td>-</td>';
+            echo '<td>' . $totales['encuestas'] . '</td>';
+            echo '</tr>';
+            echo '</table>';
+            echo '</body>';
+            echo '</html>';
+            exit;
+
+        } catch (Exception $e) {
+            echo "Error al generar Excel: " . $e->getMessage();
+        }
+    }
 }
 
 // ==================== CLASES PERSONALIZADAS PARA PDFs ====================
