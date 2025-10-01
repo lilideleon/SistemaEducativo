@@ -39,6 +39,50 @@
 
     /* Si NO quieres sidebar en alguna página, añade class="no-sidebar" al body */
     body.no-sidebar section.main-content{margin-left:0;width:100%}
+
+    /* ===== Enhancements scoped to this page ===== */
+    /* Form controls */
+    #frmAlumno .form-control, #frmAlumno .form-select{
+      border-radius: .5rem;
+      border-color: rgba(0,0,0,.15);
+      transition: box-shadow .15s ease, border-color .15s ease;
+    }
+    #frmAlumno .form-control:focus, #frmAlumno .form-select:focus{
+      border-color: #0f766e;
+      box-shadow: 0 0 0 .2rem rgba(15,118,110,.15);
+    }
+    #frmAlumno .input-group .btn{
+      border-radius: .5rem;
+    }
+    .btn-registrar{
+      border: 0; border-radius: .6rem; padding: .5rem 1rem; font-weight: 700; color: #fff;
+      background: linear-gradient(135deg,#117867,#15a085);
+      box-shadow: 0 8px 18px rgba(17,120,103,.25);
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .btn-registrar:hover{ transform: translateY(-1px); box-shadow: 0 10px 22px rgba(17,120,103,.3) }
+
+    /* DataTable styling */
+    #tblAlumnos{
+      border-color: rgba(0,0,0,.08);
+    }
+    #tblAlumnos thead th{
+      background: linear-gradient(180deg,#0f1c2e,#1f3554);
+      color: #fff; border-color: #14253f;
+    }
+    #tblAlumnos tbody tr:hover{ background: #f5faf9 }
+    #tblAlumnos.table > :not(caption) > * > *{ vertical-align: middle }
+    #tblAlumnos td:nth-child(7){ /* Rol */
+      font-weight: 600; color: #0b4f44; background: rgba(17,120,103,.06);
+    }
+
+    /* DataTables buttons look */
+    .dt-buttons .btn{
+      border: 0; border-radius: .5rem; font-weight: 600; color: #fff;
+      background: linear-gradient(135deg,#0f1c2e,#1f3554);
+      box-shadow: 0 4px 10px rgba(0,0,0,.12);
+    }
+    .dt-buttons .btn:hover{ filter: brightness(1.05) }
   </style>
 </head>
 <body>

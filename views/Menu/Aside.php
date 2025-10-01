@@ -1,12 +1,12 @@
 <!-- Estilos del menú responsivo mejorado -->
 <style>
 :root {
-    --sidebar-width: 190px;
-    --sidebar-collapsed-width: 70px;
-    --sidebar-bg: linear-gradient(180deg, #117867 0%, #0d5d52 100%);
-    --sidebar-hover: rgba(255, 255, 255, 0.1);
-    --sidebar-active: rgba(255, 255, 255, 0.2);
-    --transition-speed: 0.3s;
+  --sidebar-width: 190px;
+  --sidebar-collapsed-width: 70px;
+  --sidebar-bg: linear-gradient(180deg, #117867 0%, #0d5d52 100%);
+  --sidebar-hover: rgba(255, 255, 255, 0.10);
+  --sidebar-active: rgba(255, 255, 255, 0.20);
+  --transition-speed: 0.3s;
 }
 
 /* Botón hamburguesa mejorado */
@@ -51,7 +51,7 @@
     height: 100vh;
     width: var(--sidebar-width);
     background: var(--sidebar-bg);
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.10);
     transition: transform var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 20000;
     overflow-y: auto;
@@ -98,10 +98,10 @@
 
 /* Header del sidebar */
 .sidebar-header {
-    padding: 4rem 1rem 1rem 1rem;
-    background: rgba(0, 0, 0, 0.1);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    transition: opacity var(--transition-speed) ease;
+  padding: 4rem 1rem 1rem 1rem;
+  background: rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  transition: opacity var(--transition-speed) ease;
 }
 
 .sidebar-header small {
@@ -126,50 +126,47 @@
 }
 
 .sidebar-box .d-grid {
-    padding: 1rem 0.85rem;
-    flex: 0 0 auto;
-    display: flex;
-    flex-direction: column;
+  padding: 1rem 0.85rem;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Espaciado mejorado para botones */
 .d-grid.gap-3 {
-    gap: 0.6rem !important;
+  gap: 0.75rem !important;
 }
 
-/* Botones mejorados */
+/* Botones con estilo de tarjeta (como antes) */
 .btn-glow {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: white !important;
-    padding: 0.6rem 0.85rem;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    font-weight: 500;
-    font-size: 0.875rem;
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-    overflow: hidden;
-    height: 44px;
-    max-height: 44px;
-    flex: 0 0 auto;
+  background:
+    radial-gradient(140% 120% at 50% 40%, rgba(255,255,255,.28) 0%, rgba(255,255,255,.08) 42%, rgba(0,0,0,.22) 75%),
+    linear-gradient(180deg,#0f1c2e 0%,#1f3554 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff !important;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  min-height: 44px;
+  height: auto;
+  box-shadow: 0 8px 18px rgba(0,0,0,.20), inset 0 -2px 0 rgba(255,255,255,.08);
 }
 
 .btn-glow:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateX(5px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateX(4px);
+  box-shadow: 0 10px 22px rgba(0,0,0,.25), inset 0 -2px 0 rgba(255,255,255,.1);
 }
 
 .btn-glow i {
-    font-size: 1rem;
-    transition: transform 0.3s ease;
-    min-width: 1rem;
-}
-
-.btn-glow:hover i {
-    transform: scale(1.15);
+  font-size: 1.05rem;
+  min-width: 1.05rem;
 }
 
 .sidebar-text {
@@ -261,18 +258,10 @@
     }
 }
 
-.btn-glow {
-    animation: slideIn 0.3s ease-out backwards;
-}
+/* mantener sin animaciones excesivas */
+/* .btn-glow { animation: none !important; } */
 
-.btn-glow:nth-child(1) { animation-delay: 0.05s; }
-.btn-glow:nth-child(2) { animation-delay: 0.1s; }
-.btn-glow:nth-child(3) { animation-delay: 0.15s; }
-.btn-glow:nth-child(4) { animation-delay: 0.2s; }
-.btn-glow:nth-child(5) { animation-delay: 0.25s; }
-.btn-glow:nth-child(6) { animation-delay: 0.3s; }
-.btn-glow:nth-child(7) { animation-delay: 0.35s; }
-.btn-glow:nth-child(8) { animation-delay: 0.4s; }
+/* eliminar retrasos de animación para estilo simple */
 </style>
 
 <!-- Botón hamburguesa universal -->
