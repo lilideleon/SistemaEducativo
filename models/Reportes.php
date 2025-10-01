@@ -156,11 +156,38 @@ class ReportesModel {
         }
     }
 
-    public function obtenerUsuariosPorRol() {
+    public function obtenerUsuariosPorRol($filtros = []) {
         try {
             $this->ConexionSql = $this->Conexion->CrearConexion();
-            $sql = "SELECT rol, COUNT(*) as total FROM usuarios WHERE activo = 1 GROUP BY rol ORDER BY total DESC";
-            $stmt = $this->ConexionSql->query($sql);
+            $sql = "SELECT rol, COUNT(*) as total FROM usuarios WHERE activo = 1";
+            $params = [];
+
+
+            if (!empty($filtros['institucion_id'])) {
+                $sql .= " AND institucion_id = ?";
+                $params[] = $filtros['institucion_id'];
+            }
+
+            if (!empty($filtros['grado_id'])) {
+                $sql .= " AND grado_id = ?";
+                $params[] = $filtros['grado_id'];
+            }
+
+            // Si se envía un array de roles, filtrar
+            if (!empty($filtros['roles']) && is_array($filtros['roles'])) {
+                // Construir placeholders y añadir al SQL
+                $placeholders = rtrim(str_repeat('?,', count($filtros['roles'])), ',');
+                $sql .= " AND rol IN ($placeholders)";
+                foreach ($filtros['roles'] as $r) $params[] = $r;
+            }
+
+            $sql .= " GROUP BY rol ORDER BY total DESC";
+            $stmt = $this->ConexionSql->prepare($sql);
+            if (!empty($params)) {
+                $stmt->execute($params);
+            } else {
+                $stmt->execute();
+            }
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             throw new Exception("Error al obtener usuarios por rol: " . $e->getMessage());
@@ -169,16 +196,29 @@ class ReportesModel {
         }
     }
 
-    public function obtenerInstitucionesPorDistrito() {
+    public function obtenerInstitucionesPorDistrito($filtros = []) {
         try {
             $this->ConexionSql = $this->Conexion->CrearConexion();
             $sql = "SELECT d.nombre as distrito, COUNT(i.id) as total 
                     FROM distritos d 
-                    LEFT JOIN instituciones i ON d.id = i.distrito_id 
-                    GROUP BY d.id, d.nombre 
+                    LEFT JOIN instituciones i ON d.id = i.distrito_id ";
+
+            $params = [];
+            if (!empty($filtros['institucion_id'])) {
+                $sql .= " WHERE i.id = ?";
+                $params[] = $filtros['institucion_id'];
+            }
+
+            $sql .= " GROUP BY d.id, d.nombre 
                     ORDER BY total DESC 
                     LIMIT 10";
-            $stmt = $this->ConexionSql->query($sql);
+
+            $stmt = $this->ConexionSql->prepare($sql);
+            if (!empty($params)) {
+                $stmt->execute($params);
+            } else {
+                $stmt->execute();
+            }
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             throw new Exception("Error al obtener instituciones por distrito: " . $e->getMessage());
@@ -263,10 +303,9 @@ class ReportesModel {
         }
     }
 
-    public function obtenerPromediosPorInstitucion() {
+    public function obtenerPromediosPorInstitucion($filtros = []) {
         try {
             $this->ConexionSql = $this->Conexion->CrearConexion();
-            
             $sql = "SELECT 
                         i.nombre as institucion,
                         AVG(c.puntaje) as promedio,
@@ -275,13 +314,50 @@ class ReportesModel {
                         MAX(c.puntaje) as max_puntaje
                     FROM calificaciones c 
                     INNER JOIN instituciones i ON c.institucion_id = i.id 
-                    WHERE c.activo = 1 
-                    GROUP BY c.institucion_id, i.nombre 
+                    WHERE c.activo = 1";
+
+            $params = [];
+            if (!empty($filtros['institucion_id'])) {
+                $sql .= " AND c.institucion_id = ?";
+                $params[] = $filtros['institucion_id'];
+            }
+
+            // Si se proporcionó periodo (rango o periodo exacto), usar la columna period o la columna `periodo` en calificaciones
+            if (!empty($filtros['periodo'])) {
+                // Si viene como rango de fechas
+                if (!empty($filtros['fecha_inicio']) && !empty($filtros['fecha_fin'])) {
+                    // No hay columna fecha explícita en calificaciones según tu esquema; si tu intención es filtrar por periodo
+                    // (ej. '2025-09'), el campo correcto es `periodo`. Si usas fecha completa en otra tabla, actualiza aquí.
+                    // Para seguridad, intentaremos filtrar por `periodo` que contenga el año-mes
+                    $inicio = $filtros['fecha_inicio'];
+                    $fin = $filtros['fecha_fin'];
+                    // Convertir a YYYY-MM para buscar en periodo si aplica
+                    $inicioY = date('Y-m', strtotime($inicio));
+                    $finY = date('Y-m', strtotime($fin));
+                    if ($inicioY === $finY) {
+                        $sql .= " AND c.periodo = ?";
+                        $params[] = $inicioY;
+                    } else {
+                        // Si es rango de meses distinto, intentar usar BETWEEN comparando strings (asumiendo formato YYYY-MM en periodo)
+                        $sql .= " AND c.periodo BETWEEN ? AND ?";
+                        $params[] = $inicioY;
+                        $params[] = $finY;
+                    }
+                }
+            }
+
+            $sql .= " GROUP BY c.institucion_id, i.nombre 
                     HAVING COUNT(c.id) > 0
                     ORDER BY promedio DESC 
                     LIMIT 15";
-                    
-            $stmt = $this->ConexionSql->query($sql);
+
+            $stmt = $this->ConexionSql->prepare($sql);
+            if (!empty($params)) {
+                $stmt->execute($params);
+            } else {
+                $stmt->execute();
+            }
+
             $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
             // Formatear los datos para mejor presentación
@@ -293,20 +369,14 @@ class ReportesModel {
             
             return $resultados;
         } catch (Exception $e) {
-            // Si hay error, devolvemos datos de ejemplo
-            return [
-                ['institucion' => 'Instituto Nacional', 'promedio' => 85.5, 'total_calificaciones' => 145],
-                ['institucion' => 'Colegio San José', 'promedio' => 82.3, 'total_calificaciones' => 98],
-                ['institucion' => 'Escuela Central', 'promedio' => 79.8, 'total_calificaciones' => 112],
-                ['institucion' => 'Centro Educativo Los Ángeles', 'promedio' => 77.2, 'total_calificaciones' => 87],
-                ['institucion' => 'Instituto Técnico', 'promedio' => 75.9, 'total_calificaciones' => 76]
-            ];
+            error_log('ERROR obtenerPromediosPorInstitucion: ' . $e->getMessage());
+            return [];
         } finally {
             $this->Conexion->CerrarConexion();
         }
     }
 
-    public function obtenerMejoresAlumnos() {
+    public function obtenerMejoresAlumnos($filtros = []) {
         error_log("=== DEBUGGING: obtenerMejoresAlumnos() iniciado ===");
         try {
             $this->ConexionSql = $this->Conexion->CrearConexion();
@@ -330,17 +400,46 @@ class ReportesModel {
                     INNER JOIN cursos c ON cal.curso_id = c.id
                     INNER JOIN grados g ON cal.grado_id = g.id
                     INNER JOIN instituciones i ON cal.institucion_id = i.id
-                    WHERE cal.activo = 1 AND u.rol = 'ALUMNO'
-                    GROUP BY cal.alumno_user_id, cal.curso_id, cal.grado_id, 
+                    WHERE cal.activo = 1 AND u.rol = 'ALUMNO'";
+
+            $params = [];
+            if (!empty($filtros['institucion_id'])) {
+                $sql .= " AND cal.institucion_id = ?";
+                $params[] = $filtros['institucion_id'];
+            }
+
+            if (!empty($filtros['curso_id'])) {
+                $sql .= " AND cal.curso_id = ?";
+                $params[] = $filtros['curso_id'];
+            }
+
+            if (!empty($filtros['grado_id'])) {
+                $sql .= " AND cal.grado_id = ?";
+                $params[] = $filtros['grado_id'];
+            }
+
+            // Manejo de periodo específico (campo `periodo` en la tabla calificaciones)
+            if (!empty($filtros['periodo']) && is_string($filtros['periodo'])) {
+                // Si el periodo se pasa como 'YYYY-MM' o similar
+                $sql .= " AND c.periodo = ?";
+                $params[] = $filtros['periodo'];
+            }
+
+            $sql .= " GROUP BY cal.alumno_user_id, cal.curso_id, cal.grado_id, 
                              u.nombres, u.apellidos, c.nombre, g.nombre, i.nombre
                     HAVING COUNT(cal.id) >= 2
                     ORDER BY promedio DESC, total_calificaciones DESC
                     LIMIT 20";
-            
-            // Agregar debugging
+
             error_log("SQL MejoresAlumnos: " . $sql);
-                    
-            $stmt = $this->ConexionSql->query($sql);
+
+            $stmt = $this->ConexionSql->prepare($sql);
+            if (!empty($params)) {
+                $stmt->execute($params);
+            } else {
+                $stmt->execute();
+            }
+
             $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
             // Debug resultados
@@ -378,34 +477,8 @@ class ReportesModel {
             
             return $resultados;
         } catch (Exception $e) {
-            // Datos de ejemplo si hay error
-            return [
-                [
-                    'alumno' => 'María González', 'curso' => 'Matemáticas', 'grado' => '3er Grado',
-                    'promedio' => 95.5, 'total_calificaciones' => 8, 'institucion' => 'Instituto Nacional',
-                    'curso_id' => 1, 'grado_id' => 3
-                ],
-                [
-                    'alumno' => 'Carlos Rodríguez', 'curso' => 'Ciencias', 'grado' => '4to Grado', 
-                    'promedio' => 94.2, 'total_calificaciones' => 6, 'institucion' => 'Colegio San José',
-                    'curso_id' => 2, 'grado_id' => 4
-                ],
-                [
-                    'alumno' => 'Ana Martínez', 'curso' => 'Lenguaje', 'grado' => '5to Grado',
-                    'promedio' => 93.8, 'total_calificaciones' => 7, 'institucion' => 'Escuela Central',
-                    'curso_id' => 3, 'grado_id' => 5
-                ],
-                [
-                    'alumno' => 'José López', 'curso' => 'Historia', 'grado' => '2do Grado',
-                    'promedio' => 92.5, 'total_calificaciones' => 5, 'institucion' => 'Centro Los Ángeles',
-                    'curso_id' => 4, 'grado_id' => 2
-                ],
-                [
-                    'alumno' => 'Laura Pérez', 'curso' => 'Matemáticas', 'grado' => '4to Grado',
-                    'promedio' => 91.7, 'total_calificaciones' => 9, 'institucion' => 'Instituto Técnico',
-                    'curso_id' => 1, 'grado_id' => 4
-                ]
-            ];
+            error_log('ERROR obtenerMejoresAlumnos: ' . $e->getMessage());
+            return [];
         } finally {
             $this->Conexion->CerrarConexion();
         }

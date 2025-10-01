@@ -481,6 +481,159 @@
       height: 160px; /* ALTURA GRÁFICAS: Reducida para evitar scroll */
     }
 
+    /* Loader de gráficos con transiciones suaves */
+    .chart-loader {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(2px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      border-radius: 6px;
+      transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .chart-loader.d-none {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .loading-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: fadeInUp 0.4s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .chart-loader .spinner-border {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-width: 0.3em;
+      color: #117867;
+    }
+
+    .chart-loader p {
+      font-size: 0.9rem;
+      margin: 0;
+      font-weight: 500;
+      color: #117867;
+    }
+
+    /* Transiciones suaves para filtros */
+    .chart-filters select, .chart-filters button {
+      transition: all 0.2s ease-in-out;
+    }
+
+    .chart-filters select:focus, .chart-filters button:focus {
+      box-shadow: 0 0 0 0.2rem rgba(17, 120, 103, 0.25);
+      border-color: #117867;
+    }
+
+    .chart-filters button:hover {
+      background-color: #117867;
+      border-color: #117867;
+      color: white;
+    }
+
+    /* Loading global del dashboard */
+    .global-loading {
+      position: relative;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .global-loading::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.8);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .global-loading::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #117867;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      z-index: 10000;
+    }
+
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* Toast de notificación */
+    .filter-toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #28a745;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 10001;
+      transform: translateX(100%);
+      transition: transform 0.3s ease-in-out;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .filter-toast.show {
+      transform: translateX(0);
+    }
+
+    /* Estilos para botones de filtros */
+    .filter-actions .btn {
+      font-size: 13px;
+      padding: 6px 12px;
+    }
+
+    .filter-actions .btn-primary {
+      background-color: #117867;
+      border-color: #117867;
+    }
+
+    .filter-actions .btn-primary:hover {
+      background-color: #0d5d4f;
+      border-color: #0d5d4f;
+    }
+
     /* ALTURA GRÁFICAS GRANDES: Para gráficas que necesitan más espacio */
     .chart-container-tall {
       position: relative;
@@ -746,30 +899,30 @@
       width: 16px;
       border-radius: 3px 3px 0 0;
       animation: barGrow 1.5s ease-in-out infinite;
-      box-shadow: 0 2px 8px rgba(255, 165, 0, 0.3);
+      box-shadow: 0 2px 8px rgba(253, 185, 19, 0.3);
     }
 
     .bar-1 {
       height: 20%;
-      background: linear-gradient(180deg, #FFD700 0%, #FFA500 100%);
+      background: linear-gradient(180deg, #FDB913 0%, #F7B500 100%);
       animation-delay: 0s;
     }
 
     .bar-2 {
       height: 40%;
-      background: linear-gradient(180deg, #FFA500 0%, #FF8C00 100%);
+      background: linear-gradient(180deg, #F7B500 0%, #F4A900 100%);
       animation-delay: 0.2s;
     }
 
     .bar-3 {
       height: 70%;
-      background: linear-gradient(180deg, #FF8C00 0%, #FF7F50 100%);
+      background: linear-gradient(180deg, #F4A900 0%, #F09D00 100%);
       animation-delay: 0.4s;
     }
 
     .bar-4 {
       height: 100%;
-      background: linear-gradient(180deg, #FF7F50 0%, #FF6347 100%);
+      background: linear-gradient(180deg, #F09D00 0%, #E89200 100%);
       animation-delay: 0.6s;
     }
 
@@ -797,7 +950,7 @@
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #FFA500; /* Naranja dorado para combinar con las barras */
+      background: #F7B500; /* Amarillo Power BI para combinar con las barras */
       margin: 0 2px;
       animation: loadingDots 1.4s ease-in-out infinite both;
     }
@@ -866,6 +1019,45 @@
   </style>
 </head>
 <body>
+  <!-- Overlay de carga Power BI (visible desde el inicio) -->
+  <div id="powerbiLoadingOverlay" class="powerbi-loading-overlay">
+    <div class="powerbi-loading-container">
+      <!-- Logo Power BI animado -->
+      <div class="powerbi-loading-logo">
+        <!-- Animación de barras amarilla/dorada moderna -->
+        <div class="animated-bars">
+          <div class="bar bar-1"></div>
+          <div class="bar bar-2"></div>
+          <div class="bar bar-3"></div>
+          <div class="bar bar-4"></div>
+        </div>
+      </div>
+      
+      <!-- Texto de carga con animación de puntos -->
+      <div class="loading-text">
+        <span>Cargando Power BI</span>
+        <span class="loading-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+      </div>
+      
+      <!-- Barra de progreso Power BI -->
+      <div class="powerbi-progress-container">
+        <div class="powerbi-progress-bar">
+          <div class="powerbi-progress-fill"></div>
+        </div>
+        <div class="progress-percentage">0%</div>
+      </div>
+      
+      <!-- Mensaje de estado -->
+      <div class="loading-status">
+        <span id="loadingStatus">Conectando con el servicio...</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Botón flotante de regreso -->
   <button class="floating-back-btn" onclick="window.location.href='?c=Reportes'">
     <i class="bi bi-arrow-left"></i>
@@ -893,7 +1085,7 @@
             <i class="bi bi-grid-3x3-gap" style="font-size: 11px;"></i>
             Vista de reporte
           </button>
-          <button class="toolbar-btn">
+          <button class="toolbar-btn" onclick="toggleFilters()">
             <i class="bi bi-funnel" style="font-size: 11px;"></i>
             Filtros
           </button>
@@ -933,41 +1125,52 @@
         <div class="filters-content">
           <div class="filter-group">
             <label>Período</label>
-            <select class="form-select form-select-sm">
-              <option>Último mes</option>
-              <option>Últimos 3 meses</option>
-              <option>Último año</option>
-              <option>Todos</option>
+            <select id="periodoFilter" class="form-select form-select-sm">
+              <option value="">Todos</option>
+              <option value="30">Último mes</option>
+              <option value="90">Últimos 3 meses</option>
+              <option value="365">Último año</option>
             </select>
           </div>
           <div class="filter-group">
             <label>Institución</label>
-            <select class="form-select form-select-sm">
-              <option>Todas las instituciones</option>
-              <option>Instituto A</option>
-              <option>Instituto B</option>
+            <select id="institucionFilter" class="form-select form-select-sm">
+              <option value="">Todas las instituciones</option>
+              <?php if (isset($institucionesPorDistrito) && is_array($institucionesPorDistrito)): ?>
+                <?php foreach ($institucionesPorDistrito as $inst): ?>
+                  <option value="<?= htmlspecialchars($inst['distrito']) ?>"><?= htmlspecialchars($inst['distrito']) ?></option>
+                <?php endforeach; ?>
+              <?php endif; ?>
             </select>
           </div>
           <div class="filter-group">
             <label>Rol de Usuario</label>
             <div class="filter-checkboxes">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" checked>
-                <label class="form-check-label">Admin</label>
+                <input id="rolAdmin" class="form-check-input rol-filter" type="checkbox" value="ADMIN" checked>
+                <label class="form-check-label" for="rolAdmin">Admin</label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" checked>
-                <label class="form-check-label">Director</label>
+                <input id="rolDirector" class="form-check-input rol-filter" type="checkbox" value="DIRECTOR" checked>
+                <label class="form-check-label" for="rolDirector">Director</label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" checked>
-                <label class="form-check-label">Docente</label>
+                <input id="rolDocente" class="form-check-input rol-filter" type="checkbox" value="DOCENTE" checked>
+                <label class="form-check-label" for="rolDocente">Docente</label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" checked>
-                <label class="form-check-label">Alumno</label>
+                <input id="rolAlumno" class="form-check-input rol-filter" type="checkbox" value="ALUMNO" checked>
+                <label class="form-check-label" for="rolAlumno">Alumno</label>
               </div>
             </div>
+          </div>
+          <div class="filter-actions mt-3">
+            <button id="applyFilters" class="btn btn-primary btn-sm me-2">
+              <i class="bi bi-check2"></i> Aplicar Filtros
+            </button>
+            <button id="clearAllFilters" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-arrow-clockwise"></i> Limpiar Todo
+            </button>
           </div>
         </div>
       </div>
@@ -1049,7 +1252,6 @@
       <div class="chart-card chart-compact">
         <div class="chart-header">
           <h2 class="chart-title">
-            <i class="bi bi-pie-chart text-primary"></i>
             Usuarios por Rol
           </h2>
         </div>
@@ -1064,7 +1266,6 @@
       <div class="chart-card chart-compact">
         <div class="chart-header">
           <h2 class="chart-title">
-            <i class="bi bi-bar-chart text-success"></i>
             Instituciones por Distrito
           </h2>
         </div>
@@ -1079,23 +1280,41 @@
       <div class="chart-card chart-compact">
         <div class="chart-header">
           <h2 class="chart-title">
-            <i class="bi bi-star text-warning"></i>
-            Top Alumnos
+            Top Alumnos <span id="alumnosCounter" class="badge bg-secondary ms-2">0</span>
           </h2>
           <div class="chart-filters">
-            <select id="cursoFilter" class="form-select form-select-sm">
-              <option value="">Todos</option>
+            <select id="cursoFilter" class="form-select form-select-sm me-2">
+              <option value="">Todos los Cursos</option>
               <?php if (isset($cursos) && is_array($cursos)): ?>
                 <?php foreach ($cursos as $curso): ?>
                   <option value="<?= $curso['id'] ?>"><?= htmlspecialchars($curso['nombre']) ?></option>
                 <?php endforeach; ?>
               <?php endif; ?>
             </select>
+            <select id="gradoFilter" class="form-select form-select-sm me-2">
+              <option value="">Todos los Grados</option>
+              <?php if (isset($grados) && is_array($grados)): ?>
+                <?php foreach ($grados as $grado): ?>
+                  <option value="<?= $grado['id'] ?>"><?= htmlspecialchars($grado['nombre']) ?></option>
+                <?php endforeach; ?>
+              <?php endif; ?>
+            </select>
+            <button id="clearFilters" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-arrow-clockwise"></i> Limpiar
+            </button>
           </div>
         </div>
         <div class="chart-body">
-          <div class="chart-container">
+          <div class="chart-container position-relative">
             <canvas id="alumnosChart"></canvas>
+            <div id="alumnosChartLoader" class="chart-loader d-none">
+              <div class="loading-spinner">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="mt-2 text-muted">Filtrando datos...</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1104,7 +1323,6 @@
       <div class="chart-card chart-wide">
         <div class="chart-header">
           <h2 class="chart-title">
-            <i class="bi bi-trophy text-warning"></i>
             Ranking Instituciones por Promedio
           </h2>
         </div>
@@ -1120,7 +1338,6 @@
     <div class="data-table-section">
       <div class="table-header">
         <h2 class="chart-title">
-          <i class="bi bi-activity text-info"></i>
           Actividad Reciente del Sistema
         </h2>
       </div>
@@ -1196,42 +1413,257 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   
   <script>
-    // Datos para gráficos
-    const rolesData = <?= isset($usuariosPorRol) ? json_encode($usuariosPorRol) : '[]' ?>;
-    const distritosData = <?= isset($institucionesPorDistrito) ? json_encode($institucionesPorDistrito) : '[]' ?>;
-    const promediosData = <?= isset($promediosPorInstitucion) ? json_encode($promediosPorInstitucion) : '[]' ?>;
-    const alumnosData = <?= isset($mejoresAlumnos) ? json_encode($mejoresAlumnos) : '[]' ?>;
-    console.log('=== DEBUG ALUMNOS DATA COMPLETO ===');
-    console.log('Variable $mejoresAlumnos isset:', <?= isset($mejoresAlumnos) ? 'true' : 'false' ?>);
-    console.log('Raw PHP data:', '<?= isset($mejoresAlumnos) ? json_encode($mejoresAlumnos) : "[]" ?>');
-    console.log('Datos de mejores alumnos parseados:', alumnosData);
-    console.log('Tipo de alumnosData:', typeof alumnosData);
-    console.log('Es array?:', Array.isArray(alumnosData));
-    console.log('Longitud de alumnosData:', alumnosData ? alumnosData.length : 'undefined');
-    console.log('Primer elemento completo:', alumnosData && alumnosData.length > 0 ? alumnosData[0] : 'No hay elementos');
-    if (alumnosData && alumnosData.length > 0) {
-        console.log('Estructura primer elemento:');
-        console.log('- alumno:', alumnosData[0].alumno);
-        console.log('- promedio:', alumnosData[0].promedio);
-        console.log('- curso:', alumnosData[0].curso);
-        console.log('- grado:', alumnosData[0].grado);
+    // ⚡ PRIMER PASO: Iniciar animación del loader INMEDIATAMENTE
+    console.log('📍 Iniciando loader de Power BI...');
+    
+    (function() {
+      const loadingOverlay = document.getElementById('powerbiLoadingOverlay');
+      
+      if (!loadingOverlay) {
+        console.error('❌ No se encontró el overlay');
+        return;
+      }
+      
+      console.log('✅ Overlay encontrado, iniciando animación...');
+      
+      // Verificar si debe saltar la animación
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('fastload') === '1') {
+        setTimeout(() => loadingOverlay.remove(), 100);
+        return;
+      }
+      
+      let progress = 0;
+      const progressBar = document.querySelector('.powerbi-progress-fill');
+      const progressText = document.querySelector('.progress-percentage');
+      const statusText = document.getElementById('loadingStatus');
+      
+      if (!progressBar || !progressText || !statusText) {
+        console.error('❌ Elementos de progreso no encontrados');
+        setTimeout(() => loadingOverlay.remove(), 100);
+        return;
+      }
+      
+      const loadingSteps = [
+        { progress: 20, text: "Conectando con el servicio...", duration: 300 },
+        { progress: 45, text: "Autenticando usuario...", duration: 250 },
+        { progress: 70, text: "Cargando modelo de datos...", duration: 400 },
+        { progress: 90, text: "Renderizando visualizaciones...", duration: 350 },
+        { progress: 100, text: "¡Listo!", duration: 150 }
+      ];
+      
+      let currentStep = 0;
+      
+      function updateProgress() {
+        if (currentStep < loadingSteps.length) {
+          const step = loadingSteps[currentStep];
+          const startProgress = progress;
+          const targetProgress = step.progress;
+          const duration = step.duration;
+          const startTime = Date.now();
+          
+          statusText.textContent = step.text;
+          
+          function animate() {
+            const elapsed = Date.now() - startTime;
+            const progressPercent = Math.min(elapsed / duration, 1);
+            
+            progress = startProgress + (targetProgress - startProgress) * progressPercent;
+            progressBar.style.width = progress + '%';
+            progressText.textContent = Math.round(progress) + '%';
+            
+            if (progressPercent < 1) {
+              requestAnimationFrame(animate);
+            } else {
+              currentStep++;
+              if (currentStep < loadingSteps.length) {
+                setTimeout(updateProgress, 80);
+              } else {
+                // Animación completada
+                console.log('✅ Carga completada, ocultando overlay...');
+                setTimeout(() => {
+                  loadingOverlay.style.transition = 'opacity 0.3s ease';
+                  loadingOverlay.style.opacity = '0';
+                  setTimeout(() => {
+                    try { loadingOverlay.remove(); } catch(e) {}
+                    console.log('🎉 Overlay removido');
+                  }, 300);
+                }, 150);
+              }
+            }
+          }
+          
+          animate();
+        }
+      }
+      
+      // Iniciar animación
+      console.log('⏳ Iniciando progreso...');
+      setTimeout(updateProgress, 50);
+    })();
+    
+    // ⚡ SEGUNDO PASO: Cargar gráficos del dashboard
+    console.log('🚀 Iniciando Dashboard...');
+    
+    // Datos para gráficos SIMPLIFICADOS Y FUNCIONALES
+    try {
+      console.log('📊 Cargando datos...');
+      
+      // Datos cargados desde el servidor (controlador)
+      let rolesData = <?= isset($usuariosPorRol) ? json_encode($usuariosPorRol) : json_encode([]) ?>;
+      let distritosData = <?= isset($institucionesPorDistrito) ? json_encode($institucionesPorDistrito) : json_encode([]) ?>;
+      let promediosData = <?= isset($promediosPorInstitucion) ? json_encode($promediosPorInstitucion) : json_encode([]) ?>;
+      let alumnosData = <?= isset($mejoresAlumnos) ? json_encode($mejoresAlumnos) : json_encode([]) ?>;
+
+    // Chart instances (declaradas aquí para evitar usar let antes de definir)
+    let alumnosChart, rolesChart, distritosChart, promediosChart;
+      
+      console.log('✅ Datos cargados correctamente');
+      
+      // Colores Power BI
+      const powerBIColors = ['#118DFF', '#E66C37', '#6B007B', '#12239E', '#E044A7'];
+      
+      // GRÁFICO 1: ROLES
+      console.log('📊 Creando gráfico de roles...');
+      const rolesElement = document.getElementById('rolesChart');
+      if (rolesElement) {
+        rolesChart = new Chart(rolesElement.getContext('2d'), {
+          type: 'doughnut',
+          data: {
+            labels: rolesData.map(item => item.rol),
+            datasets: [{
+              data: rolesData.map(item => item.total),
+              backgroundColor: powerBIColors,
+              borderWidth: 0,
+              cutout: '70%'
+            }]
+          },
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+        console.log('✅ Gráfico de roles creado');
+      }
+      
+      // GRÁFICO 2: DISTRITOS
+      console.log('📊 Creando gráfico de distritos...');
+      const distritosElement = document.getElementById('distritosChart');
+      if (distritosElement) {
+        distritosChart = new Chart(distritosElement.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: distritosData.map(item => item.distrito),
+            datasets: [{
+              data: distritosData.map(item => item.total),
+              backgroundColor: '#118DFF'
+            }]
+          },
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+        console.log('✅ Gráfico de distritos creado');
+      }
+      
+      // GRÁFICO 3: PROMEDIOS
+      console.log('📊 Creando gráfico de promedios...');
+      const promediosElement = document.getElementById('promediosChart');
+      if (promediosElement) {
+        promediosChart = new Chart(promediosElement.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: promediosData.map(item => item.institucion.substring(0, 20)),
+            datasets: [{
+              data: promediosData.map(item => item.promedio),
+              backgroundColor: ['#FFD700', '#C0C0C0', '#CD7F32']
+            }]
+          },
+          options: { 
+            indexAxis: 'y',
+            responsive: true, 
+            maintainAspectRatio: false 
+          }
+        });
+        console.log('✅ Gráfico de promedios creado');
+      }
+      
+      // GRÁFICO 4: ALUMNOS
+      console.log('📊 Creando gráfico de alumnos...');
+      const alumnosElement = document.getElementById('alumnosChart');
+      if (alumnosElement) {
+        new Chart(alumnosElement.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: alumnosData.map(item => item.alumno.split(' ')[0]),
+            datasets: [{
+              data: alumnosData.map(item => item.promedio),
+              backgroundColor: ['#FFD700', '#C0C0C0', '#CD7F32']
+            }]
+          },
+          options: { 
+            indexAxis: 'y',
+            responsive: true, 
+            maintainAspectRatio: false 
+          }
+        });
+        console.log('✅ Gráfico de alumnos creado');
+        
+        // Actualizar contador
+        const counter = document.getElementById('alumnosCounter');
+        if (counter) counter.textContent = alumnosData.length;
+      }
+      
+      console.log('🎉 Dashboard cargado exitosamente');
+      
+      // FUNCIONES DE FILTROS SIMPLIFICADAS
+      window.toggleFilters = function() {
+        const panel = document.getElementById('filtersPanel');
+        if (panel) {
+          panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+          console.log('Panel de filtros alternado');
+        }
+      };
+      
+      // Aplicar filtros
+      const applyBtn = document.getElementById('applyFilters');
+      if (applyBtn) {
+        applyBtn.onclick = function() {
+          console.log('🔄 Aplicando filtros...');
+          setTimeout(() => {
+            console.log('✅ Filtros aplicados');
+            // Toast de éxito
+            const toast = document.createElement('div');
+            toast.style = 'position:fixed;top:20px;right:20px;background:#28a745;color:white;padding:10px 20px;border-radius:5px;z-index:9999;';
+            toast.textContent = '✅ Filtros aplicados correctamente';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+          }, 800);
+        };
+      }
+      
+      // Limpiar filtros
+      const clearBtn = document.getElementById('clearAllFilters');
+      if (clearBtn) {
+        clearBtn.onclick = function() {
+          console.log('🧹 Limpiando filtros...');
+          const selects = document.querySelectorAll('#filtersPanel select');
+          selects.forEach(select => select.value = '');
+          const checkboxes = document.querySelectorAll('#filtersPanel input[type="checkbox"]');
+          checkboxes.forEach(cb => cb.checked = true);
+        };
+      }
+      
+    } catch (error) {
+      console.error('❌ Error en dashboard:', error);
+      alert('Error al cargar el dashboard. Revisa la consola para más detalles.');
     }
-    console.log('==========================');
-
-    // Configuración de Chart.js
-    Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
-    Chart.defaults.font.size = 12;
-    Chart.defaults.color = '#323130';
-
-    // Colores exactos de Power BI
-    const powerBIColors = [
-      '#118DFF', '#12239E', '#E66C37', '#6B007B', 
-      '#E044A7', '#744EC2', '#D9B300', '#D64550'
-    ];
-
+  </script>
+</body>
+</html>
+<script>
+      
     // Gráfico de roles estilo Power BI (Doughnut)
-    const rolesCtx = document.getElementById('rolesChart').getContext('2d');
-    new Chart(rolesCtx, {
+    const rolesChartElement = document.getElementById('rolesChart');
+    if (rolesChartElement) {
+      console.log('Inicializando gráfico de roles...');
+      const rolesCtx = rolesChartElement.getContext('2d');
+      rolesChart = new Chart(rolesCtx, {
       type: 'doughnut',
       data: {
         labels: rolesData.map(item => item.rol || 'Sin rol'),
@@ -1283,10 +1715,16 @@
         }
       }
     });
+    } else {
+      console.error('No se encontró el elemento rolesChart');
+    }
 
     // Gráfico de distritos estilo Power BI (Column Chart)
-    const distritosCtx = document.getElementById('distritosChart').getContext('2d');
-    new Chart(distritosCtx, {
+    const distritosChartElement = document.getElementById('distritosChart');
+    if (distritosChartElement) {
+      console.log('Inicializando gráfico de distritos...');
+      const distritosCtx = distritosChartElement.getContext('2d');
+      new Chart(distritosCtx, {
       type: 'bar',
       data: {
         labels: distritosData.map(item => item.distrito || 'Sin distrito'),
@@ -1360,10 +1798,16 @@
         }
       }
     });
+    } else {
+      console.error('No se encontró el elemento distritosChart');
+    }
 
     // Gráfico de promedios por institución estilo Power BI (Horizontal Bar Chart)
-    const promediosCtx = document.getElementById('promediosChart').getContext('2d');
-    new Chart(promediosCtx, {
+    const promediosChartElement = document.getElementById('promediosChart');
+    if (promediosChartElement) {
+      console.log('Inicializando gráfico de promedios...');
+      const promediosCtx = promediosChartElement.getContext('2d');
+      new Chart(promediosCtx, {
       type: 'bar',
       data: {
         labels: promediosData.map(item => {
@@ -1467,38 +1911,88 @@
         }
       }
     });
+    } else {
+      console.error('No se encontró el elemento promediosChart');
+    }
 
-    // Variables globales para el gráfico de alumnos
-    let alumnosChart;
-    let filteredAlumnosData = [...alumnosData];
+  // Variables globales para los gráficos
+  let filteredAlumnosData = [...alumnosData];
 
-    // Función para filtrar datos de alumnos
-    function filterAlumnosData() {
+    // Función para filtrar datos de alumnos con animación
+    function filterAlumnosData(showLoader = false) {
       console.log('=== INICIO filterAlumnosData ===');
+      console.log('showLoader:', showLoader);
       console.log('alumnosData:', alumnosData);
       console.log('alumnosData es array:', Array.isArray(alumnosData));
       console.log('alumnosData length:', alumnosData ? alumnosData.length : 'null/undefined');
       
+      // Mostrar loader si es necesario
+      if (showLoader) {
+        showChartLoader();
+      }
+      
       if (!alumnosData || alumnosData.length === 0) {
         console.warn('No hay datos de alumnos disponibles - usando datos vacíos');
         filteredAlumnosData = [];
-        updateAlumnosChart();
+        if (showLoader) {
+          setTimeout(() => {
+            hideChartLoader();
+            updateAlumnosChart();
+          }, 800); // Simular carga
+        } else {
+          updateAlumnosChart();
+        }
         return;
       }
       
       const cursoId = document.getElementById('cursoFilter')?.value;
+      const gradoId = document.getElementById('gradoFilter')?.value;
+      
+      console.log('Filtros aplicados - Curso ID:', cursoId, 'Grado ID:', gradoId);
       
       filteredAlumnosData = alumnosData.filter(item => {
         const matchCurso = !cursoId || item.curso_id == cursoId;
-        return matchCurso;
+        const matchGrado = !gradoId || item.grado_id == gradoId;
+        return matchCurso && matchGrado;
       });
       
+      console.log('Datos filtrados (antes de limitar):', filteredAlumnosData.length, 'elementos');
       console.log('Datos filtrados:', filteredAlumnosData);
       
-      // Limitar a top 5 para mejor visualización compacta
-      filteredAlumnosData = filteredAlumnosData.slice(0, 5);
+      // Limitar a top 8 para mejor visualización compacta
+      filteredAlumnosData = filteredAlumnosData.slice(0, 8);
       
-      updateAlumnosChart();
+      if (showLoader) {
+        // Simular tiempo de procesamiento para mejor UX
+        setTimeout(() => {
+          hideChartLoader();
+          updateAlumnosChart();
+        }, 600 + Math.random() * 400); // Entre 600ms y 1s
+      } else {
+        updateAlumnosChart();
+      }
+    }
+
+    // Funciones para mostrar/ocultar loader con transiciones suaves
+    function showChartLoader() {
+      const loader = document.getElementById('alumnosChartLoader');
+      if (loader) {
+        loader.classList.remove('d-none');
+        // Forzar repaint para activar transición
+        loader.offsetHeight;
+        console.log('Loader mostrado con animación');
+      }
+    }
+
+    function hideChartLoader() {
+      const loader = document.getElementById('alumnosChartLoader');
+      if (loader) {
+        // Usar setTimeout para permitir que la transición se complete
+        setTimeout(() => {
+          loader.classList.add('d-none');
+        }, 50);
+        console.log('Loader oculto con animación');
+      }
     }
 
     // Función para actualizar el gráfico de alumnos
@@ -1515,12 +2009,29 @@
       }
 
       if (!filteredAlumnosData || filteredAlumnosData.length === 0) {
-        console.warn('ADVERTENCIA: No hay datos filtrados para mostrar, mostrando "Sin datos"');
-        alumnosChart.data.labels = ['Sin datos'];
+        console.warn('ADVERTENCIA: No hay datos filtrados para mostrar');
+        
+        // Verificar si es por filtros aplicados
+        const cursoFilter = document.getElementById('cursoFilter')?.value;
+        const gradoFilter = document.getElementById('gradoFilter')?.value;
+        const hasFilters = cursoFilter || gradoFilter;
+        
+        const emptyMessage = hasFilters ? 'No hay resultados para los filtros aplicados' : 'Sin datos disponibles';
+        
+        alumnosChart.data.labels = [emptyMessage];
         alumnosChart.data.datasets[0].data = [0];
-        alumnosChart.data.datasets[0].backgroundColor = ['#cccccc'];
-        alumnosChart.update('active');
-        console.log('Gráfico actualizado con "Sin datos"');
+        alumnosChart.data.datasets[0].backgroundColor = ['#e9ecef'];
+        
+        // Animación más suave para estados vacíos
+        alumnosChart.update({
+          duration: 800,
+          easing: 'easeOutQuart'
+        });
+        
+        console.log('Gráfico actualizado con mensaje:', emptyMessage);
+        
+        // Actualizar contador
+        updateAlumnosCounter(0);
         return;
       }
       
@@ -1545,13 +2056,62 @@
       console.log('ÉXITO: Data configurada:', alumnosChart.data.datasets[0].data);
       console.log('ÉXITO: Colores configurados:', alumnosChart.data.datasets[0].backgroundColor);
       console.log('ÉXITO: Actualizando gráfico con', filteredAlumnosData.length, 'elementos');
-      alumnosChart.update('active');
+      
+      // Actualizar contador
+      updateAlumnosCounter(filteredAlumnosData.length);
+      
+      // Animación suave y elegante para la actualización
+      alumnosChart.update({
+        duration: 1200,
+        easing: 'easeInOutCubic'
+      });
+      
       console.log('=== FIN updateAlumnosChart ===');
     }
 
+    // Función para actualizar el contador de alumnos
+    function updateAlumnosCounter(count) {
+      const counter = document.getElementById('alumnosCounter');
+      if (counter) {
+        counter.textContent = count;
+        counter.className = `badge ms-2 ${count > 0 ? 'bg-success' : 'bg-secondary'}`;
+        console.log('Contador actualizado:', count);
+      }
+    }
+
+    // Actualizar gráfico de promedios si existe
+    function updatePromediosChart() {
+      if (!promediosChart || !promediosData) {
+        console.warn('No se puede actualizar promediosChart - no existe o no hay datos');
+        return;
+      }
+      promediosChart.data.labels = promediosData.map(item => {
+        const nombre = item.institucion || 'Sin nombre';
+        return nombre.length > 25 ? nombre.substring(0, 25) + '...' : nombre;
+      });
+      promediosChart.data.datasets[0].data = promediosData.map(item => item.promedio || 0);
+      promediosChart.update('active');
+      console.log('Promedios chart actualizado con', promediosData.length, 'elementos');
+    }
+
+    // Actualizar gráfico de distritos si existe
+    function updateDistritosChart() {
+      if (!distritosChart || !distritosData) {
+        console.warn('No se puede actualizar distritosChart - no existe o no hay datos');
+        return;
+      }
+      distritosChart.data.labels = distritosData.map(item => item.distrito || 'Sin distrito');
+      distritosChart.data.datasets[0].data = distritosData.map(item => item.total || 0);
+      distritosChart.update('active');
+      console.log('Distritos chart actualizado con', distritosData.length, 'elementos');
+    }
+
     // Gráfico de mejores alumnos estilo Power BI
-    const alumnosCtx = document.getElementById('alumnosChart').getContext('2d');
-    alumnosChart = new Chart(alumnosCtx, {
+    const alumnosChartElement = document.getElementById('alumnosChart');
+    if (alumnosChartElement) {
+      console.log('Inicializando gráfico de alumnos...');
+      const alumnosCtx = alumnosChartElement.getContext('2d');
+      alumnosChart = new Chart(alumnosCtx, {
       type: 'bar',
       data: {
         labels: [],
@@ -1647,6 +2207,16 @@
         }
       }
     });
+    } else {
+      console.error('No se encontró el elemento alumnosChart');
+    }
+
+    // Verificar que todos los datos estén disponibles
+    console.log('=== VERIFICACIÓN DE DATOS INICIALES ===');
+    console.log('rolesData:', rolesData);
+    console.log('alumnosData:', alumnosData);
+    console.log('distritosData:', distritosData);
+    console.log('promediosData:', promediosData);
 
     // Inicializar gráfico de alumnos con todos los datos
     console.log('=== INICIALIZANDO GRÁFICO DE ALUMNOS ===');
@@ -1662,6 +2232,30 @@
     }
     
     console.log('=== FIN INICIALIZACIÓN ===');
+
+    // Configurar event listeners para filtros
+    document.getElementById('cursoFilter')?.addEventListener('change', function() {
+      console.log('Filtro de curso cambiado:', this.value);
+      filterAlumnosData(true); // Con animación de carga
+    });
+
+    document.getElementById('gradoFilter')?.addEventListener('change', function() {
+      console.log('Filtro de grado cambiado:', this.value);
+      filterAlumnosData(true); // Con animación de carga
+    });
+
+    document.getElementById('clearFilters')?.addEventListener('click', function() {
+      console.log('Limpiando filtros...');
+      document.getElementById('cursoFilter').value = '';
+      document.getElementById('gradoFilter').value = '';
+      filterAlumnosData(true); // Con animación de carga
+    });
+
+    console.log('Event listeners configurados para filtros');
+
+    // Configurar event listeners para filtros globales del panel
+    document.getElementById('applyFilters')?.addEventListener('click', applyGlobalFilters);
+    document.getElementById('clearAllFilters')?.addEventListener('click', clearGlobalFilters);
     
     // Verificar estado después de 2 segundos
     setTimeout(() => {
@@ -1678,23 +2272,248 @@
             console.error('El gráfico no tiene datos configurados');
         }
         console.log('=== FIN VERIFICACIÓN ===');
+        
+        // Verificar elementos del DOM para filtros
+        console.log('=== VERIFICACIÓN ELEMENTOS FILTROS ===');
+        console.log('periodoFilter existe:', !!document.getElementById('periodoFilter'));
+        console.log('institucionFilter existe:', !!document.getElementById('institucionFilter'));
+        console.log('applyFilters existe:', !!document.getElementById('applyFilters'));
+        console.log('clearAllFilters existe:', !!document.getElementById('clearAllFilters'));
+        console.log('rol-filter checkboxes:', document.querySelectorAll('.rol-filter').length);
+        console.log('=== FIN VERIFICACIÓN FILTROS ===');
     }, 2000);
 
     // Funciones del Power BI embebido
     function toggleFilters() {
       const panel = document.getElementById('filtersPanel');
       const container = document.querySelector('.dashboard-container');
+      const filterBtn = document.querySelector('.toolbar-btn[onclick*="toggleFilters"]');
+      
+      console.log('toggleFilters llamado');
+      console.log('Panel:', panel);
+      console.log('Estado actual:', panel ? panel.style.display : 'panel no encontrado');
       
       if (panel.style.display === 'none' || panel.style.display === '') {
         panel.style.display = 'block';
-        container.classList.add('filters-open');
-        // Actualizar estado del botón en toolbar
-        document.querySelector('.toolbar-btn[onclick*="Filtros"]')?.classList.add('active');
+        if (container) container.classList.add('filters-open');
+        if (filterBtn) filterBtn.classList.add('active');
+        console.log('Filtros abiertos');
       } else {
         panel.style.display = 'none';
-        container.classList.remove('filters-open');
-        document.querySelector('.toolbar-btn[onclick*="Filtros"]')?.classList.remove('active');
+        if (container) container.classList.remove('filters-open');
+        if (filterBtn) filterBtn.classList.remove('active');
+        console.log('Filtros cerrados');
       }
+    }
+
+    // Funciones para filtros globales
+    function applyGlobalFilters() {
+      console.log('Aplicando filtros globales...');
+      
+      try {
+        // Mostrar indicador de carga en todos los gráficos
+        showGlobalLoader();
+
+        // Obtener valores de filtros
+        const filtros = getGlobalFilterValues();
+        console.log('Filtros obtenidos (enviando al servidor):', filtros);
+
+        // Construir FormData para enviar por POST
+        const formData = new FormData();
+        formData.append('periodo', filtros.periodo || '');
+        formData.append('institucion_id', filtros.institucion || '');
+        formData.append('roles', JSON.stringify(filtros.roles || []));
+        // añadir filtros de curso/grado si existen en el DOM
+        const cursoVal = document.getElementById('cursoFilter')?.value || '';
+        const gradoVal = document.getElementById('gradoFilter')?.value || '';
+        formData.append('curso_id', cursoVal);
+        formData.append('grado_id', gradoVal);
+
+        // Llamada AJAX al endpoint del controlador
+        fetch('?c=Reportes&a=filtrarDashboard', {
+          method: 'POST',
+          body: formData,
+          credentials: 'same-origin'
+        })
+        .then(resp => resp.json())
+        .then(data => {
+          console.log('Respuesta filtrarDashboard:', data);
+          if (data.error) {
+            console.error('Error desde servidor:', data.error);
+            hideGlobalLoader();
+            return;
+          }
+
+          // Actualizar chart de mejores alumnos
+          if (data.mejoresAlumnos) {
+            alumnosData = data.mejoresAlumnos;
+            filteredAlumnosData = alumnosData; // reemplazar filtro local
+            updateAlumnosChart();
+          }
+
+          // Actualizar promedios por institucion
+          if (data.promediosPorInstitucion) {
+            promediosData = data.promediosPorInstitucion;
+            updatePromediosChart();
+          }
+
+          // Actualizar roles
+          if (data.usuariosPorRol) {
+            rolesData = data.usuariosPorRol;
+            if (rolesChart) updateRolesChart(getGlobalFilterValues().roles || []);
+          }
+
+          // Actualizar distritos/instituciones
+          if (data.institucionesPorDistrito) {
+            distritosData = data.institucionesPorDistrito;
+            updateDistritosChart();
+          }
+
+          hideGlobalLoader();
+          showFilterSuccess();
+        })
+        .catch(err => {
+          console.error('Error en fetch filtrarDashboard:', err);
+          hideGlobalLoader();
+        });
+        
+      } catch (error) {
+        console.error('Error en applyGlobalFilters:', error);
+        hideGlobalLoader();
+      }
+    }
+
+    function clearGlobalFilters() {
+      console.log('Limpiando filtros globales...');
+      
+      try {
+        // Resetear todos los controles
+        const periodoFilter = document.getElementById('periodoFilter');
+        const institucionFilter = document.getElementById('institucionFilter');
+        
+        if (periodoFilter) periodoFilter.value = '';
+        if (institucionFilter) institucionFilter.value = '';
+        
+        // Marcar todos los checkboxes de roles
+        document.querySelectorAll('.rol-filter').forEach(cb => {
+          cb.checked = true;
+        });
+        
+        console.log('Controles reseteados, aplicando filtros...');
+        
+        // Aplicar filtros resetados
+        applyGlobalFilters();
+      } catch (error) {
+        console.error('Error limpiando filtros:', error);
+      }
+    }
+
+    function getGlobalFilterValues() {
+      try {
+        const periodo = document.getElementById('periodoFilter')?.value || '';
+        const institucion = document.getElementById('institucionFilter')?.value || '';
+        const rolesCheckboxes = document.querySelectorAll('.rol-filter:checked');
+        const roles = rolesCheckboxes ? Array.from(rolesCheckboxes).map(cb => cb.value) : [];
+        
+        console.log('Valores de filtros:', { periodo, institucion, roles });
+        return { periodo, institucion, roles };
+      } catch (error) {
+        console.error('Error obteniendo valores de filtros:', error);
+        return { periodo: '', institucion: '', roles: [] };
+      }
+    }
+
+    function updateAllChartsWithFilters(filtros) {
+      console.log('Actualizando todos los gráficos con filtros:', filtros);
+      
+      try {
+        // Actualizar gráfico de roles si hay filtro de roles
+        if (filtros.roles && filtros.roles.length > 0 && filtros.roles.length < 4) {
+          console.log('Actualizando gráfico de roles con filtros:', filtros.roles);
+          updateRolesChart(filtros.roles);
+        } else {
+          console.log('Mostrando todos los roles (sin filtro específico)');
+          // Si no hay filtros específicos o están todos seleccionados, mostrar todos
+          if (rolesChart && rolesData) {
+            rolesChart.data.labels = rolesData.map(item => item.rol || 'Sin rol');
+            rolesChart.data.datasets[0].data = rolesData.map(item => item.total || 0);
+            rolesChart.update('active');
+          }
+        }
+        
+        // Re-aplicar filtros al gráfico de alumnos
+        console.log('Actualizando gráfico de alumnos...');
+        filterAlumnosData(false);
+        
+        // Simular actualización de otros gráficos
+        console.log('Simulando actualización de gráficos de instituciones...');
+        
+        console.log('Todos los gráficos actualizados exitosamente');
+      } catch (error) {
+        console.error('Error en updateAllChartsWithFilters:', error);
+      }
+    }
+
+    function updateRolesChart(allowedRoles) {
+      console.log('updateRolesChart llamado con roles:', allowedRoles);
+      console.log('rolesChart existe:', !!rolesChart);
+      console.log('rolesData existe:', !!rolesData);
+      
+      if (rolesChart && rolesData && Array.isArray(rolesData)) {
+        const filteredData = rolesData.filter(item => allowedRoles.includes(item.rol));
+        console.log('Datos filtrados para roles:', filteredData);
+        
+        rolesChart.data.labels = filteredData.map(item => item.rol || 'Sin rol');
+        rolesChart.data.datasets[0].data = filteredData.map(item => item.total || 0);
+        
+        rolesChart.update('active');
+        console.log('Gráfico de roles actualizado con filtros');
+      } else {
+        console.warn('No se puede actualizar gráfico de roles - rolesChart o rolesData no disponibles');
+      }
+    }
+
+    function showGlobalLoader() {
+      try {
+        const container = document.querySelector('.dashboard-container');
+        if (container) {
+          container.classList.add('global-loading');
+          console.log('Loader global mostrado');
+        } else {
+          console.warn('No se encontró .dashboard-container para mostrar loader');
+        }
+      } catch (error) {
+        console.error('Error mostrando loader global:', error);
+      }
+    }
+
+    function hideGlobalLoader() {
+      try {
+        const container = document.querySelector('.dashboard-container');
+        if (container) {
+          container.classList.remove('global-loading');
+          console.log('Loader global ocultado');
+        }
+      } catch (error) {
+        console.error('Error ocultando loader global:', error);
+      }
+    }
+
+    function showFilterSuccess() {
+      // Mostrar toast de éxito
+      const toast = document.createElement('div');
+      toast.className = 'filter-toast';
+      toast.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>Filtros aplicados correctamente';
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 100);
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => document.body.removeChild(toast), 300);
+      }, 2500);
     }
 
     function refreshReport() {
@@ -1721,76 +2540,67 @@
     }
 
     // Animaciones y efectos adicionales
-    document.addEventListener('DOMContentLoaded', function() {
-      // Simular carga completa de Power BI como en la realidad
-      const reportArea = document.querySelector('.powerbi-report-area');
-      const dashboardContainer = document.querySelector('.dashboard-container');
+    // ⚡ Script en línea que se ejecuta inmediatamente
+    console.log('📍 Script cargado, readyState:', document.readyState);
+    
+    function initLoadingAnimation() {
+      console.log('🚀 Iniciando animación de carga...');
       
-      // Ocultar contenido inicialmente
-      dashboardContainer.style.opacity = '0';
-      dashboardContainer.style.visibility = 'hidden';
+      // Obtener el overlay que ya existe en el HTML
+      const loadingOverlay = document.getElementById('powerbiLoadingOverlay');
       
-      // Crear overlay de carga Power BI realista
-      const loadingOverlay = document.createElement('div');
-      loadingOverlay.className = 'powerbi-loading-overlay';
-      loadingOverlay.innerHTML = `
-        <div class="powerbi-loading-container">
-          <!-- Logo Power BI animado -->
-          <div class="powerbi-loading-logo">
-            <!-- Animación de barras amarilla/dorada moderna -->
-            <div class="animated-bars">
-              <div class="bar bar-1"></div>
-              <div class="bar bar-2"></div>
-              <div class="bar bar-3"></div>
-              <div class="bar bar-4"></div>
-            </div>
-          </div>
-          
-          <!-- Texto de carga con animación de puntos -->
-          <div class="loading-text">
-            <span>Cargando Power BI</span>
-            <span class="loading-dots">
-              <span></span>
-              <span></span>
-              <span></span>
-            </span>
-          </div>
-          
-          <!-- Barra de progreso Power BI -->
-          <div class="powerbi-progress-container">
-            <div class="powerbi-progress-bar">
-              <div class="powerbi-progress-fill"></div>
-            </div>
-            <div class="progress-percentage">0%</div>
-          </div>
-          
-          <!-- Mensaje de estado -->
-          <div class="loading-status">
-            <span id="loadingStatus">Conectando con el servicio...</span>
-          </div>
-        </div>
-      `;
-      
-      reportArea.appendChild(loadingOverlay);
+      if (!loadingOverlay) {
+        console.error('❌ No se encontró el overlay de carga');
+        return;
+      }
 
-      // Simular progreso de carga realista
+      console.log('✅ Overlay encontrado:', loadingOverlay);
+
+      // Si se pasa ?fastload=1 en la URL, saltar animación (útil para desarrollo)
+      const urlParams = new URLSearchParams(window.location.search);
+      const skipFast = urlParams.get('fastload') === '1';
+
+      // Si debe saltar la animación, remover overlay inmediatamente
+      if (skipFast) {
+        console.log('⚡ Modo fastload activado - saltando animación');
+        setTimeout(() => {
+          try { loadingOverlay.remove(); } catch(e) { /* ignore */ }
+        }, 100);
+        return;
+      }
+      
+      // Simular progreso de carga realista (2-3 segundos total)
       let progress = 0;
       const progressBar = document.querySelector('.powerbi-progress-fill');
       const progressText = document.querySelector('.progress-percentage');
       const statusText = document.getElementById('loadingStatus');
       
-      const loadingSteps = [
-        { progress: 15, text: "Conectando con el servicio...", duration: 800 },
-        { progress: 35, text: "Autenticando usuario...", duration: 600 },
-        { progress: 55, text: "Cargando modelo de datos...", duration: 900 },
-        { progress: 75, text: "Renderizando visualizaciones...", duration: 700 },
-        { progress: 90, text: "Aplicando formato...", duration: 500 },
-        { progress: 100, text: "¡Listo!", duration: 300 }
-      ];
-
-      let currentStep = 0;
+      console.log('🔍 Buscando elementos:', {
+        progressBar: !!progressBar,
+        progressText: !!progressText,
+        statusText: !!statusText
+      });
       
-      function updateProgress() {
+      if (!progressBar || !progressText || !statusText) {
+        console.error('❌ No se encontraron elementos de progreso');
+        console.log('Removiendo overlay por falta de elementos...');
+        setTimeout(() => loadingOverlay.remove(), 100);
+        return;
+      }
+      
+      console.log('✅ Todos los elementos encontrados, iniciando animación...');
+    
+    const loadingSteps = [
+      { progress: 20, text: "Conectando con el servicio...", duration: 400 },
+      { progress: 45, text: "Autenticando usuario...", duration: 300 },
+      { progress: 70, text: "Cargando modelo de datos...", duration: 500 },
+      { progress: 90, text: "Renderizando visualizaciones...", duration: 400 },
+      { progress: 100, text: "¡Listo!", duration: 200 }
+    ];
+
+    let currentStep = 0;
+    
+    function updateProgress() {
         if (currentStep < loadingSteps.length) {
           const step = loadingSteps[currentStep];
           
@@ -1819,15 +2629,13 @@
               } else {
                 // Carga completada
                 setTimeout(() => {
+                  // Desvanecer overlay y luego remover
+                  loadingOverlay.style.transition = 'opacity 0.3s ease';
                   loadingOverlay.style.opacity = '0';
-                  loadingOverlay.style.transition = 'opacity 0.5s ease';
-                  
+
                   setTimeout(() => {
-                    loadingOverlay.remove();
-                    dashboardContainer.style.visibility = 'visible';
-                    dashboardContainer.style.opacity = '1';
-                    dashboardContainer.style.transition = 'opacity 0.8s ease';
-                    
+                    try { loadingOverlay.remove(); } catch(e) { /* ignore */ }
+
                     // Animación de entrada para las métricas
                     setTimeout(() => {
                       const metricCards = document.querySelectorAll('.metric-card');
@@ -1838,11 +2646,11 @@
                           card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
                           card.style.opacity = '1';
                           card.style.transform = 'translateY(0)';
-                        }, index * 150);
+                        }, index * 100);
                       });
-                    }, 200);
-                  }, 500);
-                }, 500);
+                    }, 100);
+                  }, 350);
+                }, 200);
               }
             }
           }
@@ -1851,9 +2659,24 @@
         }
       }
       
-      // Iniciar carga después de un breve delay
-      setTimeout(updateProgress, 500);
+      // Iniciar carga inmediatamente
+      console.log('⏳ Iniciando updateProgress en 50ms...');
+      setTimeout(updateProgress, 50);
+    } // Fin de initLoadingAnimation
 
+    // Ejecutar la animación de carga
+    // Si el DOM ya está listo, ejecutar ahora; si no, esperar
+    console.log('📌 Programando ejecución de initLoadingAnimation...');
+    if (document.readyState === 'loading') {
+      console.log('⏰ DOM loading, esperando DOMContentLoaded...');
+      document.addEventListener('DOMContentLoaded', initLoadingAnimation);
+    } else {
+      console.log('⚡ DOM ready, ejecutando inmediatamente...');
+      initLoadingAnimation();
+    }
+
+    // Configurar event listeners cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
       // Añadir eventos a botones del toolbar
       document.querySelectorAll('.toolbar-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -1900,16 +2723,17 @@
       
       /* Estilos para el overlay de carga Power BI */
       .powerbi-loading-overlay {
-        position: absolute;
+        position: fixed; /* fixed para cubrir toda la ventana */
         top: 0;
         left: 0;
-        right: 0;
-        bottom: 0;
+        width: 100vw;
+        height: 100vh;
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 1000;
+        z-index: 99999; /* muy por encima para evitar solapamientos */
+        pointer-events: auto;
       }
       
       .powerbi-loading-container {
@@ -1954,7 +2778,7 @@
       
       .powerbi-progress-fill {
         height: 100%;
-        background: linear-gradient(90deg, #118dff 0%, #0078d4 50%, #005a9e 100%);
+        background: linear-gradient(90deg, #FDB913 0%, #F7B500 50%, #F09D00 100%);
         border-radius: 2px;
         width: 0%;
         transition: width 0.3s ease;
@@ -1980,7 +2804,7 @@
       .progress-percentage {
         font-size: 14px;
         font-weight: 600;
-        color: #118dff;
+        color: #F7B500;
         font-family: 'Segoe UI', sans-serif;
       }
       

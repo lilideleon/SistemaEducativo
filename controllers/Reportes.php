@@ -220,4 +220,65 @@ class ReportesController {
             echo "Error: " . $e->getMessage();
         }
     }
+
+    // Nuevo endpoint para filtrar datos del dashboard via AJAX
+    public function filtrarDashboard() {
+        try {
+            // Sólo aceptar peticiones POST
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                http_response_code(405);
+                echo json_encode(['error' => 'Método no permitido']);
+                return;
+            }
+
+            // Leer filtros desde POST
+            $filtros = [];
+            $filtros['periodo'] = isset($_POST['periodo']) ? trim($_POST['periodo']) : '';
+            $filtros['institucion_id'] = isset($_POST['institucion_id']) && $_POST['institucion_id'] !== '' ? intval($_POST['institucion_id']) : '';
+            $filtros['roles'] = isset($_POST['roles']) ? $_POST['roles'] : [];
+            // Si roles viene como JSON string, decodificarlo
+            if (is_string($filtros['roles'])) {
+                $decodedRoles = json_decode($filtros['roles'], true);
+                if (is_array($decodedRoles)) {
+                    $filtros['roles'] = $decodedRoles;
+                } else {
+                    $filtros['roles'] = [];
+                }
+            }
+            $filtros['curso_id'] = isset($_POST['curso_id']) && $_POST['curso_id'] !== '' ? intval($_POST['curso_id']) : '';
+            $filtros['grado_id'] = isset($_POST['grado_id']) && $_POST['grado_id'] !== '' ? intval($_POST['grado_id']) : '';
+
+            // Si periodo viene en formato rango 'dd/mm/yyyy - dd/mm/yyyy', convertir a fechas (para filtros que lo requieran)
+            if (!empty($filtros['periodo']) && strpos($filtros['periodo'], ' - ') !== false) {
+                $fechas = explode(' - ', $filtros['periodo']);
+                if (count($fechas) == 2) {
+                    $filtros['fecha_inicio'] = date('Y-m-d', strtotime(str_replace('/', '-', $fechas[0])));
+                    $filtros['fecha_fin'] = date('Y-m-d', strtotime(str_replace('/', '-', $fechas[1])));
+                }
+            }
+
+            // Llamar a los métodos del modelo. Algunos métodos no aceptan filtros actualmente,
+            // por lo que se hará una llamada estándar. Para obtener datos filtrados por curso/grado
+            // en mejoresAlumnos, se ha adaptado el modelo para usar los filtros si están presentes.
+
+            $mejoresAlumnos = $this->modelo->obtenerMejoresAlumnos($filtros);
+            $promedios = $this->modelo->obtenerPromediosPorInstitucion($filtros);
+            $roles = $this->modelo->obtenerUsuariosPorRol($filtros);
+            $distritos = $this->modelo->obtenerInstitucionesPorDistrito($filtros);
+
+            $response = [
+                'mejoresAlumnos' => $mejoresAlumnos,
+                'promediosPorInstitucion' => $promedios,
+                'usuariosPorRol' => $roles,
+                'institucionesPorDistrito' => $distritos
+            ];
+
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode($response);
+        } catch (Exception $e) {
+            http_response_code(500);
+            error_log('ERROR filtrarDashboard: ' . $e->getMessage());
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+    }
 }
