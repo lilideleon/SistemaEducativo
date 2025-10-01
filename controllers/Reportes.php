@@ -700,34 +700,38 @@ class ReportesController {
             echo '<body>';
             echo '<table border="1">';
             echo '<tr style="background-color: #117867; color: white; font-weight: bold;">';
-            echo '<td colspan="8" style="text-align: center; font-size: 16px; padding: 10px;">REPORTE DE USUARIOS</td>';
+            echo '<td colspan="9" style="text-align: center; font-size: 16px; padding: 10px;">REPORTE DE USUARIOS</td>';
             echo '</tr>';
             echo '<tr style="background-color: #117867; color: white; font-weight: bold;">';
             echo '<td>Código</td>';
-            echo '<td>Nombre Completo</td>';
-            echo '<td>Email</td>';
+            echo '<td>Nombres</td>';
+            echo '<td>Apellidos</td>';
             echo '<td>Rol</td>';
             echo '<td>Institución</td>';
             echo '<td>Grado</td>';
+            echo '<td>Sección</td>';
             echo '<td>Estado</td>';
             echo '<td>Fecha Registro</td>';
             echo '</tr>';
 
             foreach($usuarios as $usuario) {
                 echo '<tr>';
-                echo '<td>' . htmlspecialchars($usuario->codigo) . '</td>';
-                echo '<td>' . htmlspecialchars($usuario->nombre_completo) . '</td>';
-                echo '<td>' . htmlspecialchars($usuario->email) . '</td>';
+                echo '<td>' . htmlspecialchars($usuario->codigo ? $usuario->codigo : 'N/A') . '</td>';
+                echo '<td>' . htmlspecialchars($usuario->nombres) . '</td>';
+                echo '<td>' . htmlspecialchars($usuario->apellidos) . '</td>';
                 echo '<td>' . htmlspecialchars($usuario->rol) . '</td>';
-                echo '<td>' . htmlspecialchars($usuario->institucion) . '</td>';
-                echo '<td>' . htmlspecialchars($usuario->grado) . '</td>';
+                $institucion = $usuario->institucion_nombre ? $usuario->institucion_nombre : 'Sin asignar';
+                echo '<td>' . htmlspecialchars($institucion) . '</td>';
+                $grado = $usuario->grado_nombre ? $usuario->grado_nombre : 'N/A';
+                echo '<td>' . htmlspecialchars($grado) . '</td>';
+                echo '<td>' . ($usuario->seccion ? $usuario->seccion : '-') . '</td>';
                 echo '<td>' . ($usuario->activo == 1 ? 'Activo' : 'Inactivo') . '</td>';
-                echo '<td>' . date('d/m/Y', strtotime($usuario->fecha_registro)) . '</td>';
+                echo '<td>' . date('d/m/Y H:i', strtotime($usuario->creado_en)) . '</td>';
                 echo '</tr>';
             }
 
             echo '<tr style="background-color: #f0f0f0; font-weight: bold;">';
-            echo '<td colspan="8">Total de registros: ' . count($usuarios) . '</td>';
+            echo '<td colspan="9">Total de registros: ' . count($usuarios) . '</td>';
             echo '</tr>';
             echo '</table>';
             echo '</body>';
@@ -755,30 +759,22 @@ class ReportesController {
             echo '<body>';
             echo '<table border="1">';
             echo '<tr style="background-color: #15a085; color: white; font-weight: bold;">';
-            echo '<td colspan="6" style="text-align: center; font-size: 16px; padding: 10px;">REPORTE DE INSTITUCIONES</td>';
+            echo '<td colspan="2" style="text-align: center; font-size: 16px; padding: 10px;">REPORTE DE INSTITUCIONES</td>';
             echo '</tr>';
             echo '<tr style="background-color: #15a085; color: white; font-weight: bold;">';
             echo '<td>ID</td>';
             echo '<td>Nombre</td>';
-            echo '<td>Dirección</td>';
-            echo '<td>Teléfono</td>';
-            echo '<td>Email</td>';
-            echo '<td>Tipo</td>';
             echo '</tr>';
 
             foreach($instituciones as $inst) {
                 echo '<tr>';
                 echo '<td>' . $inst->id . '</td>';
                 echo '<td>' . htmlspecialchars($inst->nombre) . '</td>';
-                echo '<td>' . htmlspecialchars($inst->direccion) . '</td>';
-                echo '<td>' . htmlspecialchars($inst->telefono) . '</td>';
-                echo '<td>' . htmlspecialchars($inst->email) . '</td>';
-                echo '<td>' . htmlspecialchars($inst->tipo) . '</td>';
                 echo '</tr>';
             }
 
             echo '<tr style="background-color: #f0f0f0; font-weight: bold;">';
-            echo '<td colspan="6">Total de instituciones: ' . count($instituciones) . '</td>';
+            echo '<td colspan="2">Total de instituciones: ' . count($instituciones) . '</td>';
             echo '</tr>';
             echo '</table>';
             echo '</body>';
