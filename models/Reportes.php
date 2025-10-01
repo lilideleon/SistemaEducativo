@@ -515,4 +515,186 @@ class ReportesModel {
             $this->Conexion->CerrarConexion();
         }
     }
+
+    // ==================== NUEVOS MÉTODOS PARA REPORTES ====================
+
+    public function obtenerCalificaciones($filtros = []) {
+        try {
+            $this->ConexionSql = $this->Conexion->CrearConexion();
+            
+            $sql = "SELECT 
+                        c.id,
+                        c.puntaje,
+                        c.periodo,
+                        CONCAT(u.nombres, ' ', u.apellidos) as alumno,
+                        u.codigo as codigo_alumno,
+                        cur.nombre as curso,
+                        g.nombre as grado,
+                        i.nombre as institucion,
+                        c.activo
+                    FROM calificaciones c
+                    INNER JOIN usuarios u ON c.alumno_user_id = u.id
+                    INNER JOIN cursos cur ON c.curso_id = cur.id
+                    INNER JOIN grados g ON c.grado_id = g.id
+                    INNER JOIN instituciones i ON c.institucion_id = i.id
+                    WHERE c.activo = 1";
+            
+            $params = [];
+            
+            if (!empty($filtros['institucion_id'])) {
+                $sql .= " AND c.institucion_id = ?";
+                $params[] = $filtros['institucion_id'];
+            }
+            
+            if (!empty($filtros['curso_id'])) {
+                $sql .= " AND c.curso_id = ?";
+                $params[] = $filtros['curso_id'];
+            }
+            
+            if (!empty($filtros['grado_id'])) {
+                $sql .= " AND c.grado_id = ?";
+                $params[] = $filtros['grado_id'];
+            }
+            
+            if (!empty($filtros['periodo'])) {
+                $sql .= " AND c.periodo = ?";
+                $params[] = $filtros['periodo'];
+            }
+            
+            $sql .= " ORDER BY u.apellidos, u.nombres, cur.nombre";
+            
+            $stmt = $this->ConexionSql->prepare($sql);
+            if (!empty($params)) {
+                $stmt->execute($params);
+            } else {
+                $stmt->execute();
+            }
+            
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+            
+        } catch (Exception $e) {
+            error_log('ERROR obtenerCalificaciones: ' . $e->getMessage());
+            return [];
+        } finally {
+            $this->Conexion->CerrarConexion();
+        }
+    }
+
+    public function obtenerDistritos() {
+        try {
+            $this->ConexionSql = $this->Conexion->CrearConexion();
+            $sql = "SELECT id, nombre FROM distritos ORDER BY nombre";
+            $stmt = $this->ConexionSql->query($sql);
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+        } catch (Exception $e) {
+            error_log('ERROR obtenerDistritos: ' . $e->getMessage());
+            return [];
+        } finally {
+            $this->Conexion->CerrarConexion();
+        }
+    }
+
+    public function obtenerResumenAcademicoDetallado($filtros = []) {
+        try {
+            $this->ConexionSql = $this->Conexion->CrearConexion();
+            
+            $sql = "SELECT 
+                        i.id as institucion_id,
+                        i.nombre as institucion,
+                        i.tipo,
+                        d.nombre as distrito,
+                        COUNT(DISTINCT u.id) as total_usuarios,
+                        COUNT(DISTINCT CASE WHEN u.rol = 'ALUMNO' THEN u.id END) as total_alumnos,
+                        COUNT(DISTINCT CASE WHEN u.rol = 'DOCENTE' THEN u.id END) as total_docentes,
+                        COUNT(DISTINCT CASE WHEN u.rol = 'DIRECTOR' THEN u.id END) as total_directores,
+                        COUNT(DISTINCT c.id) as total_calificaciones,
+                        COALESCE(ROUND(AVG(c.puntaje), 2), 0) as promedio_general,
+                        COUNT(DISTINCT e.id) as total_encuestas,
+                        COUNT(DISTINCT u.grado_id) as grados_activos
+                    FROM instituciones i
+                    LEFT JOIN distritos d ON i.distrito_id = d.id
+                    LEFT JOIN usuarios u ON i.id = u.institucion_id AND u.activo = 1
+                    LEFT JOIN calificaciones c ON i.id = c.institucion_id AND c.activo = 1
+                    LEFT JOIN encuestas e ON i.id = e.institucion_id AND e.activo = 1
+                    WHERE 1=1";
+            
+            $params = [];
+            
+            if (!empty($filtros['institucion_id'])) {
+                $sql .= " AND i.id = ?";
+                $params[] = $filtros['institucion_id'];
+            }
+            
+            if (!empty($filtros['distrito_id'])) {
+                $sql .= " AND i.distrito_id = ?";
+                $params[] = $filtros['distrito_id'];
+            }
+            
+            $sql .= " GROUP BY i.id, i.nombre, i.tipo, d.nombre
+                     HAVING total_usuarios > 0
+                     ORDER BY total_alumnos DESC, i.nombre";
+            
+            $stmt = $this->ConexionSql->prepare($sql);
+            if (!empty($params)) {
+                $stmt->execute($params);
+            } else {
+                $stmt->execute();
+            }
+            
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+            
+        } catch (Exception $e) {
+            error_log('ERROR obtenerResumenAcademicoDetallado: ' . $e->getMessage());
+            return [];
+        } finally {
+            $this->Conexion->CerrarConexion();
+        }
+    }
+
+    public function obtenerInstitucionesPorDistritoDetallado($filtros = []) {
+        try {
+            $this->ConexionSql = $this->Conexion->CrearConexion();
+            
+            $sql = "SELECT 
+                        d.id as distrito_id,
+                        d.nombre as distrito,
+                        i.id as institucion_id,
+                        i.nombre as institucion,
+                        i.tipo,
+                        COUNT(DISTINCT u.id) as total_usuarios,
+                        COUNT(DISTINCT CASE WHEN u.rol = 'ALUMNO' THEN u.id END) as total_alumnos,
+                        COUNT(DISTINCT CASE WHEN u.rol = 'DOCENTE' THEN u.id END) as total_docentes,
+                        COALESCE(ROUND(AVG(c.puntaje), 2), 0) as promedio_institucion
+                    FROM distritos d
+                    LEFT JOIN instituciones i ON d.id = i.distrito_id
+                    LEFT JOIN usuarios u ON i.id = u.institucion_id AND u.activo = 1
+                    LEFT JOIN calificaciones c ON i.id = c.institucion_id AND c.activo = 1
+                    WHERE i.id IS NOT NULL";
+            
+            $params = [];
+            
+            if (!empty($filtros['distrito_id'])) {
+                $sql .= " AND d.id = ?";
+                $params[] = $filtros['distrito_id'];
+            }
+            
+            $sql .= " GROUP BY d.id, d.nombre, i.id, i.nombre, i.tipo
+                     ORDER BY d.nombre, i.nombre";
+            
+            $stmt = $this->ConexionSql->prepare($sql);
+            if (!empty($params)) {
+                $stmt->execute($params);
+            } else {
+                $stmt->execute();
+            }
+            
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+            
+        } catch (Exception $e) {
+            error_log('ERROR obtenerInstitucionesPorDistritoDetallado: ' . $e->getMessage());
+            return [];
+        } finally {
+            $this->Conexion->CerrarConexion();
+        }
+    }
 }

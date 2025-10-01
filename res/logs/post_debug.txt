@@ -1,7 +1,0 @@
-2025-09-13T02:35:47+00:00 {"Codigo":"76543","nombres":"ana","apellidos":"ads","Rol":"DIRECTOR","Contraseña":"5645","GradoId":"","InstitucionId":"","Seccion":""}
-2025-09-13T02:38:21+00:00 {"Codigo":"345846","nombres":"dfa","apellidos":"fdas","Rol":"DIRECTOR","Contraseña":"fdsa","GradoId":"","InstitucionId":"","Seccion":""}
-2025-09-13T02:40:53+00:00 {"Codigo":"432432","nombres":"gdsas","apellidos":"gdsa","Rol":"DIRECTOR","Contraseña":"4321432","GradoId":"2","InstitucionId":"2","Seccion":""}
-2025-09-13T02:41:21+00:00 {"Codigo":"566546","nombres":"fdsafds","apellidos":"de leon","Rol":"ALUMNO","Contraseña":"342dfsa","GradoId":"4","InstitucionId":"3","Seccion":"1"}
-2025-09-13T03:21:44+00:00 {"Codigo":"ana","nombres":"de León","apellidos":"aguilar","Rol":"DIRECTOR","Contraseña":"test","GradoId":"4","InstitucionId":"3","Seccion":""}
-2025-09-20T16:29:47+00:00 {"Codigo":"1111","nombres":"cesr","apellidos":"test","Rol":"ALUMNO","Contraseña":"1111","GradoId":"1","InstitucionId":"10","Seccion":"2"}
-2025-09-28T09:29:35-06:00 {"Codigo":"0000","nombres":"ana","apellidos":"maria","Rol":"ALUMNO","Contraseña":"1234","GradoId":"2","InstitucionId":"12","Seccion":"2"}

@@ -8,7 +8,7 @@ class ReportesController {
     public function __construct() {
         @session_start();
         require_once "core/AuthValidation.php";
-        validarRol(['ADMIN','DIRECTOR']);
+        validarRol(['ADMIN','DIRECTOR','DOCENTE']); // Permitir también a docentes
         
         // Asegurar que la zona horaria esté configurada
         if (!ini_get('date.timezone')) {
@@ -281,4 +281,526 @@ class ReportesController {
             echo json_encode(['error' => $e->getMessage()]);
         }
     }
+
+    public function impresos() {
+        try {
+            // Obtener instituciones para los filtros
+            $instituciones = $this->modelo->obtenerInstituciones();
+            
+            // Extraer variable para la vista
+            extract(['instituciones' => $instituciones]);
+            
+            // Cargar la vista de reportes impresos
+            require_once "views/Reportes/Impresos.php";
+        } catch (Exception $e) {
+            echo "Error: " . $e->getMessage();
+        }
+    }
+
+    // ==================== GENERACIÓN DE REPORTES PDF ====================
+
+    public function generarPDFUsuarios() {
+        try {
+            // Obtener filtros de la URL
+            $filtros = [
+                'rol' => isset($_GET['rol']) ? $_GET['rol'] : '',
+                'institucion_id' => isset($_GET['institucion_id']) ? $_GET['institucion_id'] : '',
+                'grado_id' => isset($_GET['grado_id']) ? $_GET['grado_id'] : '',
+                'activo' => isset($_GET['activo']) ? $_GET['activo'] : '1'
+            ];
+
+            // Obtener usuarios
+            $usuarios = $this->modelo->obtenerUsuarios($filtros);
+
+            // Crear PDF con diseño profesional
+            $pdf = new PDF_Usuarios();
+            $pdf->SetTitle('Reporte de Usuarios');
+            $pdf->SetAuthor('Sistema Educativo');
+            $pdf->AliasNbPages();
+            $pdf->AddPage('L'); // Landscape para más espacio
+            
+            // Información de filtros aplicados
+            $pdf->SetFont('Arial', '', 9);
+            $pdf->SetTextColor(100, 100, 100);
+            $fechaActual = date('d/m/Y H:i:s');
+            $pdf->Cell(0, 5, 'Fecha de generacion: ' . $fechaActual, 0, 1, 'L');
+            $pdf->Cell(0, 5, 'Total de registros: ' . count($usuarios), 0, 1, 'L');
+            $pdf->Ln(5);
+
+            // Encabezados de tabla con color verde
+            $pdf->SetFillColor(17, 120, 103); // Verde del sistema
+            $pdf->SetTextColor(255, 255, 255);
+            $pdf->SetDrawColor(17, 120, 103);
+            $pdf->SetLineWidth(0.3);
+            $pdf->SetFont('Arial', 'B', 9);
+
+            // Anchos de columnas
+            $w = array(25, 40, 40, 25, 55, 30, 20, 20);
+            
+            $headers = array('Codigo', 'Nombres', 'Apellidos', 'Rol', 'Institucion', 'Grado', 'Seccion', 'Estado');
+            for($i = 0; $i < count($headers); $i++) {
+                $pdf->Cell($w[$i], 7, utf8_decode($headers[$i]), 1, 0, 'C', true);
+            }
+            $pdf->Ln();
+
+            // Datos con colores alternados
+            $pdf->SetFillColor(240, 255, 250); // Verde muy claro
+            $pdf->SetTextColor(50, 50, 50);
+            $pdf->SetFont('Arial', '', 8);
+
+            $fill = false;
+            foreach($usuarios as $usuario) {
+                $pdf->Cell($w[0], 6, utf8_decode($usuario->codigo), 'LR', 0, 'L', $fill);
+                $pdf->Cell($w[1], 6, utf8_decode(substr($usuario->nombres, 0, 25)), 'LR', 0, 'L', $fill);
+                $pdf->Cell($w[2], 6, utf8_decode(substr($usuario->apellidos, 0, 25)), 'LR', 0, 'L', $fill);
+                $pdf->Cell($w[3], 6, utf8_decode($usuario->rol), 'LR', 0, 'C', $fill);
+                $institucion = isset($usuario->institucion_nombre) ? substr($usuario->institucion_nombre, 0, 35) : '-';
+                $pdf->Cell($w[4], 6, utf8_decode($institucion), 'LR', 0, 'L', $fill);
+                $grado = isset($usuario->grado_nombre) ? substr($usuario->grado_nombre, 0, 20) : '-';
+                $pdf->Cell($w[5], 6, utf8_decode($grado), 'LR', 0, 'L', $fill);
+                $pdf->Cell($w[6], 6, $usuario->seccion ? utf8_decode($usuario->seccion) : '-', 'LR', 0, 'C', $fill);
+                $pdf->Cell($w[7], 6, $usuario->activo ? 'Activo' : 'Inactivo', 'LR', 0, 'C', $fill);
+                $pdf->Ln();
+                $fill = !$fill;
+            }
+
+            // Línea de cierre
+            $pdf->Cell(array_sum($w), 0, '', 'T');
+
+            // Output
+            $pdf->Output('D', 'Reporte_Usuarios_' . date('Ymd_His') . '.pdf');
+
+        } catch (Exception $e) {
+            echo "Error al generar PDF: " . $e->getMessage();
+        }
+    }
+
+    public function generarPDFInstituciones() {
+        try {
+            // Obtener instituciones
+            $instituciones = $this->modelo->obtenerInstituciones();
+
+            // Crear PDF con diseño profesional
+            $pdf = new PDF_Instituciones();
+            $pdf->SetTitle('Reporte de Instituciones');
+            $pdf->SetAuthor('Sistema Educativo');
+            $pdf->AliasNbPages();
+            $pdf->AddPage();
+            
+            // Información de generación
+            $pdf->SetFont('Arial', '', 9);
+            $pdf->SetTextColor(100, 100, 100);
+            $fechaActual = date('d/m/Y H:i:s');
+            $pdf->Cell(0, 5, 'Fecha de generacion: ' . $fechaActual, 0, 1, 'L');
+            $pdf->Cell(0, 5, 'Total de instituciones: ' . count($instituciones), 0, 1, 'L');
+            $pdf->Ln(5);
+
+            // Encabezados de tabla con color verde
+            $pdf->SetFillColor(17, 120, 103); // Verde del sistema
+            $pdf->SetTextColor(255, 255, 255);
+            $pdf->SetDrawColor(17, 120, 103);
+            $pdf->SetLineWidth(0.3);
+            $pdf->SetFont('Arial', 'B', 10);
+
+            $w = array(20, 170);
+            $pdf->Cell($w[0], 7, 'ID', 1, 0, 'C', true);
+            $pdf->Cell($w[1], 7, utf8_decode('Nombre de la Institucion'), 1, 0, 'C', true);
+            $pdf->Ln();
+
+            // Datos con colores alternados
+            $pdf->SetFillColor(240, 255, 250); // Verde muy claro
+            $pdf->SetTextColor(50, 50, 50);
+            $pdf->SetFont('Arial', '', 9);
+
+            $fill = false;
+            foreach($instituciones as $inst) {
+                $pdf->Cell($w[0], 6, $inst->id, 'LR', 0, 'C', $fill);
+                $pdf->Cell($w[1], 6, utf8_decode($inst->nombre), 'LR', 0, 'L', $fill);
+                $pdf->Ln();
+                $fill = !$fill;
+            }
+
+            // Línea de cierre
+            $pdf->Cell(array_sum($w), 0, '', 'T');
+
+            // Output
+            $pdf->Output('D', 'Reporte_Instituciones_' . date('Ymd_His') . '.pdf');
+
+        } catch (Exception $e) {
+            echo "Error al generar PDF: " . $e->getMessage();
+        }
+    }
+
+    public function generarPDFCalificaciones() {
+        try {
+            $filtros = [
+                'institucion_id' => isset($_GET['institucion_id']) ? $_GET['institucion_id'] : '',
+                'curso_id' => isset($_GET['curso_id']) ? $_GET['curso_id'] : '',
+                'grado_id' => isset($_GET['grado_id']) ? $_GET['grado_id'] : '',
+                'periodo' => isset($_GET['periodo']) ? $_GET['periodo'] : ''
+            ];
+
+            $calificaciones = $this->modelo->obtenerCalificaciones($filtros);
+
+            $pdf = new PDF_Calificaciones();
+            $pdf->SetTitle('Reporte de Calificaciones');
+            $pdf->SetAuthor('Sistema Educativo');
+            $pdf->AliasNbPages();
+            $pdf->AddPage('L');
+            
+            $pdf->SetFont('Arial', '', 9);
+            $pdf->SetTextColor(100, 100, 100);
+            $fechaActual = date('d/m/Y H:i:s');
+            $pdf->Cell(0, 5, 'Fecha de generacion: ' . $fechaActual, 0, 1, 'L');
+            $pdf->Cell(0, 5, 'Total de registros: ' . count($calificaciones), 0, 1, 'L');
+            $pdf->Ln(5);
+
+            // Encabezados
+            $pdf->SetFillColor(26, 188, 156); // Verde info
+            $pdf->SetTextColor(255, 255, 255);
+            $pdf->SetDrawColor(26, 188, 156);
+            $pdf->SetLineWidth(0.3);
+            $pdf->SetFont('Arial', 'B', 9);
+
+            $w = array(25, 50, 45, 40, 45, 30, 25);
+            $headers = array('Codigo', 'Alumno', 'Curso', 'Grado', 'Institucion', 'Periodo', 'Puntaje');
+            for($i = 0; $i < count($headers); $i++) {
+                $pdf->Cell($w[$i], 7, utf8_decode($headers[$i]), 1, 0, 'C', true);
+            }
+            $pdf->Ln();
+
+            // Datos
+            $pdf->SetFillColor(240, 255, 250);
+            $pdf->SetTextColor(50, 50, 50);
+            $pdf->SetFont('Arial', '', 8);
+
+            $fill = false;
+            foreach($calificaciones as $cal) {
+                $pdf->Cell($w[0], 6, utf8_decode($cal->codigo_alumno), 'LR', 0, 'L', $fill);
+                $pdf->Cell($w[1], 6, utf8_decode(substr($cal->alumno, 0, 30)), 'LR', 0, 'L', $fill);
+                $pdf->Cell($w[2], 6, utf8_decode(substr($cal->curso, 0, 25)), 'LR', 0, 'L', $fill);
+                $pdf->Cell($w[3], 6, utf8_decode(substr($cal->grado, 0, 20)), 'LR', 0, 'L', $fill);
+                $pdf->Cell($w[4], 6, utf8_decode(substr($cal->institucion, 0, 25)), 'LR', 0, 'L', $fill);
+                $pdf->Cell($w[5], 6, utf8_decode($cal->periodo), 'LR', 0, 'C', $fill);
+                $pdf->Cell($w[6], 6, number_format($cal->puntaje, 2), 'LR', 0, 'C', $fill);
+                $pdf->Ln();
+                $fill = !$fill;
+            }
+
+            $pdf->Cell(array_sum($w), 0, '', 'T');
+            $pdf->Output('D', 'Reporte_Calificaciones_' . date('Ymd_His') . '.pdf');
+
+        } catch (Exception $e) {
+            echo "Error al generar PDF: " . $e->getMessage();
+        }
+    }
+
+    public function generarPDFDistritos() {
+        try {
+            $filtros = [
+                'distrito_id' => isset($_GET['distrito_id']) ? $_GET['distrito_id'] : ''
+            ];
+
+            $datos = $this->modelo->obtenerInstitucionesPorDistritoDetallado($filtros);
+
+            $pdf = new PDF_Distritos();
+            $pdf->SetTitle('Reporte por Distrito');
+            $pdf->SetAuthor('Sistema Educativo');
+            $pdf->AliasNbPages();
+            $pdf->AddPage('L');
+            
+            $pdf->SetFont('Arial', '', 9);
+            $pdf->SetTextColor(100, 100, 100);
+            $fechaActual = date('d/m/Y H:i:s');
+            $pdf->Cell(0, 5, 'Fecha de generacion: ' . $fechaActual, 0, 1, 'L');
+            $pdf->Cell(0, 5, 'Total de registros: ' . count($datos), 0, 1, 'L');
+            $pdf->Ln(5);
+
+            // Encabezados
+            $pdf->SetFillColor(46, 204, 113); // Verde advertencia
+            $pdf->SetTextColor(255, 255, 255);
+            $pdf->SetDrawColor(46, 204, 113);
+            $pdf->SetLineWidth(0.3);
+            $pdf->SetFont('Arial', 'B', 9);
+
+            $w = array(40, 70, 40, 30, 30, 30, 30);
+            $headers = array('Distrito', 'Institucion', 'Tipo', 'Usuarios', 'Alumnos', 'Docentes', 'Promedio');
+            for($i = 0; $i < count($headers); $i++) {
+                $pdf->Cell($w[$i], 7, utf8_decode($headers[$i]), 1, 0, 'C', true);
+            }
+            $pdf->Ln();
+
+            // Datos agrupados por distrito
+            $pdf->SetFillColor(240, 255, 250);
+            $pdf->SetTextColor(50, 50, 50);
+            $pdf->SetFont('Arial', '', 8);
+
+            $fill = false;
+            $distrito_actual = '';
+            
+            foreach($datos as $dato) {
+                // Si cambia el distrito, agregar subtotal o separador
+                if ($distrito_actual != $dato->distrito && $distrito_actual != '') {
+                    $pdf->Ln(2);
+                }
+                $distrito_actual = $dato->distrito;
+                
+                $pdf->Cell($w[0], 6, utf8_decode(substr($dato->distrito, 0, 25)), 'LR', 0, 'L', $fill);
+                $pdf->Cell($w[1], 6, utf8_decode(substr($dato->institucion, 0, 45)), 'LR', 0, 'L', $fill);
+                $tipo_value = isset($dato->tipo) ? $dato->tipo : 'N/D';
+                $pdf->Cell($w[2], 6, utf8_decode(substr($tipo_value, 0, 20)), 'LR', 0, 'C', $fill);
+                $pdf->Cell($w[3], 6, $dato->total_usuarios, 'LR', 0, 'C', $fill);
+                $pdf->Cell($w[4], 6, $dato->total_alumnos, 'LR', 0, 'C', $fill);
+                $pdf->Cell($w[5], 6, $dato->total_docentes, 'LR', 0, 'C', $fill);
+                $promedio = $dato->promedio_institucion > 0 ? number_format($dato->promedio_institucion, 2) : 'N/D';
+                $pdf->Cell($w[6], 6, $promedio, 'LR', 0, 'C', $fill);
+                $pdf->Ln();
+                $fill = !$fill;
+            }
+
+            $pdf->Cell(array_sum($w), 0, '', 'T');
+            $pdf->Output('D', 'Reporte_Distritos_' . date('Ymd_His') . '.pdf');
+
+        } catch (Exception $e) {
+            echo "Error al generar PDF: " . $e->getMessage();
+        }
+    }
+
+    public function generarPDFResumenAcademico() {
+        try {
+            $filtros = [
+                'institucion_id' => isset($_GET['institucion_id']) ? $_GET['institucion_id'] : '',
+                'distrito_id' => isset($_GET['distrito_id']) ? $_GET['distrito_id'] : ''
+            ];
+
+            $resumen = $this->modelo->obtenerResumenAcademicoDetallado($filtros);
+
+            $pdf = new PDF_ResumenAcademico();
+            $pdf->SetTitle('Resumen Academico');
+            $pdf->SetAuthor('Sistema Educativo');
+            $pdf->AliasNbPages();
+            $pdf->AddPage('L');
+            
+            $pdf->SetFont('Arial', '', 9);
+            $pdf->SetTextColor(100, 100, 100);
+            $fechaActual = date('d/m/Y H:i:s');
+            $pdf->Cell(0, 5, 'Fecha de generacion: ' . $fechaActual, 0, 1, 'L');
+            $pdf->Cell(0, 5, 'Total de instituciones: ' . count($resumen), 0, 1, 'L');
+            $pdf->Ln(5);
+
+            // Encabezados
+            $pdf->SetFillColor(72, 201, 176); // Verde claro
+            $pdf->SetTextColor(255, 255, 255);
+            $pdf->SetDrawColor(72, 201, 176);
+            $pdf->SetLineWidth(0.3);
+            $pdf->SetFont('Arial', 'B', 8);
+
+            $w = array(55, 35, 22, 22, 22, 22, 28, 28, 26);
+            $headers = array('Institucion', 'Distrito', 'Alumnos', 'Docentes', 'Direct.', 'Total', 'Calif.', 'Promedio', 'Encuestas');
+            for($i = 0; $i < count($headers); $i++) {
+                $pdf->Cell($w[$i], 7, utf8_decode($headers[$i]), 1, 0, 'C', true);
+            }
+            $pdf->Ln();
+
+            // Datos
+            $pdf->SetFillColor(240, 255, 250);
+            $pdf->SetTextColor(50, 50, 50);
+            $pdf->SetFont('Arial', '', 7);
+
+            $fill = false;
+            $totales = [
+                'alumnos' => 0,
+                'docentes' => 0,
+                'directores' => 0,
+                'usuarios' => 0,
+                'calificaciones' => 0,
+                'encuestas' => 0
+            ];
+
+            foreach($resumen as $res) {
+                $pdf->Cell($w[0], 6, utf8_decode(substr($res->institucion, 0, 35)), 'LR', 0, 'L', $fill);
+                $distrito_value = isset($res->distrito) ? $res->distrito : 'N/D';
+                $pdf->Cell($w[1], 6, utf8_decode(substr($distrito_value, 0, 20)), 'LR', 0, 'L', $fill);
+                $pdf->Cell($w[2], 6, $res->total_alumnos, 'LR', 0, 'C', $fill);
+                $pdf->Cell($w[3], 6, $res->total_docentes, 'LR', 0, 'C', $fill);
+                $pdf->Cell($w[4], 6, $res->total_directores, 'LR', 0, 'C', $fill);
+                $pdf->Cell($w[5], 6, $res->total_usuarios, 'LR', 0, 'C', $fill);
+                $pdf->Cell($w[6], 6, $res->total_calificaciones, 'LR', 0, 'C', $fill);
+                $pdf->Cell($w[7], 6, number_format($res->promedio_general, 2), 'LR', 0, 'C', $fill);
+                $pdf->Cell($w[8], 6, $res->total_encuestas, 'LR', 0, 'C', $fill);
+                $pdf->Ln();
+                $fill = !$fill;
+
+                // Acumular totales
+                $totales['alumnos'] += $res->total_alumnos;
+                $totales['docentes'] += $res->total_docentes;
+                $totales['directores'] += $res->total_directores;
+                $totales['usuarios'] += $res->total_usuarios;
+                $totales['calificaciones'] += $res->total_calificaciones;
+                $totales['encuestas'] += $res->total_encuestas;
+            }
+
+            // Línea de totales
+            $pdf->Cell(array_sum($w), 0, '', 'T');
+            $pdf->Ln();
+            $pdf->SetFont('Arial', 'B', 8);
+            $pdf->SetFillColor(72, 201, 176);
+            $pdf->SetTextColor(255, 255, 255);
+            $pdf->Cell($w[0] + $w[1], 6, 'TOTALES', 1, 0, 'C', true);
+            $pdf->Cell($w[2], 6, $totales['alumnos'], 1, 0, 'C', true);
+            $pdf->Cell($w[3], 6, $totales['docentes'], 1, 0, 'C', true);
+            $pdf->Cell($w[4], 6, $totales['directores'], 1, 0, 'C', true);
+            $pdf->Cell($w[5], 6, $totales['usuarios'], 1, 0, 'C', true);
+            $pdf->Cell($w[6], 6, $totales['calificaciones'], 1, 0, 'C', true);
+            $pdf->Cell($w[7], 6, '-', 1, 0, 'C', true);
+            $pdf->Cell($w[8], 6, $totales['encuestas'], 1, 0, 'C', true);
+
+            $pdf->Output('D', 'Reporte_Resumen_Academico_' . date('Ymd_His') . '.pdf');
+
+        } catch (Exception $e) {
+            echo "Error al generar PDF: " . $e->getMessage();
+        }
+    }
 }
+
+// ==================== CLASES PERSONALIZADAS PARA PDFs ====================
+
+class PDF_Usuarios extends FPDF {
+    // Cabecera
+    function Header() {
+        // Logo o imagen (opcional)
+        // $this->Image('logo.png', 10, 6, 30);
+        
+        // Fondo verde para el header
+        $this->SetFillColor(17, 120, 103);
+        $this->Rect(0, 0, 297, 35, 'F');
+        
+        // Título
+        $this->SetY(10);
+        $this->SetFont('Arial', 'B', 18);
+        $this->SetTextColor(255, 255, 255);
+        $this->Cell(0, 10, 'REPORTE DE USUARIOS', 0, 1, 'C');
+        
+        // Subtítulo
+        $this->SetFont('Arial', '', 11);
+        $this->Cell(0, 6, 'Sistema Educativo - Listado Completo', 0, 1, 'C');
+        
+        $this->Ln(8);
+    }
+    
+    // Pie de página
+    function Footer() {
+        $this->SetY(-15);
+        $this->SetFont('Arial', 'I', 8);
+        $this->SetTextColor(128, 128, 128);
+        $this->Cell(0, 10, utf8_decode('Página ') . $this->PageNo() . '/{nb}', 0, 0, 'C');
+        $this->SetX(10);
+        $this->Cell(0, 10, 'Sistema Educativo ' . date('Y'), 0, 0, 'L');
+        $this->Cell(0, 10, 'Generado: ' . date('d/m/Y H:i'), 0, 0, 'R');
+    }
+}
+
+class PDF_Instituciones extends FPDF {
+    // Cabecera
+    function Header() {
+        // Fondo verde para el header
+        $this->SetFillColor(21, 160, 133); // Verde más claro
+        $this->Rect(0, 0, 210, 35, 'F');
+        
+        // Título
+        $this->SetY(10);
+        $this->SetFont('Arial', 'B', 18);
+        $this->SetTextColor(255, 255, 255);
+        $this->Cell(0, 10, utf8_decode('REPORTE DE INSTITUCIONES'), 0, 1, 'C');
+        
+        // Subtítulo
+        $this->SetFont('Arial', '', 11);
+        $this->Cell(0, 6, utf8_decode('Sistema Educativo - Catálogo de Instituciones'), 0, 1, 'C');
+        
+        $this->Ln(8);
+    }
+    
+    // Pie de página
+    function Footer() {
+        $this->SetY(-15);
+        $this->SetFont('Arial', 'I', 8);
+        $this->SetTextColor(128, 128, 128);
+        $this->Cell(0, 10, utf8_decode('Página ') . $this->PageNo() . '/{nb}', 0, 0, 'C');
+        $this->SetX(10);
+        $this->Cell(0, 10, 'Sistema Educativo ' . date('Y'), 0, 0, 'L');
+        $this->Cell(0, 10, 'Generado: ' . date('d/m/Y H:i'), 0, 0, 'R');
+    }
+}
+
+class PDF_Calificaciones extends FPDF {
+    function Header() {
+        $this->SetFillColor(26, 188, 156);
+        $this->Rect(0, 0, 297, 35, 'F');
+        $this->SetY(10);
+        $this->SetFont('Arial', 'B', 18);
+        $this->SetTextColor(255, 255, 255);
+        $this->Cell(0, 10, 'REPORTE DE CALIFICACIONES', 0, 1, 'C');
+        $this->SetFont('Arial', '', 11);
+        $this->Cell(0, 6, utf8_decode('Sistema Educativo - Concentrado de Calificaciones'), 0, 1, 'C');
+        $this->Ln(8);
+    }
+    
+    function Footer() {
+        $this->SetY(-15);
+        $this->SetFont('Arial', 'I', 8);
+        $this->SetTextColor(128, 128, 128);
+        $this->Cell(0, 10, utf8_decode('Página ') . $this->PageNo() . '/{nb}', 0, 0, 'C');
+        $this->SetX(10);
+        $this->Cell(0, 10, 'Sistema Educativo ' . date('Y'), 0, 0, 'L');
+        $this->Cell(0, 10, 'Generado: ' . date('d/m/Y H:i'), 0, 0, 'R');
+    }
+}
+
+class PDF_Distritos extends FPDF {
+    function Header() {
+        $this->SetFillColor(11, 79, 68); // Verde oscuro
+        $this->Rect(0, 0, 297, 35, 'F');
+        $this->SetY(10);
+        $this->SetFont('Arial', 'B', 18);
+        $this->SetTextColor(255, 255, 255);
+        $this->Cell(0, 10, 'REPORTE POR DISTRITO', 0, 1, 'C');
+        $this->SetFont('Arial', '', 11);
+        $this->Cell(0, 6, utf8_decode('Sistema Educativo - Instituciones Agrupadas por Distrito'), 0, 1, 'C');
+        $this->Ln(8);
+    }
+    
+    function Footer() {
+        $this->SetY(-15);
+        $this->SetFont('Arial', 'I', 8);
+        $this->SetTextColor(128, 128, 128);
+        $this->Cell(0, 10, utf8_decode('Página ') . $this->PageNo() . '/{nb}', 0, 0, 'C');
+        $this->SetX(10);
+        $this->Cell(0, 10, 'Sistema Educativo ' . date('Y'), 0, 0, 'L');
+        $this->Cell(0, 10, 'Generado: ' . date('d/m/Y H:i'), 0, 0, 'R');
+    }
+}
+
+class PDF_ResumenAcademico extends FPDF {
+    function Header() {
+        $this->SetFillColor(72, 201, 176); // Verde claro
+        $this->Rect(0, 0, 297, 35, 'F');
+        $this->SetY(10);
+        $this->SetFont('Arial', 'B', 18);
+        $this->SetTextColor(255, 255, 255);
+        $this->Cell(0, 10, utf8_decode('RESUMEN ACADÉMICO'), 0, 1, 'C');
+        $this->SetFont('Arial', '', 11);
+        $this->Cell(0, 6, utf8_decode('Sistema Educativo - Estadísticas Completas por Institución'), 0, 1, 'C');
+        $this->Ln(8);
+    }
+    
+    function Footer() {
+        $this->SetY(-15);
+        $this->SetFont('Arial', 'I', 8);
+        $this->SetTextColor(128, 128, 128);
+        $this->Cell(0, 10, utf8_decode('Página ') . $this->PageNo() . '/{nb}', 0, 0, 'C');
+        $this->SetX(10);
+        $this->Cell(0, 10, 'Sistema Educativo ' . date('Y'), 0, 0, 'L');
+        $this->Cell(0, 10, 'Generado: ' . date('d/m/Y H:i'), 0, 0, 'R');
+    }
+}
+?>
