@@ -112,7 +112,6 @@
           <div class="form-title">Registro de Alumnos</div>
           <div class="p-3">
             <form id="frmAlumno" class="row g-3 align-items-end">
-              <input type="hidden" id="idUsuario" />
               <div class="col-md-3">
                 <label for="codigo" class="form-label">Código</label>
                 <input type="text" class="form-control form-control-sm" id="codigo" required>
@@ -149,8 +148,7 @@
                   <option value="" selected disabled>Seleccione un rol</option>
                   <option value="Alumno">Alumno</option>
                   <option value="Director">Director</option>
-                  <option value="Secretario">Secretario</option>
-                  <option value="Profesor">Profesor</option>
+                  <option value="Docente">Docente</option>
                 </select>
               </div>
               <div class="col-md-3">
@@ -162,9 +160,15 @@
                   </button>
                 </div>
               </div>
-              <div class="col-md-3 ms-auto text-md-end">
-                <button type="submit" class="btn-registrar mt-2" id="btnGuardar">
-                  Registrar
+              <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                <button type="button" class="btn btn-secondary btn-sm" id="btnNuevo">
+                  <i class="bi bi-file-earmark-plus"></i> Nuevo
+                </button>
+                <button type="button" class="btn btn-primary btn-sm btn-registrar" id="btnGuardar">
+                  <i class="bi bi-save"></i> Guardar
+                </button>
+                <button type="button" class="btn btn-success btn-sm" id="btnActualizar">
+                  <i class="bi bi-arrow-repeat"></i> Actualizar
                 </button>
               </div>
             </form>
@@ -250,9 +254,11 @@
       }
     });
     (() => {
-      const frm = document.getElementById('frmAlumno');
-      const tbody = document.querySelector('#tblAlumnos tbody');
-      const btnGuardar = document.getElementById('btnGuardar');
+  const frm = document.getElementById('frmAlumno');
+  const tbody = document.querySelector('#tblAlumnos tbody');
+  const btnGuardar = document.getElementById('btnGuardar');
+  const btnActualizar = document.getElementById('btnActualizar');
+  const btnNuevo = document.getElementById('btnNuevo');
 
       // Intentar primero la URL corta y si falla, usar index.php como fallback
       const baseCandidates = ['?c=Usuarios', 'index.php?c=Usuarios'];
@@ -292,7 +298,8 @@
       const rolMap = {
         'Alumno': 'ALUMNO',
         'Director': 'DIRECTOR',
-        'Profesor': 'DOCENTE'
+        'Docente': 'DOCENTE',
+        'Admin': 'ADMIN'
       };
 
       const splitTwo = (str) => {
@@ -304,6 +311,21 @@
       let editId = null;
       let deleteId = null;
 
+      // Control de modo de la UI: 'nuevo' o 'edicion'
+      const setMode = (mode) => {
+        if (mode === 'nuevo') {
+          // Requisito: cuando sea "Nuevo" los otros dos se bloquean
+          btnGuardar.disabled = false;  // acción vigente
+          btnActualizar.disabled = true; // bloqueado
+          btnNuevo.disabled = true;      // bloqueado
+        } else if (mode === 'edicion') {
+          // Requisito: cuando edita, solo Actualizar activo
+          btnGuardar.disabled = true;   // bloqueado
+          btnActualizar.disabled = false; // acción vigente
+          btnNuevo.disabled = true;       // bloqueado
+        }
+      };
+
       const clearForm = () => {
         frm.reset();
         document.getElementById('grado').selectedIndex = 0;
@@ -311,9 +333,10 @@
         document.getElementById('rol').selectedIndex = 0;
         const seccion = document.getElementById('seccion');
         if (seccion) seccion.value = '';
-        document.getElementById('idUsuario').value = '';
+        const idU = document.getElementById('idUsuario');
+        if (idU) idU.value = '';
         editId = null;
-        btnGuardar.textContent = 'Registrar';
+        // El modo controlará qué botones están habilitados
       };
 
       // Cargar catálogos desde el backend
@@ -473,6 +496,8 @@
         cargarInstituciones();
         cargarGrados();
         cargarSecciones();
+        // Estado inicial: modo nuevo
+        setMode('nuevo');
 
         // Inicializar DataTable con server-side hacia el endpoint Tabla
         dt = $('#tblAlumnos').DataTable({
@@ -649,7 +674,7 @@
 
             // Activar modo edición
             editId = u.id;
-            btnGuardar.textContent = 'Actualizar';
+            setMode('edicion');
           })
           .fail((jq, ts, err) => {
             console.error('Error Obtener usuario:', ts, err, jq.responseText);
@@ -674,8 +699,14 @@
           </td>
         </tr>`;
 
-      frm.addEventListener('submit', (e) => {
-        e.preventDefault();
+      // Botón Nuevo: limpiar y dejar modo nuevo
+      btnNuevo.addEventListener('click', function() {
+        clearForm();
+        setMode('nuevo');
+      });
+
+      // Envío centralizado para Guardar/Actualizar
+      const submitUsuario = (isEdit) => {
         const codigo = document.getElementById('codigo').value.trim();
         const nombresStr = document.getElementById('nombres').value.trim();
         const apellidosStr = document.getElementById('apellidos').value.trim();
@@ -687,7 +718,7 @@
         const password = document.getElementById('password').value;
         const seccionVal = (document.getElementById('seccion').value || '').trim();
 
-        if (!codigo || !nombresStr || !apellidosStr || !rolTxt || !password) {
+        if (!codigo || !nombresStr || !apellidosStr || !rolTxt || (!isEdit && !password)) {
           alert('Complete los campos requeridos.');
           return;
         }
@@ -696,7 +727,7 @@
         const [PrimerApellido, SegundoApellido] = splitTwo(apellidosStr);
         const Rol = rolMap[rolTxt];
         if (!Rol) {
-          alert('Rol no válido. Use Alumno, Director o Profesor.');
+          alert('Rol no válido. Use Alumno, Director, Docente o Admin.');
           return;
         }
 
@@ -724,34 +755,51 @@
           // Enviar siempre los IDs; el backend decidirá si aplicarlos o no
           GradoId: gradoIdSafe,
           InstitucionId: institucionIdSafe,
-          Seccion: Rol === 'ALUMNO' ? seccionSafe : ''
+          Seccion: seccionVal
         };
 
-        const isEdit = !!editId;
         const submitUrl = isEdit ? urlActualizar : urlAgregar;
         if (isEdit) {
           payload.IdUsuario = editId;
         }
 
+        console.log('Enviando payload a backend:', payload);
         $.ajax({
           url: submitUrl,
           method: 'POST',
           data: payload,
           dataType: 'json'
         }).done((data) => {
+          console.log('Respuesta del backend:', data);
           if (data && data.success) {
             // Recargar DataTable para reflejar el alta
             if (dt) {
               dt.ajax.reload(null, false);
             }
             clearForm();
+            setMode('nuevo');
           }
           alert(data && data.msj ? data.msj.replace(/<[^>]+>/g, '') : (data && data.success ? 'Operación exitosa' : 'Ocurrió un error'));
         }).fail((jqXHR, textStatus) => {
-          console.error(textStatus, jqXHR.responseText);
+          console.log('Error AJAX:', {jqXHR, textStatus, response: jqXHR.responseText});
           alert('Error de comunicación con el servidor');
         });
+      };
+
+      // Clicks en Guardar / Actualizar
+      btnGuardar.addEventListener('click', () => {
+        if (btnGuardar.disabled) return;
+        editId = null; // asegurar inserción
+        submitUsuario(false);
       });
+      btnActualizar.addEventListener('click', () => {
+        if (btnActualizar.disabled) return;
+        if (!editId) { alert('Seleccione un registro para actualizar.'); return; }
+        submitUsuario(true);
+      });
+
+      // Evitar submit nativo del formulario (Enter)
+      frm.addEventListener('submit', (e) => e.preventDefault());
     })();
   </script>
 </body>

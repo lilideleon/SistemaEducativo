@@ -48,41 +48,30 @@ class Usuarios_model
         }
     }
 
-    // Método para insertar un usuario
+    // Método para insertar un usuario (directo, sin procedimientos)
     public function InsertarUsuario()
     {
         try {
             $this->ConexionSql = $this->Conexion->CrearConexion();
-            $this->SentenciaSql = "CALL sp_usuarios_insert_min(?, ?, ?, ?, ?, ?, ?, ?, @id)";
-            $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
-
-            $this->Procedure->bindValue(1, $this->getCodigo(), PDO::PARAM_STR);
-            $this->Procedure->bindValue(2, $this->getNombres(), PDO::PARAM_STR);
-            $this->Procedure->bindValue(3, $this->getApellidos(), PDO::PARAM_STR);
-                // grado_id puede ser NULL (si no aplica); enlazar correctamente como NULL o INT
-                if ($this->getGradoId() === null) {
-                    $this->Procedure->bindValue(4, null, PDO::PARAM_NULL);
-                } else {
-                    $this->Procedure->bindValue(4, (int)$this->getGradoId(), PDO::PARAM_INT);
-                }
-
-                // institucion_id puede ser NULL (si no aplica); enlazar correctamente como NULL o INT
-                if ($this->getInstitucionId() === null) {
-                    $this->Procedure->bindValue(5, null, PDO::PARAM_NULL);
-                } else {
-                    $this->Procedure->bindValue(5, (int)$this->getInstitucionId(), PDO::PARAM_INT);
-                }
-            $this->Procedure->bindValue(6, $this->getRol(), PDO::PARAM_STR);
-            $this->Procedure->bindValue(7, $this->getPasswordHash(), PDO::PARAM_STR);
-            $this->Procedure->bindValue(8, $this->getSeccion(), PDO::PARAM_INT);
-
-            $this->Procedure->execute();
-            
-            // Obtener el ID generado
-            $result = $this->ConexionSql->query("SELECT @id as id");
-            $row = $result->fetch(PDO::FETCH_ASSOC);
-            return $row['id'];
-            
+            $sql = "INSERT INTO usuarios (codigo, nombres, apellidos, rol, seccion, institucion_id, grado_id, activo, password_hash)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)";
+            $stmt = $this->ConexionSql->prepare($sql);
+            $stmt->bindParam(1, $this->codigo, PDO::PARAM_STR);
+            $stmt->bindParam(2, $this->nombres, PDO::PARAM_STR);
+            $stmt->bindParam(3, $this->apellidos, PDO::PARAM_STR);
+            $stmt->bindParam(4, $this->rol, PDO::PARAM_STR);
+            $seccion = $this->getSeccion();
+            if ($seccion === null) $seccion = null;
+            $stmt->bindParam(5, $seccion, $seccion === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
+            $institucion_id = $this->getInstitucionId();
+            if ($institucion_id === null) $institucion_id = null;
+            $stmt->bindParam(6, $institucion_id, $institucion_id === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
+            $grado_id = $this->getGradoId();
+            if ($grado_id === null) $grado_id = null;
+            $stmt->bindParam(7, $grado_id, $grado_id === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
+            $stmt->bindParam(8, $this->password_hash, PDO::PARAM_STR);
+            $stmt->execute();
+            return $this->ConexionSql->lastInsertId();
         } catch (Exception $e) {
             throw new Exception("Error al insertar usuario: " . $e->getMessage());
         } finally {
@@ -90,62 +79,38 @@ class Usuarios_model
         }
     }
 
-    // Método para actualizar un usuario (actualización parcial)
-    public function ActualizarUsuario()
+    // Método para actualizar un usuario (directo, sin procedimientos)
+    public function ActualizarUsuario($updatePassword = false)
     {
         try {
             $this->ConexionSql = $this->Conexion->CrearConexion();
-            $this->SentenciaSql = "CALL sp_usuarios_update_min(?, ?, ?, ?, ?, ?, ?, ?, ?, @rows_affected)";
-            $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
-
-            $this->Procedure->bindValue(1, $this->getId(), PDO::PARAM_INT);
-            $this->Procedure->bindValue(2, $this->getCodigo(), PDO::PARAM_STR);
-            $this->Procedure->bindValue(3, $this->getNombres(), PDO::PARAM_STR);
-            $this->Procedure->bindValue(4, $this->getApellidos(), PDO::PARAM_STR);
-            // Bind correcto para grado_id en actualización
-                if ($this->getGradoId() === null) {
-                    $this->Procedure->bindValue(5, null, PDO::PARAM_NULL);
-                } else {
-                    $this->Procedure->bindValue(5, (int)$this->getGradoId(), PDO::PARAM_INT);
-                }
-
-                // Bind correcto para institucion_id en actualización
-                if ($this->getInstitucionId() === null) {
-                    $this->Procedure->bindValue(6, null, PDO::PARAM_NULL);
-                } else {
-                    $this->Procedure->bindValue(6, (int)$this->getInstitucionId(), PDO::PARAM_INT);
-                }
-            $this->Procedure->bindValue(7, $this->getRol(), PDO::PARAM_STR);
-            $this->Procedure->bindValue(8, $this->getPasswordHash(), PDO::PARAM_STR);
-            $this->Procedure->bindValue(9, $this->getSeccion(), PDO::PARAM_INT);
-
-                // --- DEBUG: registrar los valores ligados antes de ejecutar el SP ---
-                try {
-                    $dbgPath = __DIR__ . '/../res/logs/model_update_bindings.txt';
-                    @mkdir(dirname($dbgPath), 0777, true);
-                    $payloadDbg = [
-                        'id' => $this->getId(),
-                        'codigo' => $this->getCodigo(),
-                        'nombres' => $this->getNombres(),
-                        'apellidos' => $this->getApellidos(),
-                        'grado_id' => $this->getGradoId(),
-                        'institucion_id' => $this->getInstitucionId(),
-                        'rol' => $this->getRol(),
-                        'password_hash' => $this->getPasswordHash(),
-                        'seccion' => $this->getSeccion(),
-                    ];
-                    file_put_contents($dbgPath, date('c') . ' ' . json_encode($payloadDbg, JSON_UNESCAPED_UNICODE) . PHP_EOL, FILE_APPEND);
-                } catch (Exception $e) {
-                    // no bloquear la ejecución por errores de logging
-                }
-
-            $this->Procedure->execute();
-            
-            // Obtener el número de filas afectadas
-            $result = $this->ConexionSql->query("SELECT @rows_affected as rows_affected");
-            $row = $result->fetch(PDO::FETCH_ASSOC);
-            return $row['rows_affected'] > 0;
-            
+            if ($updatePassword) {
+                $sql = "UPDATE usuarios SET codigo = ?, nombres = ?, apellidos = ?, grado_id = ?, institucion_id = ?, rol = ?, seccion = ?, password_hash = ? WHERE id = ?";
+            } else {
+                $sql = "UPDATE usuarios SET codigo = ?, nombres = ?, apellidos = ?, grado_id = ?, institucion_id = ?, rol = ?, seccion = ? WHERE id = ?";
+            }
+            $stmt = $this->ConexionSql->prepare($sql);
+            $stmt->bindParam(1, $this->codigo, PDO::PARAM_STR);
+            $stmt->bindParam(2, $this->nombres, PDO::PARAM_STR);
+            $stmt->bindParam(3, $this->apellidos, PDO::PARAM_STR);
+            $grado_id = $this->getGradoId();
+            if ($grado_id === null) $grado_id = null;
+            $stmt->bindParam(4, $grado_id, $grado_id === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
+            $institucion_id = $this->getInstitucionId();
+            if ($institucion_id === null) $institucion_id = null;
+            $stmt->bindParam(5, $institucion_id, $institucion_id === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
+            $stmt->bindParam(6, $this->rol, PDO::PARAM_STR);
+            $seccion = $this->getSeccion();
+            if ($seccion === null) $seccion = null;
+            $stmt->bindParam(7, $seccion, $seccion === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
+            if ($updatePassword) {
+                $stmt->bindParam(8, $this->password_hash, PDO::PARAM_STR);
+                $stmt->bindParam(9, $this->id, PDO::PARAM_INT);
+            } else {
+                $stmt->bindParam(8, $this->id, PDO::PARAM_INT);
+            }
+            $stmt->execute();
+            return $stmt->rowCount() > 0;
         } catch (Exception $e) {
             throw new Exception("Error al actualizar usuario: " . $e->getMessage());
         } finally {
@@ -153,20 +118,17 @@ class Usuarios_model
         }
     }
 
-    // Método para eliminar un usuario (eliminación lógica)
+    // Método para eliminar un usuario (eliminación lógica sin procedimientos)
     public function EliminarUsuario()
     {
         try {
             $this->ConexionSql = $this->Conexion->CrearConexion();
-            $this->SentenciaSql = "CALL sp_usuarios_delete_logico_min(?, @rows_affected)";
-            $this->Procedure = $this->ConexionSql->prepare($this->SentenciaSql);
-            $this->Procedure->bindValue(1, $this->getId(), PDO::PARAM_INT);
-            $this->Procedure->execute();
-            
-            // Obtener el número de filas afectadas
-            $result = $this->ConexionSql->query("SELECT @rows_affected as rows_affected");
-            $row = $result->fetch(PDO::FETCH_ASSOC);
-            return $row['rows_affected'] > 0;
+            // Eliminar lógicamente (activo = 0) de forma directa
+            $sql = "UPDATE usuarios SET activo = 0 WHERE id = :id";
+            $stmt = $this->ConexionSql->prepare($sql);
+            $stmt->bindValue(':id', $this->getId(), PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->rowCount() > 0;
         } catch (Exception $e) {
             throw new Exception("Error al eliminar usuario: " . $e->getMessage());
         } finally {
@@ -398,8 +360,7 @@ class Usuarios_model
     public function setSeccion($seccion)
     {
         if ($seccion === '' || $seccion === null) {
-            // La tabla define `seccion` como NOT NULL, usar 0 cuando no exista
-            $this->seccion = 0;
+            $this->seccion = null; // permitir NULL cuando no aplique (no alumno)
         } else {
             $this->seccion = (int)$seccion;
         }

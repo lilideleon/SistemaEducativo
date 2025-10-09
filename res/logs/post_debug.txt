@@ -1,0 +1,11 @@
+2025-10-07T23:38:21-06:00 {"Codigo":"56456","nombres":"dafds","apellidos":"fdsa","Rol":"DIRECTOR","Contraseña":"dfsafds","GradoId":"2","InstitucionId":"4","Seccion":"3"}
+2025-10-07T23:41:06-06:00 {"Codigo":"65654","nombres":"65465","apellidos":"65465","Rol":"ALUMNO","Contraseña":"654654","GradoId":"2","InstitucionId":"4","Seccion":"3"}
+2025-10-07T23:41:25-06:00 {"Codigo":"454354","nombres":"dfadfas","apellidos":"fdsafds","Rol":"DIRECTOR","Contraseña":"fdsafdsa","GradoId":"2","InstitucionId":"4","Seccion":"3"}
+2025-10-07T23:41:48-06:00 {"Codigo":"4354354","nombres":"Eli","apellidos":"de leon","Rol":"DIRECTOR","Contraseña":"543543","GradoId":"2","InstitucionId":"12","Seccion":"4"}
+2025-10-07T23:42:05-06:00 {"Codigo":"543","nombres":"43","apellidos":"543","Rol":"ALUMNO","Contraseña":"54354","GradoId":"2","InstitucionId":"12","Seccion":"2"}
+2025-10-07T23:44:03-06:00 {"Codigo":"56465","nombres":"testtt","apellidos":"654654","Rol":"DIRECTOR","Contraseña":"654654","GradoId":"2","InstitucionId":"10","Seccion":"3"}
+2025-10-07T23:44:23-06:00 {"Codigo":"654654","nombres":"Eli","apellidos":"de leon","Rol":"ALUMNO","Contraseña":"654654","GradoId":"1","InstitucionId":"12","Seccion":"2"}
+2025-10-07T23:49:20-06:00 {"Codigo":"65654","nombres":"654645654","apellidos":"654654654","Rol":"ALUMNO","Contraseña":"654654","GradoId":"2","InstitucionId":"10","Seccion":"1"}
+2025-10-09T08:46:58-06:00 {"Codigo":"036254","nombres":"Alexandra","apellidos":"Barbara","Rol":"DIRECTOR","Contraseña":"3698522","GradoId":"2","InstitucionId":"5","Seccion":"2"}
+2025-10-09T09:07:05-06:00 {"Codigo":"65654","nombres":"barbara","apellidos":"juarez","Rol":"DIRECTOR","Contraseña":"1365","GradoId":"2","InstitucionId":"5","Seccion":"3"}
+2025-10-09T09:08:21-06:00 {"Codigo":"4546545","nombres":"seño","apellidos":"yaretxy","Rol":"DIRECTOR","Contraseña":"326+56+","GradoId":"3","InstitucionId":"10","Seccion":"3"}
