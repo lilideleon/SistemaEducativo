@@ -13,7 +13,13 @@ class UsuariosController
 
     public function index()
     {
-        require_once "views/Usuarios/Usuarios.php";
+        $u = function_exists('obtenerUsuarioActual') ? obtenerUsuarioActual() : null;
+        $rol = $u && isset($u['rol']) ? strtoupper($u['rol']) : null;
+        if ($rol === 'DIRECTOR') {
+            require_once "views/Usuarios/UsuariosDirector.php";
+        } else {
+            require_once "views/Usuarios/Usuarios.php";
+        }
     }
 
     
@@ -46,6 +52,11 @@ class UsuariosController
 
             $rol = $get(array('Rol', 'rol'), 'ALUMNO');
             $rol = $rol === '' ? 'ALUMNO' : $rol;
+            // Si el usuario autenticado es DIRECTOR, forzar rol ALUMNO
+            $u = function_exists('obtenerUsuarioActual') ? obtenerUsuarioActual() : null;
+            if ($u && isset($u['rol']) && strtoupper($u['rol']) === 'DIRECTOR') {
+                $rol = 'ALUMNO';
+            }
 
             $gradoId = $get(array('GradoId', 'grado_id', 'Grado', 'grado'), '');
             $institucionId = $get(array('InstitucionId', 'institucion_id', 'Instituto', 'instituto'), null);
@@ -125,6 +136,14 @@ class UsuariosController
                 throw new Exception('Usuario no encontrado');
             }
 
+            // Si es DIRECTOR, solo puede actualizar ALUMNO
+            $u = function_exists('obtenerUsuarioActual') ? obtenerUsuarioActual() : null;
+            if ($u && isset($u['rol']) && strtoupper($u['rol']) === 'DIRECTOR') {
+                if (strtoupper($usuarioExistente['rol']) !== 'ALUMNO') {
+                    throw new Exception('No autorizado: solo puede editar alumnos');
+                }
+            }
+
             // Establecer ID y cargar valores actuales como base
             $usuario->setId($idUsuario);
             $usuario->setCodigo(isset($_POST['Codigo']) ? $_POST['Codigo'] : $usuarioExistente['codigo']);
@@ -147,9 +166,14 @@ class UsuariosController
             $usuario->setInstitucionId(isset($_POST['InstitucionId']) ? $_POST['InstitucionId'] : $usuarioExistente['institucion_id']);
 
             if (isset($_POST['Rol'])) {
-                $usuario->setRol($_POST['Rol']);
+                // Si es DIRECTOR, forzar ALUMNO
+                if ($u && isset($u['rol']) && strtoupper($u['rol']) === 'DIRECTOR') {
+                    $usuario->setRol('ALUMNO');
+                } else {
+                    $usuario->setRol($_POST['Rol']);
+                }
 
-                if ($_POST['Rol'] === 'ALUMNO') {
+                if (($u && isset($u['rol']) && strtoupper($u['rol']) === 'DIRECTOR') || $_POST['Rol'] === 'ALUMNO') {
                     if (isset($_POST['Seccion'])) {
                         if ($_POST['Seccion'] === '' || $_POST['Seccion'] === null) {
                             $usuario->setSeccion(null);
@@ -219,6 +243,14 @@ class UsuariosController
         $json = array();
 
         try {
+            // Si es DIRECTOR, solo puede desactivar alumnos
+            $u = function_exists('obtenerUsuarioActual') ? obtenerUsuarioActual() : null;
+            if ($u && isset($u['rol']) && strtoupper($u['rol']) === 'DIRECTOR') {
+                $target = $usuario->ObtenerUsuario($_POST['IdUsuario']);
+                if (!$target || strtoupper($target['rol']) !== 'ALUMNO') {
+                    throw new Exception('No autorizado: solo puede desactivar alumnos');
+                }
+            }
             if ($usuario->EliminarUsuario()) { // eliminación lógica (activo=0)
                 $json['name'] = 'position';
                 $json['defaultValue'] = 'top-right';
@@ -247,6 +279,14 @@ class UsuariosController
         $json = array();
 
         try {
+            // Si es DIRECTOR, solo puede eliminar alumnos
+            $u = function_exists('obtenerUsuarioActual') ? obtenerUsuarioActual() : null;
+            if ($u && isset($u['rol']) && strtoupper($u['rol']) === 'DIRECTOR') {
+                $target = $usuario->ObtenerUsuario($_POST['IdUsuario']);
+                if (!$target || strtoupper($target['rol']) !== 'ALUMNO') {
+                    throw new Exception('No autorizado: solo puede eliminar alumnos');
+                }
+            }
             if ($usuario->EliminarUsuario()) {
                 $json['name'] = 'position';
                 $json['defaultValue'] = 'top-right';
@@ -316,6 +356,13 @@ class UsuariosController
             if (!$data) {
                 throw new Exception('Usuario no encontrado');
             }
+            // Si es DIRECTOR, solo puede ver alumnos
+            $u = function_exists('obtenerUsuarioActual') ? obtenerUsuarioActual() : null;
+            if ($u && isset($u['rol']) && strtoupper($u['rol']) === 'DIRECTOR') {
+                if (strtoupper($data['rol']) !== 'ALUMNO') {
+                    throw new Exception('No autorizado: solo puede consultar alumnos');
+                }
+            }
             echo json_encode(['success' => true, 'data' => $data]);
         } catch (Exception $e) {
             echo json_encode(['success' => false, 'msj' => 'Error: ' . $e->getMessage()]);
@@ -383,8 +430,10 @@ class UsuariosController
                 $sOrder = rtrim($sOrder, ", ");
             }
 
-            // Filtro
+            // Filtro base
             $sWhere = "WHERE u.activo = 1";
+            $u = function_exists('obtenerUsuarioActual') ? obtenerUsuarioActual() : null;
+            $onlyAlumnos = ($u && isset($u['rol']) && strtoupper($u['rol']) === 'DIRECTOR');
             if (!empty($_GET['sSearch'])) {
                 $term = $_GET['sSearch'];
                 $sWhere = "WHERE (";
@@ -393,6 +442,13 @@ class UsuariosController
                 }
                 $sWhere = substr_replace($sWhere, "", -4); // quitar último OR
                 $sWhere .= ") AND u.activo = 1";
+                if ($onlyAlumnos) {
+                    $sWhere .= " AND u.rol = 'ALUMNO'";
+                }
+            } else {
+                if ($onlyAlumnos) {
+                    $sWhere .= " AND u.rol = 'ALUMNO'";
+                }
             }
 
             // Query principal al estilo legacy con SQL_CALC_FOUND_ROWS

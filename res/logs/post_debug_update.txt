@@ -8,3 +8,4 @@
 2025-10-09T08:46:03-06:00 {"Codigo":"543","nombres":"43","apellidos":"543","Rol":"DIRECTOR","Contraseña":"123","GradoId":"2","InstitucionId":"12","Seccion":"2","IdUsuario":"32"}
 2025-10-09T08:46:15-06:00 {"Codigo":"65654","nombres":"65465","apellidos":"65465","Rol":"DOCENTE","Contraseña":"123","GradoId":"2","InstitucionId":"4","Seccion":"3","IdUsuario":"29"}
 2025-10-09T09:07:41-06:00 {"Codigo":"65654","nombres":"Barbara","apellidos":"Juarez","Rol":"ALUMNO","Contraseña":"43543","GradoId":"2","InstitucionId":"5","Seccion":"1","IdUsuario":"38"}
+2025-10-09T11:59:01-06:00 {"Codigo":"1010","nombres":"Alma Consuelo","apellidos":"Reyes Maldonado","Rol":"DIRECTOR","Contraseña":"1010","GradoId":"2","InstitucionId":"9","Seccion":"","IdUsuario":"15"}
