@@ -118,6 +118,24 @@ class Usuarios_model
         }
     }
 
+    // Actualiza únicamente la contraseña del usuario (password_hash) por id
+    public function ActualizarSoloPassword()
+    {
+        try {
+            $this->ConexionSql = $this->Conexion->CrearConexion();
+            $sql = "UPDATE usuarios SET password_hash = ? WHERE id = ?";
+            $stmt = $this->ConexionSql->prepare($sql);
+            $stmt->bindParam(1, $this->password_hash, PDO::PARAM_STR);
+            $stmt->bindParam(2, $this->id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->rowCount() > 0;
+        } catch (Exception $e) {
+            throw new Exception("Error al actualizar contraseña: " . $e->getMessage());
+        } finally {
+            $this->Conexion->CerrarConexion();
+        }
+    }
+
     // Método para eliminar un usuario (eliminación lógica sin procedimientos)
     public function EliminarUsuario()
     {

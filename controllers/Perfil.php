@@ -66,10 +66,10 @@ class PerfilController
                 }
             }
 
-            // Update password via model
+            // Update password only via model (no otros campos)
             $usuarios->setId($userId);
             $usuarios->setPassword($new);
-            $ok = $usuarios->ActualizarUsuario();
+            $ok = $usuarios->ActualizarSoloPassword();
 
             if (!$ok) throw new Exception('No se pudo actualizar la contraseña');
 

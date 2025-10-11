@@ -109,15 +109,22 @@ class Preguntas_model
         }
     }
 
-    // LISTAR por encuesta en orden aleatorio (solo activas por defecto)
-    public function ListarPorEncuestaRandom($encuesta_id, $soloActivas = true)
+    // LISTAR por encuesta en orden aleatorio (solo activas por defecto) con límite opcional
+    public function ListarPorEncuestaRandom($encuesta_id, $soloActivas = true, $limite = 20)
     {
         try {
             $this->ConexionSql = $this->Conexion->CrearConexion();
+            // Asegurar límite entero válido si se especifica
+            $limitSql = '';
+            if ($limite !== null) {
+                $lim = (int)$limite;
+                if ($lim <= 0) { $lim = 20; }
+                $limitSql = " LIMIT " . $lim;
+            }
             $sql = "SELECT p.id, p.encuesta_id, p.enunciado, p.tipo, p.ponderacion, p.orden, p.activo
                       FROM preguntas p
                      WHERE p.encuesta_id = :eid" . ($soloActivas ? " AND p.activo = 1" : "") . "
-                     ORDER BY RAND()";
+                     ORDER BY RAND()" . $limitSql;
             $stmt = $this->ConexionSql->prepare($sql);
             $stmt->bindValue(':eid', (int)$encuesta_id, PDO::PARAM_INT);
             $stmt->execute();

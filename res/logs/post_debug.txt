@@ -10,3 +10,4 @@
 2025-10-09T09:07:05-06:00 {"Codigo":"65654","nombres":"barbara","apellidos":"juarez","Rol":"DIRECTOR","Contraseña":"1365","GradoId":"2","InstitucionId":"5","Seccion":"3"}
 2025-10-09T09:08:21-06:00 {"Codigo":"4546545","nombres":"seño","apellidos":"yaretxy","Rol":"DIRECTOR","Contraseña":"326+56+","GradoId":"3","InstitucionId":"10","Seccion":"3"}
 2025-10-09T12:04:46-06:00 {"Codigo":"356465","nombres":"anaaaa","apellidos":"arcia","Rol":"ALUMNO","GradoId":"1","InstitucionId":"4","Seccion":"3","Contraseña":"369554"}
+2025-10-10T17:59:26-06:00 {"Codigo":"1010","nombres":"ana","apellidos":"garcia","Rol":"ALUMNO","Contraseña":"1010","GradoId":"1","InstitucionId":"12","Seccion":"1"}

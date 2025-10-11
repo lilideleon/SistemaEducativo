@@ -75,7 +75,11 @@ class EvaluacionController
 
             $pregModel = new Preguntas_model();
             $respModel = new Respuestas_model();
-            $pregs = $pregModel->ListarPorEncuestaRandom($encuesta_id, true);
+            // Obtener hasta 20 preguntas aleatorias
+            $pregs = $pregModel->ListarPorEncuestaRandom($encuesta_id, true, 20);
+            if (count($pregs) > 20) {
+                $pregs = array_slice($pregs, 0, 20);
+            }
             // Adjuntar respuestas activas
             foreach ($pregs as &$p) {
                 $p['respuestas'] = $respModel->ListarPorPregunta($p['id'], true);
