@@ -9,6 +9,11 @@ class ReportesController {
         $this->modelo = new ReportesModel();
     }
 
+    public function index() {
+        // Mostrar el menú principal de reportes
+        require_once "views/Reportes/Reportes.php";
+    }
+
     public function generarPDFInstituciones() {
         try {
             // Obtener instituciones con sus promedios por curso
