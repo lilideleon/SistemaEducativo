@@ -428,8 +428,8 @@ class ReportesModel {
 
             // Manejo de periodo específico (campo `periodo` en la tabla calificaciones)
             if (!empty($filtros['periodo']) && is_string($filtros['periodo'])) {
-                // Si el periodo se pasa como 'YYYY-MM' o similar
-                $sql .= " AND c.periodo = ?";
+                // Si el periodo se pasa como 'YYYY-MM' o similar, filtrar por el campo periodo de calificaciones
+                $sql .= " AND cal.periodo = ?";
                 $params[] = $filtros['periodo'];
             }
 

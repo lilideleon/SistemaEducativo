@@ -1255,27 +1255,6 @@
           <h2 class="chart-title">
             Top Alumnos <span id="alumnosCounter" class="badge bg-secondary ms-2">0</span>
           </h2>
-          <div class="chart-filters">
-            <select id="cursoFilter" class="form-select form-select-sm me-2">
-              <option value="">Todos los Cursos</option>
-              <?php if (isset($cursos) && is_array($cursos)): ?>
-                <?php foreach ($cursos as $curso): ?>
-                  <option value="<?= $curso['id'] ?>"><?= htmlspecialchars($curso['nombre']) ?></option>
-                <?php endforeach; ?>
-              <?php endif; ?>
-            </select>
-            <select id="gradoFilter" class="form-select form-select-sm me-2">
-              <option value="">Todos los Grados</option>
-              <?php if (isset($grados) && is_array($grados)): ?>
-                <?php foreach ($grados as $grado): ?>
-                  <option value="<?= $grado['id'] ?>"><?= htmlspecialchars($grado['nombre']) ?></option>
-                <?php endforeach; ?>
-              <?php endif; ?>
-            </select>
-            <button id="clearFilters" class="btn btn-outline-secondary btn-sm">
-              <i class="bi bi-arrow-clockwise"></i> Limpiar
-            </button>
-          </div>
         </div>
         <div class="chart-body">
           <div class="chart-container position-relative">
@@ -2058,12 +2037,7 @@
       if (!filteredAlumnosData || filteredAlumnosData.length === 0) {
         console.warn('ADVERTENCIA: No hay datos filtrados para mostrar');
         
-        // Verificar si es por filtros aplicados
-        const cursoFilter = document.getElementById('cursoFilter')?.value;
-        const gradoFilter = document.getElementById('gradoFilter')?.value;
-        const hasFilters = cursoFilter || gradoFilter;
-        
-        const emptyMessage = hasFilters ? 'No hay resultados para los filtros aplicados' : 'Sin datos disponibles';
+        const emptyMessage = 'Sin datos disponibles';
         
         alumnosChart.data.labels = [emptyMessage];
         alumnosChart.data.datasets[0].data = [0];
@@ -2299,26 +2273,6 @@
     
     console.log('=== FIN INICIALIZACIÓN ===');
 
-    // Configurar event listeners para filtros
-    document.getElementById('cursoFilter')?.addEventListener('change', function() {
-      console.log('Filtro de curso cambiado:', this.value);
-      filterAlumnosData(true); // Con animación de carga
-    });
-
-    document.getElementById('gradoFilter')?.addEventListener('change', function() {
-      console.log('Filtro de grado cambiado:', this.value);
-      filterAlumnosData(true); // Con animación de carga
-    });
-
-    document.getElementById('clearFilters')?.addEventListener('click', function() {
-      console.log('Limpiando filtros...');
-      document.getElementById('cursoFilter').value = '';
-      document.getElementById('gradoFilter').value = '';
-      filterAlumnosData(true); // Con animación de carga
-    });
-
-    console.log('Event listeners configurados para filtros');
-
     // Configurar event listeners para filtros globales del panel
     document.getElementById('applyFilters')?.addEventListener('click', applyGlobalFilters);
     document.getElementById('clearAllFilters')?.addEventListener('click', clearGlobalFilters);
@@ -2389,11 +2343,9 @@
         formData.append('periodo', filtros.periodo || '');
         formData.append('institucion_id', filtros.institucion || '');
         formData.append('roles', JSON.stringify(filtros.roles || []));
-        // añadir filtros de curso/grado si existen en el DOM
-        const cursoVal = document.getElementById('cursoFilter')?.value || '';
-        const gradoVal = document.getElementById('gradoFilter')?.value || '';
-        formData.append('curso_id', cursoVal);
-        formData.append('grado_id', gradoVal);
+        // No enviamos curso_id ni grado_id ya que no hay filtros locales
+        formData.append('curso_id', '');
+        formData.append('grado_id', '');
 
         // Llamada AJAX al endpoint del controlador
         fetch('?c=Reportes&a=filtrarDashboard', {
@@ -2410,10 +2362,12 @@
             return;
           }
 
-          // Actualizar chart de mejores alumnos
-          if (data.mejoresAlumnos) {
-            alumnosData = data.mejoresAlumnos;
+          // Actualizar chart de mejores alumnos (siempre, incluso si está vacío)
+          if (data.hasOwnProperty('mejoresAlumnos')) {
+            console.log('Actualizando mejoresAlumnos. Array length:', data.mejoresAlumnos ? data.mejoresAlumnos.length : 0);
+            alumnosData = data.mejoresAlumnos || [];
             filteredAlumnosData = alumnosData; // reemplazar filtro local
+            console.log('filteredAlumnosData después de actualizar:', filteredAlumnosData);
             updateAlumnosChart();
           }
 
