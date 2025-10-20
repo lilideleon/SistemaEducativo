@@ -542,7 +542,7 @@
           <i class="bi bi-file-earmark-text"></i>
         </div>
         <div class="stat-info">
-          <div class="stat-value">5</div>
+          <div class="stat-value">3</div>
           <div class="stat-label">Tipos de Reportes</div>
         </div>
       </div>
@@ -820,78 +820,6 @@
             }
           });
         </script>
-
-      <!-- Reporte 4: Distritos -->
-      <div class="report-card" style="--card-gradient: var(--dark-gradient);">
-        <div class="report-icon">
-          <i class="bi bi-geo-alt"></i>
-        </div>
-        <span class="category-tag tag-administrative">Administrativo</span>
-        <h3 class="report-title mt-2">Reporte por Distrito</h3>
-        <p class="report-description">
-          Instituciones agrupadas por distrito con estadísticas de usuarios y rendimiento académico
-        </p>
-        <div class="report-meta">
-          <span class="meta-item">
-            <i class="bi bi-file-earmark"></i>
-            PDF
-          </span>
-          <span class="meta-item">
-            <i class="bi bi-clock"></i>
-            2-4 páginas
-          </span>
-          <span class="meta-item">
-            <i class="bi bi-star"></i>
-            Nuevo
-          </span>
-        </div>
-        <div class="report-actions">
-          <a href="?c=Reportes&a=generarPDFDistritos" class="btn-generate" target="_blank">
-            <i class="bi bi-file-pdf"></i>
-            Descargar PDF
-          </a>
-          <a href="?c=Reportes&a=generarExcelDistritos" class="btn-excel" target="_blank">
-            <i class="bi bi-file-excel"></i>
-            Descargar Excel
-          </a>
-        </div>
-      </div>
-
-      <!-- Reporte 5: Resumen Académico -->
-      <div class="report-card" style="--card-gradient: var(--purple-gradient);">
-        <div class="report-icon">
-          <i class="bi bi-graph-up-arrow"></i>
-        </div>
-        <span class="category-tag tag-statistical">Estadístico</span>
-        <h3 class="report-title mt-2">Resumen Académico</h3>
-        <p class="report-description">
-          Estadísticas completas por institución: alumnos, docentes, directores, calificaciones y encuestas
-        </p>
-        <div class="report-meta">
-          <span class="meta-item">
-            <i class="bi bi-file-earmark"></i>
-            PDF
-          </span>
-          <span class="meta-item">
-            <i class="bi bi-clock"></i>
-            3-5 páginas
-          </span>
-          <span class="meta-item">
-            <i class="bi bi-check-circle"></i>
-            Destacado
-          </span>
-        </div>
-        <div class="report-actions">
-          <a href="?c=Reportes&a=generarPDFResumenAcademico" class="btn-generate" target="_blank">
-            <i class="bi bi-file-pdf"></i>
-            Descargar PDF
-          </a>
-          <a href="?c=Reportes&a=generarExcelResumenAcademico" class="btn-excel" target="_blank">
-            <i class="bi bi-file-excel"></i>
-            Descargar Excel
-          </a>
-        </div>
-      </div>
 
     </div>
 
