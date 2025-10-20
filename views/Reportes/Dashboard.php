@@ -1248,33 +1248,6 @@
 
     <!-- Dashboard compacto estilo Power BI -->
     <div class="dashboard-grid">
-      <!-- Gráfico de usuarios por rol -->
-      <div class="chart-card chart-compact">
-        <div class="chart-header">
-          <h2 class="chart-title">
-            Usuarios por Rol
-          </h2>
-        </div>
-        <div class="chart-body">
-          <div class="chart-container">
-            <canvas id="rolesChart"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <!-- Gráfico de instituciones por distrito -->
-      <div class="chart-card chart-compact">
-        <div class="chart-header">
-          <h2 class="chart-title">
-            Instituciones por Distrito
-          </h2>
-        </div>
-        <div class="chart-body">
-          <div class="chart-container">
-            <canvas id="distritosChart"></canvas>
-          </div>
-        </div>
-      </div>
 
       <!-- Gráfico de mejores alumnos -->
       <div class="chart-card chart-compact">
