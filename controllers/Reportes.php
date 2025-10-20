@@ -6,77 +6,82 @@ class ReportesController {
     private $modelo;
 
     public function __construct() {
-        @session_start();
-        require_once "core/AuthValidation.php";
-        validarRol(['ADMIN','DIRECTOR','DOCENTE']); // Permitir también a docentes
-        
-        // Asegurar que la zona horaria esté configurada
-        if (!ini_get('date.timezone')) {
-            date_default_timezone_set('America/El_Salvador');
-        }
-        
         $this->modelo = new ReportesModel();
     }
 
-    public function index() {
+    public function generarPDFInstituciones() {
         try {
-            $data = [
-                'usuarios' => $this->modelo->obtenerUsuarios(),
-                'instituciones' => $this->modelo->obtenerInstituciones(),
-                'grados' => $this->modelo->obtenerGrados()
-            ];
-            // Extraer variables para la vista
-            extract($data);
-            require_once "views/Reportes/Reportes.php";
-        } catch (Exception $e) {
-            echo "Error: " . $e->getMessage();
-        }
-    }
+            // Obtener instituciones con sus promedios por curso
+            $instituciones = $this->modelo->obtenerInstitucionesConPromedios();
 
-    public function usuarios() {
-        try {
-            $data = [
-                'usuarios' => $this->modelo->obtenerUsuarios(),
-                'instituciones' => $this->modelo->obtenerInstituciones(),
-                'grados' => $this->modelo->obtenerGrados()
-            ];
-            // Extraer variables para la vista
-            extract($data);
-            require_once "views/Reportes/usuarios.php";
-        } catch (Exception $e) {
-            echo "Error: " . $e->getMessage();
-        }
-    }
+            // Crear PDF con diseño profesional
+            $pdf = new PDF_Instituciones();
+            $pdf->SetTitle('Reporte de Instituciones - Promedios por Curso');
+            $pdf->SetAuthor('Sistema Educativo');
+            $pdf->AliasNbPages();
+            $pdf->AddPage();
+            
+            // Información de generación
+            $pdf->SetFont('Arial', '', 9);
+            $pdf->SetTextColor(100, 100, 100);
+            $fechaActual = date('d/m/Y H:i:s');
+            $pdf->Cell(0, 5, 'Fecha de generacion: ' . $fechaActual, 0, 1, 'L');
+            $pdf->Cell(0, 5, 'Total de instituciones: ' . count($instituciones), 0, 1, 'L');
+            $pdf->Ln(5);
 
-    public function filtrarUsuarios() {
-        try {
-            $filtros = [
-                'rol' => isset($_POST['rol']) ? $_POST['rol'] : '',
-                'institucion_id' => isset($_POST['institucion_id']) ? $_POST['institucion_id'] : '',
-                'grado_id' => isset($_POST['grado_id']) ? $_POST['grado_id'] : '',
-                'activo' => isset($_POST['activo']) ? $_POST['activo'] : '',
-                'busqueda' => isset($_POST['busqueda']) ? $_POST['busqueda'] : ''
-            ];
+            // Encabezados de tabla: Institucion | Curso | Promedio
+            $pdf->SetFillColor(17, 120, 103); // Verde del sistema
+            $pdf->SetTextColor(255, 255, 255);
+            $pdf->SetDrawColor(17, 120, 103);
+            $pdf->SetLineWidth(0.3);
+            $pdf->SetFont('Arial', 'B', 10);
 
-            // Procesar rango de fechas
-            if (!empty($_POST['fecha_rango'])) {
-                $fechas = explode(' - ', $_POST['fecha_rango']);
-                if (count($fechas) == 2) {
-                    $filtros['fecha_inicio'] = date('Y-m-d', strtotime(str_replace('/', '-', $fechas[0])));
-                    $filtros['fecha_fin'] = date('Y-m-d', strtotime(str_replace('/', '-', $fechas[1])));
+            $w = array(110, 60, 20); // Suma 190mm (ancho util A4 con márgenes estándar)
+            $pdf->Cell($w[0], 7, utf8_decode('Institución'), 1, 0, 'C', true);
+            $pdf->Cell($w[1], 7, 'Curso', 1, 0, 'C', true);
+            $pdf->Cell($w[2], 7, 'Prom.', 1, 0, 'C', true);
+            $pdf->Ln();
+
+            // Datos
+            $pdf->SetFillColor(240, 255, 250); // Verde muy claro
+            $pdf->SetTextColor(50, 50, 50);
+            $pdf->SetFont('Arial', '', 9);
+
+            $fill = false;
+            foreach($instituciones as $inst) {
+                $nombreInst = isset($inst['nombre']) ? $inst['nombre'] : (isset($inst->nombre) ? $inst->nombre : '');
+                $cursos = isset($inst['cursos']) ? $inst['cursos'] : [];
+
+                if (!empty($cursos)) {
+                    foreach ($cursos as $curso) {
+                        $pdf->SetFillColor($fill ? 240 : 255, 255, 255);
+                        $pdf->Cell($w[0], 6, utf8_decode($nombreInst), 'LR', 0, 'L', true);
+                        $pdf->Cell($w[1], 6, utf8_decode($curso['curso']), 'LR', 0, 'L', true);
+                        $pdf->Cell($w[2], 6, number_format($curso['promedio'], 2), 'LR', 0, 'C', true);
+                        $pdf->Ln();
+                        $fill = !$fill;
+                    }
+                } else {
+                    // Sin datos por curso, mostramos fila indicativa
+                    $promedio = isset($inst['promedio_general']) && $inst['promedio_general'] > 0
+                        ? number_format($inst['promedio_general'], 2) : 'N/D';
+                    $pdf->SetFillColor($fill ? 240 : 255, 255, 255);
+                    $pdf->Cell($w[0], 6, utf8_decode($nombreInst), 'LR', 0, 'L', true);
+                    $pdf->Cell($w[1], 6, utf8_decode('Sin datos'), 'LR', 0, 'L', true);
+                    $pdf->Cell($w[2], 6, $promedio, 'LR', 0, 'C', true);
+                    $pdf->Ln();
+                    $fill = !$fill;
                 }
             }
 
-            $data = [
-                'usuarios' => $this->modelo->obtenerUsuarios($filtros),
-                'instituciones' => $this->modelo->obtenerInstituciones(),
-                'grados' => $this->modelo->obtenerGrados()
-            ];
-            // Extraer variables para la vista
-            extract($data);
-            require_once "views/Reportes/usuarios.php";
+            // Línea de cierre
+            $pdf->Cell(array_sum($w), 0, '', 'T');
+
+            $pdf->Output('I', 'Reporte_Instituciones_Promedios_Curso.pdf');
+
         } catch (Exception $e) {
-            echo "Error: " . $e->getMessage();
+            // Manejo de errores
+            die('Error al generar el PDF de instituciones: ' . $e->getMessage());
         }
     }
 
@@ -380,61 +385,7 @@ class ReportesController {
         }
     }
 
-    public function generarPDFInstituciones() {
-        try {
-            // Obtener instituciones
-            $instituciones = $this->modelo->obtenerInstituciones();
-
-            // Crear PDF con diseño profesional
-            $pdf = new PDF_Instituciones();
-            $pdf->SetTitle('Reporte de Instituciones');
-            $pdf->SetAuthor('Sistema Educativo');
-            $pdf->AliasNbPages();
-            $pdf->AddPage();
-            
-            // Información de generación
-            $pdf->SetFont('Arial', '', 9);
-            $pdf->SetTextColor(100, 100, 100);
-            $fechaActual = date('d/m/Y H:i:s');
-            $pdf->Cell(0, 5, 'Fecha de generacion: ' . $fechaActual, 0, 1, 'L');
-            $pdf->Cell(0, 5, 'Total de instituciones: ' . count($instituciones), 0, 1, 'L');
-            $pdf->Ln(5);
-
-            // Encabezados de tabla con color verde
-            $pdf->SetFillColor(17, 120, 103); // Verde del sistema
-            $pdf->SetTextColor(255, 255, 255);
-            $pdf->SetDrawColor(17, 120, 103);
-            $pdf->SetLineWidth(0.3);
-            $pdf->SetFont('Arial', 'B', 10);
-
-            $w = array(20, 170);
-            $pdf->Cell($w[0], 7, 'ID', 1, 0, 'C', true);
-            $pdf->Cell($w[1], 7, utf8_decode('Nombre de la Institucion'), 1, 0, 'C', true);
-            $pdf->Ln();
-
-            // Datos con colores alternados
-            $pdf->SetFillColor(240, 255, 250); // Verde muy claro
-            $pdf->SetTextColor(50, 50, 50);
-            $pdf->SetFont('Arial', '', 9);
-
-            $fill = false;
-            foreach($instituciones as $inst) {
-                $pdf->Cell($w[0], 6, $inst->id, 'LR', 0, 'C', $fill);
-                $pdf->Cell($w[1], 6, utf8_decode($inst->nombre), 'LR', 0, 'L', $fill);
-                $pdf->Ln();
-                $fill = !$fill;
-            }
-
-            // Línea de cierre
-            $pdf->Cell(array_sum($w), 0, '', 'T');
-
-            // Output
-            $pdf->Output('D', 'Reporte_Instituciones_' . date('Ymd_His') . '.pdf');
-
-        } catch (Exception $e) {
-            echo "Error al generar PDF: " . $e->getMessage();
-        }
-    }
+    
 
     public function generarPDFCalificaciones() {
         try {
@@ -750,10 +701,10 @@ class ReportesController {
 
     public function generarExcelInstituciones() {
         try {
-            $instituciones = $this->modelo->obtenerInstituciones();
+            $instituciones = $this->modelo->obtenerInstitucionesConPromedios();
 
             header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
-            header("Content-Disposition: attachment; filename=Reporte_Instituciones_" . date('Ymd_His') . ".xls");
+            header("Content-Disposition: attachment; filename=Reporte_Instituciones_Promedios_" . date('Ymd_His') . ".xls");
             header("Pragma: no-cache");
             header("Expires: 0");
 
@@ -764,23 +715,35 @@ class ReportesController {
             echo '<body>';
             echo '<table border="1">';
             echo '<tr style="background-color: #15a085; color: white; font-weight: bold;">';
-            echo '<td colspan="2" style="text-align: center; font-size: 16px; padding: 10px;">REPORTE DE INSTITUCIONES</td>';
+            echo '<td colspan="3" style="text-align: center; font-size: 16px; padding: 10px;">REPORTE DE INSTITUCIONES - PROMEDIOS POR CURSO</td>';
             echo '</tr>';
             echo '<tr style="background-color: #15a085; color: white; font-weight: bold;">';
-            echo '<td>ID</td>';
-            echo '<td>Nombre</td>';
+            echo '<td>Institución</td>';
+            echo '<td>Curso</td>';
+            echo '<td>Promedio</td>';
             echo '</tr>';
 
             foreach($instituciones as $inst) {
-                echo '<tr>';
-                echo '<td>' . $inst->id . '</td>';
-                echo '<td>' . htmlspecialchars($inst->nombre) . '</td>';
-                echo '</tr>';
+                $nombreInst = isset($inst['nombre']) ? $inst['nombre'] : (isset($inst->nombre) ? $inst->nombre : '');
+                $cursos = isset($inst['cursos']) ? $inst['cursos'] : [];
+                if (!empty($cursos)) {
+                    foreach($cursos as $curso) {
+                        echo '<tr>';
+                        echo '<td>' . htmlspecialchars($nombreInst) . '</td>';
+                        echo '<td>' . htmlspecialchars($curso['curso']) . '</td>';
+                        echo '<td>' . number_format($curso['promedio'], 2) . '</td>';
+                        echo '</tr>';
+                    }
+                } else {
+                    $prom = isset($inst['promedio_general']) && $inst['promedio_general'] > 0 ? number_format($inst['promedio_general'], 2) : 'N/D';
+                    echo '<tr>';
+                    echo '<td>' . htmlspecialchars($nombreInst) . '</td>';
+                    echo '<td>Sin datos</td>';
+                    echo '<td>' . $prom . '</td>';
+                    echo '</tr>';
+                }
             }
 
-            echo '<tr style="background-color: #f0f0f0; font-weight: bold;">';
-            echo '<td colspan="2">Total de instituciones: ' . count($instituciones) . '</td>';
-            echo '</tr>';
             echo '</table>';
             echo '</body>';
             echo '</html>';

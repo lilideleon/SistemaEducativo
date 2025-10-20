@@ -706,6 +706,68 @@ class ReportesModel {
         }
     }
 
+    public function obtenerInstitucionesConPromedios() {
+        try {
+            $this->ConexionSql = $this->Conexion->CrearConexion();
+            
+            // 1. Obtener todas las instituciones activas
+            $sql_instituciones = "SELECT id, nombre FROM instituciones WHERE activo = 1 ORDER BY nombre";
+            $stmt_instituciones = $this->ConexionSql->query($sql_instituciones);
+            $instituciones = $stmt_instituciones->fetchAll(PDO::FETCH_ASSOC);
+            
+            if (empty($instituciones)) {
+                return [];
+            }
+            
+            $ids_instituciones = array_column($instituciones, 'id');
+            $placeholders = rtrim(str_repeat('?,', count($ids_instituciones)), ',');
+            
+            // 2. Obtener promedio general por institución
+            $sql_promedio_general = "SELECT institucion_id, AVG(puntaje) as promedio_general
+                                     FROM calificaciones
+                                     WHERE institucion_id IN ($placeholders) AND activo = 1
+                                     GROUP BY institucion_id";
+            $stmt_promedio_general = $this->ConexionSql->prepare($sql_promedio_general);
+            $stmt_promedio_general->execute($ids_instituciones);
+            $promedios_generales = $stmt_promedio_general->fetchAll(PDO::FETCH_KEY_PAIR);
+
+            // 3. Obtener promedios por curso para cada institución
+            $sql_promedio_cursos = "SELECT c.institucion_id, cur.nombre as curso_nombre, AVG(c.puntaje) as promedio_curso
+                                    FROM calificaciones c
+                                    JOIN cursos cur ON c.curso_id = cur.id
+                                    WHERE c.institucion_id IN ($placeholders) AND c.activo = 1
+                                    GROUP BY c.institucion_id, cur.nombre
+                                    ORDER BY c.institucion_id, cur.nombre";
+            $stmt_promedio_cursos = $this->ConexionSql->prepare($sql_promedio_cursos);
+            $stmt_promedio_cursos->execute($ids_instituciones);
+            $promedios_cursos_raw = $stmt_promedio_cursos->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Agrupar promedios por curso por institucion_id
+            $promedios_por_curso = [];
+            foreach ($promedios_cursos_raw as $row) {
+                $promedios_por_curso[$row['institucion_id']][] = [
+                    'curso' => $row['curso_nombre'],
+                    'promedio' => round($row['promedio_curso'], 2)
+                ];
+            }
+
+            // 4. Combinar toda la información
+            foreach ($instituciones as &$institucion) {
+                $id = $institucion['id'];
+                $institucion['promedio_general'] = isset($promedios_generales[$id]) ? round($promedios_generales[$id], 2) : 0;
+                $institucion['cursos'] = isset($promedios_por_curso[$id]) ? $promedios_por_curso[$id] : [];
+            }
+            
+            return $instituciones;
+
+        } catch (Exception $e) {
+            error_log('ERROR obtenerInstitucionesConPromedios: ' . $e->getMessage());
+            return [];
+        } finally {
+            $this->Conexion->CerrarConexion();
+        }
+    }
+
     // Top preguntas con más errores (para dashboard)
     public function obtenerPreguntasConMasErrores($filtros = [], $limit = 10) {
         try {
