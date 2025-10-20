@@ -124,7 +124,7 @@ include 'views/Menu/Aside.php';
       <header class="d-flex align-items-center justify-content-between mb-3">
         <h1 class="page-title">Gestión de Preguntas</h1>
         <a href="?c=Login&a=Logout" class="btn btn-outline-light btn-sm" title="Cerrar Sesión">
-          <i class="bi bi-box-arrow-right"></i> Salir
+          <i class="bi bi-box-arrow-right"></i> Cerrar sesión
         </a>
       </header>
 
