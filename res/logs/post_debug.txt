@@ -12,3 +12,4 @@
 2025-10-09T12:04:46-06:00 {"Codigo":"356465","nombres":"anaaaa","apellidos":"arcia","Rol":"ALUMNO","GradoId":"1","InstitucionId":"4","Seccion":"3","Contraseña":"369554"}
 2025-10-10T17:59:26-06:00 {"Codigo":"1010","nombres":"ana","apellidos":"garcia","Rol":"ALUMNO","Contraseña":"1010","GradoId":"1","InstitucionId":"12","Seccion":"1"}
 2025-10-20T11:42:12-06:00 {"Codigo":"1111","nombres":"test","apellidos":"test","Rol":"ALUMNO","Contraseña":"1111","GradoId":"1","InstitucionId":"12","Seccion":"1"}
+2025-10-20T12:28:18-06:00 {"Codigo":"3131","nombres":"Cesar","apellidos":"de Leon","Rol":"ALUMNO","Contraseña":"31107449-Eli","GradoId":"2","InstitucionId":"7","Seccion":"2"}

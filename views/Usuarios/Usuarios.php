@@ -167,10 +167,13 @@
               <div class="col-md-3">
                 <label for="password" class="form-label">Contraseña</label>
                 <div class="input-group input-group-sm">
-                  <input type="password" class="form-control form-control-sm" id="password" required>
+                  <input type="password" class="form-control form-control-sm" id="password" required minlength="8" autocomplete="new-password">
                   <button class="btn btn-outline-secondary" type="button" id="togglePassword">
                     <i class="bi bi-eye"></i>
                   </button>
+                </div>
+                <div class="invalid-feedback" id="passwordError" style="display:none;">
+                  La contraseña debe tener al menos 8 caracteres e incluir letras mayúsculas y minúsculas.
                 </div>
               </div>
               <div class="col-12 d-flex justify-content-end gap-2 mt-2">
@@ -271,6 +274,48 @@
   const btnGuardar = document.getElementById('btnGuardar');
   const btnActualizar = document.getElementById('btnActualizar');
   const btnNuevo = document.getElementById('btnNuevo');
+  const pwdInput = document.getElementById('password');
+  const pwdError = document.getElementById('passwordError');
+  let currentMode = 'nuevo';
+
+      // Validación de contraseña segura (8+ caracteres, mayúsculas y minúsculas)
+  const isStrongPassword = (v) => /^(?=.*[a-z])(?=.*[A-Z]).{8,}$/.test(v || '');
+  const getMode = () => currentMode;
+      const validatePassword = () => {
+        const v = pwdInput.value;
+        const mode = getMode();
+        // En modo edición: solo valida si el usuario escribió una nueva contraseña
+        const mustValidate = mode === 'nuevo' || v.length > 0;
+        if (!mustValidate) {
+          pwdInput.classList.remove('is-invalid', 'is-valid');
+          pwdError.style.display = 'none';
+          return true;
+        }
+        const ok = isStrongPassword(v);
+        if (ok) {
+          pwdInput.classList.remove('is-invalid');
+          pwdInput.classList.add('is-valid');
+          pwdError.style.display = 'none';
+        } else {
+          pwdInput.classList.remove('is-valid');
+          pwdInput.classList.add('is-invalid');
+          pwdError.style.display = 'block';
+        }
+        // Control de botones según el modo
+        if (mode === 'nuevo') {
+          // En nuevo, exigir contraseña válida para habilitar Guardar
+          btnGuardar.disabled = !ok;
+        } else if (mode === 'edicion') {
+          // En edición, solo bloquear Actualizar si el usuario escribió una nueva contraseña inválida
+          if (v && v.length > 0) {
+            btnActualizar.disabled = !ok;
+          } else {
+            // Si no se está cambiando la contraseña, no bloquear por este motivo
+            btnActualizar.disabled = false;
+          }
+        }
+        return ok;
+      };
 
       // Intentar primero la URL corta y si falla, usar index.php como fallback
       const baseCandidates = ['?c=Usuarios', 'index.php?c=Usuarios'];
@@ -325,16 +370,21 @@
 
       // Control de modo de la UI: 'nuevo' o 'edicion'
       const setMode = (mode) => {
+        currentMode = mode;
         if (mode === 'nuevo') {
           // Requisito: cuando sea "Nuevo" los otros dos se bloquean
           btnGuardar.disabled = false;  // acción vigente
           btnActualizar.disabled = true; // bloqueado
           btnNuevo.disabled = true;      // bloqueado
+          // Validar estado inicial de contraseña
+          validatePassword();
         } else if (mode === 'edicion') {
           // Requisito: cuando edita, solo Actualizar activo
           btnGuardar.disabled = true;   // bloqueado
           btnActualizar.disabled = false; // acción vigente
           btnNuevo.disabled = true;       // bloqueado
+          // En edición, no exigir contraseña a menos que se modifique
+          validatePassword();
         }
       };
 
@@ -639,6 +689,9 @@
             deleteId = null;
           });
         });
+
+        // Validación en vivo de contraseña
+        pwdInput.addEventListener('input', validatePassword);
       });
 
       // Helper: esperar a que un select tenga una opción y luego asignar su valor
@@ -733,6 +786,16 @@
         if (!codigo || !nombresStr || !apellidosStr || !rolTxt || (!isEdit && !password)) {
           alert('Complete los campos requeridos.');
           return;
+        }
+
+        // Validar reglas de contraseña cuando corresponda
+        const mode = getMode();
+        if ((mode === 'nuevo') || (isEdit && password)) {
+          if (!isStrongPassword(password)) {
+            validatePassword();
+            alert('La contraseña no cumple los requisitos: mínimo 8 caracteres, con letras mayúsculas y minúsculas.');
+            return;
+          }
         }
 
         const [PrimerNombre, SegundoNombre] = splitTwo(nombresStr);
