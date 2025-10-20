@@ -73,6 +73,32 @@ class EvaluacionController
             $vigente = $encModel->ObtenerVigentePorId($encuesta_id, /*requireActiva*/ true, /*requireActivo*/ true);
             if (!$vigente) { throw new Exception('La evaluación no está vigente'); }
 
+            // Bloqueo temprano: si el alumno ya respondió esta encuesta, no cargar preguntas
+            // Solo aplica a rol ALUMNO; admin puede visualizar
+            if (!isset($_SESSION)) { @session_start(); }
+            $userRol = isset($_SESSION['user_rol']) ? $_SESSION['user_rol'] : null;
+            if ($userRol === 'ALUMNO') {
+                if (!isset($_SESSION['authenticated']) || !$_SESSION['authenticated']) {
+                    throw new Exception('Usuario no autenticado');
+                }
+                $alumno_user_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
+                if ($alumno_user_id <= 0) { throw new Exception('ID de usuario inválido'); }
+
+                $respAlumnosModel = new RespuestasAlumnos_model();
+                if ($respAlumnosModel->AlumnoYaRespondio($alumno_user_id, $encuesta_id)) {
+                    $payload = json_encode([
+                        'success' => true,
+                        'responded' => true,
+                        'msj' => 'Ya has respondido esta evaluación anteriormente',
+                        'data' => []
+                    ]);
+                    while (ob_get_level() > 0) { ob_end_clean(); }
+                    if (substr($payload, 0, 3) === "\xEF\xBB\xBF") { $payload = substr($payload, 3); }
+                    echo $payload;
+                    return;
+                }
+            }
+
             $pregModel = new Preguntas_model();
             $respModel = new Respuestas_model();
             // Obtener hasta 20 preguntas aleatorias
@@ -109,7 +135,7 @@ class EvaluacionController
             }
             unset($p);
 
-            $payload = json_encode([ 'success' => true, 'data' => $pregs ]);
+            $payload = json_encode([ 'success' => true, 'responded' => false, 'data' => $pregs ]);
             // Limpiar buffers y eliminar BOM si existe
             while (ob_get_level() > 0) { ob_end_clean(); }
             if (substr($payload, 0, 3) === "\xEF\xBB\xBF") { $payload = substr($payload, 3); }

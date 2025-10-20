@@ -422,6 +422,18 @@
             const json = JSON.parse(obj.text);
             try { console.log('Evaluacion data:', json); } catch(_){ }
             if(json && json.success){
+              // Si el servidor indica que el alumno ya respondió, bloquear inmediatamente
+              if (json.responded === true) {
+                preguntas = []; idx = -1;
+                btnNext.classList.add('disabled');
+                btnNext.style.display = 'none';
+                qContainer.innerHTML = `
+                  <div class="alert alert-info">
+                    <h5>Evaluación no disponible</h5>
+                    <p>${json.msj || 'Ya has respondido esta evaluación anteriormente.'}</p>
+                  </div>`;
+                return;
+              }
               preguntas = json.data || [];
               idx = 0;
               // Configurar tiempos por pregunta de forma equitativa (1 hora / total de preguntas)
