@@ -1305,6 +1305,18 @@
           </div>
         </div>
       </div>
+
+      <!-- Gráfico: Preguntas con más errores -->
+      <div class="chart-card chart-wide">
+        <div class="chart-header">
+          <h2 class="chart-title">Preguntas con más errores</h2>
+        </div>
+        <div class="chart-body">
+          <div class="chart-container-tall">
+            <canvas id="preguntasErroresChart"></canvas>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Tabla de actividad reciente -->
@@ -1486,10 +1498,11 @@
       let rolesData = <?= isset($usuariosPorRol) ? json_encode($usuariosPorRol) : json_encode([]) ?>;
       let distritosData = <?= isset($institucionesPorDistrito) ? json_encode($institucionesPorDistrito) : json_encode([]) ?>;
       let promediosData = <?= isset($promediosPorInstitucion) ? json_encode($promediosPorInstitucion) : json_encode([]) ?>;
-      let alumnosData = <?= isset($mejoresAlumnos) ? json_encode($mejoresAlumnos) : json_encode([]) ?>;
+  let alumnosData = <?= isset($mejoresAlumnos) ? json_encode($mejoresAlumnos) : json_encode([]) ?>;
+  let preguntasErroresData = <?= isset($preguntasConMasErrores) ? json_encode($preguntasConMasErrores) : json_encode([]) ?>;
 
     // Chart instances (declaradas aquí para evitar usar let antes de definir)
-    let alumnosChart, rolesChart, distritosChart, promediosChart;
+  let alumnosChart, rolesChart, distritosChart, promediosChart, preguntasErroresChart;
       
       console.log('✅ Datos cargados correctamente');
       
@@ -1532,6 +1545,48 @@
           options: { responsive: true, maintainAspectRatio: false }
         });
         console.log('✅ Gráfico de distritos creado');
+      }
+
+      // GRÁFICO 5: PREGUNTAS CON MÁS ERRORES
+      console.log('📊 Creando gráfico de preguntas con más errores...');
+      const pregErrElement = document.getElementById('preguntasErroresChart');
+      if (pregErrElement) {
+        const labels = (preguntasErroresData || []).map(item => (item.enunciado || '').substring(0, 40) + ( (item.enunciado||'').length>40 ? '…' : '' ));
+        const dataVals = (preguntasErroresData || []).map(item => item.incorrectas || 0);
+        preguntasErroresChart = new Chart(pregErrElement.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Respuestas incorrectas',
+              data: dataVals,
+              backgroundColor: '#E66C37',
+              maxBarThickness: 32,
+              borderRadius: 4,
+              borderSkipped: false
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  title: function(ctx){ return preguntasErroresData[ctx[0].dataIndex].encuesta || 'Encuesta'; },
+                  label: function(ctx){
+                    const it = preguntasErroresData[ctx.dataIndex];
+                    return [`Incorrectas: ${it.incorrectas}`, `Total: ${it.total_respuestas}`, `Tasa error: ${it.tasa_error}%`];
+                  }
+                }
+              }
+            },
+            scales: {
+              x: { beginAtZero: true }
+            }
+          }
+        });
+        console.log('✅ Gráfico de preguntas con más errores creado');
       }
       
       // GRÁFICO 3: PROMEDIOS
@@ -2340,6 +2395,16 @@
           if (data.institucionesPorDistrito) {
             distritosData = data.institucionesPorDistrito;
             updateDistritosChart();
+          }
+
+          // Actualizar preguntas con más errores
+          if (data.preguntasConMasErrores) {
+            preguntasErroresData = data.preguntasConMasErrores;
+            if (preguntasErroresChart) {
+              preguntasErroresChart.data.labels = preguntasErroresData.map(it => (it.enunciado || '').substring(0, 40) + ((it.enunciado||'').length>40 ? '…' : ''));
+              preguntasErroresChart.data.datasets[0].data = preguntasErroresData.map(it => it.incorrectas || 0);
+              preguntasErroresChart.update();
+            }
           }
 
           hideGlobalLoader();

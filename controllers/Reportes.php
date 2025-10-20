@@ -193,7 +193,9 @@ class ReportesController {
             error_log("CONTROLADOR: Obteniendo mejores alumnos...");
             $mejoresAlumnos = $this->modelo->obtenerMejoresAlumnos();
             error_log("CONTROLADOR: Mejores alumnos obtenidos: " . json_encode($mejoresAlumnos));
-            
+            // Obtener top preguntas con más errores
+            $topErrores = $this->modelo->obtenerPreguntasConMasErrores([], 10);
+
             $data = [
                 'totalUsuarios' => $this->modelo->contarUsuarios(),
                 'totalInstituciones' => $this->modelo->contarInstituciones(),
@@ -207,11 +209,10 @@ class ReportesController {
                 'mejoresAlumnos' => $mejoresAlumnos,
                 'cursos' => $cursosGrados['cursos'],
                 'grados' => $cursosGrados['grados'],
-                'actividadReciente' => $this->modelo->obtenerActividadReciente()
+                'actividadReciente' => $this->modelo->obtenerActividadReciente(),
+                'preguntasConMasErrores' => $topErrores
             ];
-            
-            error_log("CONTROLADOR: Data completa preparada, mejoresAlumnos count: " . count($mejoresAlumnos));
-            
+
             // Extraer variables para la vista
             extract($data);
             require_once "views/Reportes/Dashboard.php";
@@ -266,11 +267,15 @@ class ReportesController {
             $roles = $this->modelo->obtenerUsuariosPorRol($filtros);
             $distritos = $this->modelo->obtenerInstitucionesPorDistrito($filtros);
 
+            // Preguntas con más errores
+            $topErrores = $this->modelo->obtenerPreguntasConMasErrores($filtros, 10);
+
             $response = [
                 'mejoresAlumnos' => $mejoresAlumnos,
                 'promediosPorInstitucion' => $promedios,
                 'usuariosPorRol' => $roles,
-                'institucionesPorDistrito' => $distritos
+                'institucionesPorDistrito' => $distritos,
+                'preguntasConMasErrores' => $topErrores
             ];
 
             header('Content-Type: application/json; charset=utf-8');
