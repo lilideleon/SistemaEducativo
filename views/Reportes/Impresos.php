@@ -613,6 +613,29 @@
         </div>
 
         <div class="filter-item">
+          <label class="filter-label">Grado</label>
+          <select class="filter-select" id="filtroGrado">
+            <option value="">Todos los grados</option>
+            <?php
+              // Obtener grados disponibles
+              try {
+                require_once 'models/Reportes.php';
+                $repModel = new ReportesModel();
+                $cg = $repModel->obtenerCursosYGrados();
+                $grados = isset($cg['grados']) ? $cg['grados'] : [];
+                if (is_array($grados)) {
+                  foreach($grados as $grado) {
+                    echo '<option value="' . $grado['id'] . '">' . htmlspecialchars($grado['nombre']) . '</option>';
+                  }
+                }
+              } catch (Exception $e) {
+                // Silenciar error si no se pueden cargar grados
+              }
+            ?>
+          </select>
+        </div>
+
+        <div class="filter-item">
           <label class="filter-label">Formato de Exportación</label>
           <select class="filter-select" id="filtroFormato">
             <option value="pdf">PDF (Recomendado)</option>
@@ -879,7 +902,46 @@
       if (applyFiltersBtn) {
         applyFiltersBtn.addEventListener('click', function() {
           console.log('Aplicando filtros...');
-          // Aquí irá la lógica de filtrado
+          
+          // Obtener valores de los filtros
+          const institucionId = document.getElementById('filtroInstitucion')?.value || '';
+          const gradoId = document.getElementById('filtroGrado')?.value || '';
+          
+          // Actualizar todos los enlaces de reportes (PDF y Excel)
+          const allReportLinks = document.querySelectorAll('.btn-generate, .btn-excel');
+          allReportLinks.forEach(link => {
+            const baseHref = link.getAttribute('data-base-href') || link.getAttribute('href');
+            
+            // Guardar la URL base si no existe
+            if (!link.hasAttribute('data-base-href')) {
+              link.setAttribute('data-base-href', baseHref);
+            }
+            
+            // Crear nueva URL con filtros (trabajar solo con query string)
+            if (baseHref && baseHref.includes('?c=Reportes&a=generar')) {
+              // Separar la parte base de los parámetros
+              const [basePath, queryString] = baseHref.split('?');
+              const params = new URLSearchParams(queryString || '');
+              
+              // Agregar o eliminar filtros
+              if (institucionId) {
+                params.set('institucion_id', institucionId);
+              } else {
+                params.delete('institucion_id');
+              }
+              
+              if (gradoId) {
+                params.set('grado_id', gradoId);
+              } else {
+                params.delete('grado_id');
+              }
+              
+              // Construir nueva URL relativa
+              const newHref = basePath + '?' + params.toString();
+              link.setAttribute('href', newHref);
+              console.log('URL actualizada:', newHref);
+            }
+          });
           
           // Feedback visual
           this.innerHTML = '<i class="bi bi-check-circle me-2"></i> ¡Filtros Aplicados!';

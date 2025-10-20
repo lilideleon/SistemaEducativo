@@ -690,13 +690,22 @@ class ReportesModel {
         }
     }
 
-    public function obtenerInstitucionesConPromedios() {
+    public function obtenerInstitucionesConPromedios($filtros = []) {
         try {
             $this->ConexionSql = $this->Conexion->CrearConexion();
             
-            // 1. Obtener todas las instituciones activas
-            $sql_instituciones = "SELECT id, nombre FROM instituciones WHERE activo = 1 ORDER BY nombre";
-            $stmt_instituciones = $this->ConexionSql->query($sql_instituciones);
+            // 1. Obtener instituciones activas (con filtro opcional)
+            $sql_instituciones = "SELECT id, nombre FROM instituciones WHERE activo = 1";
+            $params_instituciones = [];
+            
+            if (!empty($filtros['institucion_id'])) {
+                $sql_instituciones .= " AND id = ?";
+                $params_instituciones[] = $filtros['institucion_id'];
+            }
+            
+            $sql_instituciones .= " ORDER BY nombre";
+            $stmt_instituciones = $this->ConexionSql->prepare($sql_instituciones);
+            $stmt_instituciones->execute($params_instituciones);
             $instituciones = $stmt_instituciones->fetchAll(PDO::FETCH_ASSOC);
             
             if (empty($instituciones)) {
@@ -706,24 +715,38 @@ class ReportesModel {
             $ids_instituciones = array_column($instituciones, 'id');
             $placeholders = rtrim(str_repeat('?,', count($ids_instituciones)), ',');
             
-            // 2. Obtener promedio general por institución
+            // 2. Obtener promedio general por institución (con filtro de grado opcional)
             $sql_promedio_general = "SELECT institucion_id, AVG(puntaje) as promedio_general
                                      FROM calificaciones
-                                     WHERE institucion_id IN ($placeholders) AND activo = 1
-                                     GROUP BY institucion_id";
+                                     WHERE institucion_id IN ($placeholders) AND activo = 1";
+            $params_promedio_general = $ids_instituciones;
+            
+            if (!empty($filtros['grado_id'])) {
+                $sql_promedio_general .= " AND grado_id = ?";
+                $params_promedio_general[] = $filtros['grado_id'];
+            }
+            
+            $sql_promedio_general .= " GROUP BY institucion_id";
             $stmt_promedio_general = $this->ConexionSql->prepare($sql_promedio_general);
-            $stmt_promedio_general->execute($ids_instituciones);
+            $stmt_promedio_general->execute($params_promedio_general);
             $promedios_generales = $stmt_promedio_general->fetchAll(PDO::FETCH_KEY_PAIR);
 
-            // 3. Obtener promedios por curso para cada institución
+            // 3. Obtener promedios por curso para cada institución (con filtro de grado opcional)
             $sql_promedio_cursos = "SELECT c.institucion_id, cur.nombre as curso_nombre, AVG(c.puntaje) as promedio_curso
                                     FROM calificaciones c
                                     JOIN cursos cur ON c.curso_id = cur.id
-                                    WHERE c.institucion_id IN ($placeholders) AND c.activo = 1
-                                    GROUP BY c.institucion_id, cur.nombre
+                                    WHERE c.institucion_id IN ($placeholders) AND c.activo = 1";
+            $params_promedio_cursos = $ids_instituciones;
+            
+            if (!empty($filtros['grado_id'])) {
+                $sql_promedio_cursos .= " AND c.grado_id = ?";
+                $params_promedio_cursos[] = $filtros['grado_id'];
+            }
+            
+            $sql_promedio_cursos .= " GROUP BY c.institucion_id, cur.nombre
                                     ORDER BY c.institucion_id, cur.nombre";
             $stmt_promedio_cursos = $this->ConexionSql->prepare($sql_promedio_cursos);
-            $stmt_promedio_cursos->execute($ids_instituciones);
+            $stmt_promedio_cursos->execute($params_promedio_cursos);
             $promedios_cursos_raw = $stmt_promedio_cursos->fetchAll(PDO::FETCH_ASSOC);
             
             // Agrupar promedios por curso por institucion_id

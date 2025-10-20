@@ -16,8 +16,17 @@ class ReportesController {
 
     public function generarPDFInstituciones() {
         try {
-            // Obtener instituciones con sus promedios por curso
-            $instituciones = $this->modelo->obtenerInstitucionesConPromedios();
+            // Obtener filtros desde GET
+            $filtros = [];
+            if (isset($_GET['institucion_id']) && $_GET['institucion_id'] !== '') {
+                $filtros['institucion_id'] = intval($_GET['institucion_id']);
+            }
+            if (isset($_GET['grado_id']) && $_GET['grado_id'] !== '') {
+                $filtros['grado_id'] = intval($_GET['grado_id']);
+            }
+            
+            // Obtener instituciones con sus promedios por curso (con filtros)
+            $instituciones = $this->modelo->obtenerInstitucionesConPromedios($filtros);
 
             // Crear PDF con diseño profesional
             $pdf = new PDF_Instituciones();
@@ -706,7 +715,16 @@ class ReportesController {
 
     public function generarExcelInstituciones() {
         try {
-            $instituciones = $this->modelo->obtenerInstitucionesConPromedios();
+            // Obtener filtros desde GET
+            $filtros = [];
+            if (isset($_GET['institucion_id']) && $_GET['institucion_id'] !== '') {
+                $filtros['institucion_id'] = intval($_GET['institucion_id']);
+            }
+            if (isset($_GET['grado_id']) && $_GET['grado_id'] !== '') {
+                $filtros['grado_id'] = intval($_GET['grado_id']);
+            }
+            
+            $instituciones = $this->modelo->obtenerInstitucionesConPromedios($filtros);
 
             header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
             header("Content-Disposition: attachment; filename=Reporte_Instituciones_Promedios_" . date('Ymd_His') . ".xls");
