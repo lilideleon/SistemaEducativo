@@ -1495,19 +1495,31 @@
       console.log('📊 Cargando datos...');
       
       // Datos cargados desde el servidor (controlador)
-      let rolesData = <?= isset($usuariosPorRol) ? json_encode($usuariosPorRol) : json_encode([]) ?>;
-      let distritosData = <?= isset($institucionesPorDistrito) ? json_encode($institucionesPorDistrito) : json_encode([]) ?>;
-      let promediosData = <?= isset($promediosPorInstitucion) ? json_encode($promediosPorInstitucion) : json_encode([]) ?>;
-  let alumnosData = <?= isset($mejoresAlumnos) ? json_encode($mejoresAlumnos) : json_encode([]) ?>;
-  let preguntasErroresData = <?= isset($preguntasConMasErrores) ? json_encode($preguntasConMasErrores) : json_encode([]) ?>;
+      // Usar var para que sean globales y accesibles desde otros bloques <script>
+      var rolesData = <?= isset($usuariosPorRol) ? json_encode($usuariosPorRol) : json_encode([]) ?>;
+      var distritosData = <?= isset($institucionesPorDistrito) ? json_encode($institucionesPorDistrito) : json_encode([]) ?>;
+      var promediosData = <?= isset($promediosPorInstitucion) ? json_encode($promediosPorInstitucion) : json_encode([]) ?>;
+      var alumnosData = <?= isset($mejoresAlumnos) ? json_encode($mejoresAlumnos) : json_encode([]) ?>;
+      var preguntasErroresData = <?= isset($preguntasConMasErrores) ? json_encode($preguntasConMasErrores) : json_encode([]) ?>;
 
-    // Chart instances (declaradas aquí para evitar usar let antes de definir)
-  let alumnosChart, rolesChart, distritosChart, promediosChart, preguntasErroresChart;
+    // Chart instances (declaradas aquí para evitar usar var antes de definir)
+      var alumnosChart, rolesChart, distritosChart, promediosChart, preguntasErroresChart;
+      var powerBIColors = ['#118DFF', '#E66C37', '#6B007B', '#12239E', '#E044A7'];
       
       console.log('✅ Datos cargados correctamente');
+      console.log('🔍 DEBUG - promediosData:', promediosData);
+      console.log('🔍 DEBUG - promediosData length:', promediosData ? promediosData.length : 'undefined');
       
-      // Colores Power BI
-      const powerBIColors = ['#118DFF', '#E66C37', '#6B007B', '#12239E', '#E044A7'];
+      // LOG DETALLADO: Ver cada institución y su promedio
+      if (promediosData && promediosData.length > 0) {
+        console.log('📊 DETALLE DE INSTITUCIONES:');
+        promediosData.forEach((inst, idx) => {
+          console.log(`  [${idx}] ${inst.institucion}: promedio=${inst.promedio}, calificaciones=${inst.total_calificaciones}`);
+        });
+      }
+      
+      // Colores Power BI (ya definido arriba en var)
+
       
       // GRÁFICO 1: ROLES
       console.log('📊 Creando gráfico de roles...');
@@ -1589,27 +1601,7 @@
         console.log('✅ Gráfico de preguntas con más errores creado');
       }
       
-      // GRÁFICO 3: PROMEDIOS
-      console.log('📊 Creando gráfico de promedios...');
-      const promediosElement = document.getElementById('promediosChart');
-      if (promediosElement) {
-        promediosChart = new Chart(promediosElement.getContext('2d'), {
-          type: 'bar',
-          data: {
-            labels: promediosData.map(item => item.institucion.substring(0, 20)),
-            datasets: [{
-              data: promediosData.map(item => item.promedio),
-              backgroundColor: ['#FFD700', '#C0C0C0', '#CD7F32']
-            }]
-          },
-          options: { 
-            indexAxis: 'y',
-            responsive: true, 
-            maintainAspectRatio: false 
-          }
-        });
-        console.log('✅ Gráfico de promedios creado');
-      }
+      // (El gráfico de promedios se crea en el bloque avanzado más abajo)
       
       // GRÁFICO 4: ALUMNOS
       console.log('📊 Creando gráfico de alumnos...');
@@ -1834,20 +1826,44 @@
     const promediosChartElement = document.getElementById('promediosChart');
     if (promediosChartElement) {
       console.log('Inicializando gráfico de promedios...');
+      console.log('promediosData para gráfico:', promediosData);
+      
+      // MOSTRAR TODAS LAS INSTITUCIONES (con y sin datos)
+      // Ordenar: primero las que tienen datos (por promedio DESC), luego las sin datos
+      const promediosConDatos = promediosData.filter(item => parseFloat(item.promedio) > 0);
+      const promediosSinDatos = promediosData.filter(item => parseFloat(item.promedio) === 0);
+      const todasLasInstituciones = [...promediosConDatos, ...promediosSinDatos];
+      
+      console.log(`📊 Instituciones con datos: ${promediosConDatos.length}, Sin datos: ${promediosSinDatos.length}, Total: ${todasLasInstituciones.length}`);
+      
+      if (!todasLasInstituciones || todasLasInstituciones.length === 0) {
+        console.warn('⚠️  No hay instituciones para mostrar');
+      }
+      
       const promediosCtx = promediosChartElement.getContext('2d');
-      new Chart(promediosCtx, {
+      promediosChart = new Chart(promediosCtx, {
       type: 'bar',
       data: {
-        labels: promediosData.map(item => {
+        labels: todasLasInstituciones.map(item => {
           // Truncar nombres largos
           const nombre = item.institucion || 'Sin nombre';
-          return nombre.length > 25 ? nombre.substring(0, 25) + '...' : nombre;
+          const nombreCorto = nombre.length > 30 ? nombre.substring(0, 30) + '...' : nombre;
+          // Agregar indicador si no tiene datos
+          return parseFloat(item.promedio) === 0 ? nombreCorto + ' (Sin datos)' : nombreCorto;
         }),
         datasets: [{
           label: 'Promedio',
-          data: promediosData.map(item => item.promedio || 0),
+          data: todasLasInstituciones.map(item => parseFloat(item.promedio) || 0),
           backgroundColor: function(context) {
-            // Gradiente de colores basado en el ranking
+            const index = context.dataIndex;
+            const promedio = parseFloat(todasLasInstituciones[index].promedio) || 0;
+            
+            // Si no tiene datos, color gris
+            if (promedio === 0) {
+              return '#cccccc';
+            }
+            
+            // Colores para instituciones con datos (ranking)
             const colors = [
               '#FFD700', // Oro para el primero
               '#C0C0C0', // Plata para el segundo  
@@ -1858,7 +1874,10 @@
               '#106ebe',
               '#0084F4'
             ];
-            return colors[context.dataIndex] || '#118DFF';
+            
+            // Encontrar la posición en el ranking (solo entre los que tienen datos)
+            const posicionRanking = promediosConDatos.findIndex(p => p.institucion === todasLasInstituciones[index].institucion);
+            return colors[posicionRanking] || '#118DFF';
           },
           borderRadius: 4,
           borderSkipped: false,
@@ -1916,10 +1935,10 @@
             callbacks: {
               title: function(context) {
                 // Mostrar nombre completo en tooltip
-                return promediosData[context[0].dataIndex].institucion;
+                return promediosConDatos[context[0].dataIndex].institucion;
               },
               label: function(context) {
-                const data = promediosData[context.dataIndex];
+                const data = promediosConDatos[context.dataIndex];
                 return [
                   `Promedio: ${data.promedio}%`,
                   `Total calificaciones: ${data.total_calificaciones || 0}`,
@@ -1944,7 +1963,7 @@
     }
 
   // Variables globales para los gráficos
-  let filteredAlumnosData = [...alumnosData];
+      var filteredAlumnosData = [...alumnosData];
 
     // Función para filtrar datos de alumnos con animación
     function filterAlumnosData(showLoader = false) {
@@ -2113,13 +2132,32 @@
         console.warn('No se puede actualizar promediosChart - no existe o no hay datos');
         return;
       }
-      promediosChart.data.labels = promediosData.map(item => {
+      
+      // MOSTRAR TODAS LAS INSTITUCIONES (con y sin datos)
+      const promediosConDatos = promediosData.filter(item => parseFloat(item.promedio) > 0);
+      const promediosSinDatos = promediosData.filter(item => parseFloat(item.promedio) === 0);
+      const todasLasInstituciones = [...promediosConDatos, ...promediosSinDatos];
+      
+      promediosChart.data.labels = todasLasInstituciones.map(item => {
         const nombre = item.institucion || 'Sin nombre';
-        return nombre.length > 25 ? nombre.substring(0, 25) + '...' : nombre;
+        const nombreCorto = nombre.length > 30 ? nombre.substring(0, 30) + '...' : nombre;
+        return parseFloat(item.promedio) === 0 ? nombreCorto + ' (Sin datos)' : nombreCorto;
       });
-      promediosChart.data.datasets[0].data = promediosData.map(item => item.promedio || 0);
+      
+      promediosChart.data.datasets[0].data = todasLasInstituciones.map(item => parseFloat(item.promedio) || 0);
+      
+      // Actualizar colores
+      promediosChart.data.datasets[0].backgroundColor = todasLasInstituciones.map((item, index) => {
+        const promedio = parseFloat(item.promedio) || 0;
+        if (promedio === 0) return '#cccccc';
+        
+        const colors = ['#FFD700', '#C0C0C0', '#CD7F32', '#118DFF', '#0078d4', '#005a9e', '#106ebe', '#0084F4'];
+        const posicionRanking = promediosConDatos.findIndex(p => p.institucion === item.institucion);
+        return colors[posicionRanking] || '#118DFF';
+      });
+      
       promediosChart.update('active');
-      console.log('Promedios chart actualizado con', promediosData.length, 'elementos');
+      console.log('Promedios chart actualizado con', todasLasInstituciones.length, 'instituciones (con datos:', promediosConDatos.length, ', sin datos:', promediosSinDatos.length, ')');
     }
 
     // Actualizar gráfico de distritos si existe

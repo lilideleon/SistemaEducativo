@@ -306,66 +306,74 @@ class ReportesModel {
     public function obtenerPromediosPorInstitucion($filtros = []) {
         try {
             $this->ConexionSql = $this->Conexion->CrearConexion();
-            $sql = "SELECT 
-                        i.nombre as institucion,
-                        AVG(c.puntaje) as promedio,
-                        COUNT(c.id) as total_calificaciones,
-                        MIN(c.puntaje) as min_puntaje,
-                        MAX(c.puntaje) as max_puntaje
-                    FROM calificaciones c 
-                    INNER JOIN instituciones i ON c.institucion_id = i.id 
-                    WHERE c.activo = 1";
 
+            // Construir condiciones adicionales para el JOIN (para no romper el LEFT JOIN)
+            $joinExtras = [];
             $params = [];
-            if (!empty($filtros['institucion_id'])) {
-                $sql .= " AND c.institucion_id = ?";
-                $params[] = $filtros['institucion_id'];
-            }
 
-            // Si se proporcionó periodo (rango o periodo exacto), usar la columna period o la columna `periodo` en calificaciones
+            // Filtrado por periodo (YYYY-MM) o rango (fecha_inicio/fecha_fin) contra c.periodo
             if (!empty($filtros['periodo'])) {
-                // Si viene como rango de fechas
                 if (!empty($filtros['fecha_inicio']) && !empty($filtros['fecha_fin'])) {
-                    // No hay columna fecha explícita en calificaciones según tu esquema; si tu intención es filtrar por periodo
-                    // (ej. '2025-09'), el campo correcto es `periodo`. Si usas fecha completa en otra tabla, actualiza aquí.
-                    // Para seguridad, intentaremos filtrar por `periodo` que contenga el año-mes
-                    $inicio = $filtros['fecha_inicio'];
-                    $fin = $filtros['fecha_fin'];
-                    // Convertir a YYYY-MM para buscar en periodo si aplica
-                    $inicioY = date('Y-m', strtotime($inicio));
-                    $finY = date('Y-m', strtotime($fin));
+                    $inicioY = date('Y-m', strtotime($filtros['fecha_inicio']));
+                    $finY = date('Y-m', strtotime($filtros['fecha_fin']));
                     if ($inicioY === $finY) {
-                        $sql .= " AND c.periodo = ?";
+                        $joinExtras[] = 'c.periodo = ?';
                         $params[] = $inicioY;
                     } else {
-                        // Si es rango de meses distinto, intentar usar BETWEEN comparando strings (asumiendo formato YYYY-MM en periodo)
-                        $sql .= " AND c.periodo BETWEEN ? AND ?";
+                        $joinExtras[] = 'c.periodo BETWEEN ? AND ?';
                         $params[] = $inicioY;
                         $params[] = $finY;
                     }
+                } else {
+                    // Periodo simple YYYY-MM
+                    $joinExtras[] = 'c.periodo = ?';
+                    $params[] = $filtros['periodo'];
                 }
             }
 
-            $sql .= " GROUP BY c.institucion_id, i.nombre 
-                    HAVING COUNT(c.id) > 0
-                    ORDER BY promedio DESC 
-                    LIMIT 15";
+            $joinFilter = '';
+            if (!empty($joinExtras)) {
+                $joinFilter = ' AND ' . implode(' AND ', $joinExtras);
+            }
+
+            $sql = "SELECT 
+                        i.id as institucion_id,
+                        i.nombre as institucion,
+                        COALESCE(ROUND(AVG(c.puntaje), 2), 0) as promedio,
+                        COUNT(c.id) as total_calificaciones,
+                        COALESCE(ROUND(MIN(c.puntaje), 2), 0) as min_puntaje,
+                        COALESCE(ROUND(MAX(c.puntaje), 2), 0) as max_puntaje
+                    FROM instituciones i
+                    LEFT JOIN calificaciones c 
+                      ON c.institucion_id = i.id 
+                     AND c.activo = 1
+                     $joinFilter
+                    WHERE 1=1";
+
+            // Filtro por institución (aplica a la tabla instituciones directamente)
+            if (!empty($filtros['institucion_id'])) {
+                $sql .= " AND i.id = ?";
+                $params[] = $filtros['institucion_id'];
+            }
+
+            $sql .= " GROUP BY i.id, i.nombre
+                      ORDER BY promedio DESC, total_calificaciones DESC
+                      LIMIT 15";
 
             $stmt = $this->ConexionSql->prepare($sql);
-            if (!empty($params)) {
-                $stmt->execute($params);
-            } else {
-                $stmt->execute();
-            }
+            $stmt->execute($params);
 
             $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            // Formatear los datos para mejor presentación
-            foreach ($resultados as &$resultado) {
-                $resultado['promedio'] = round($resultado['promedio'], 2);
-                $resultado['min_puntaje'] = round($resultado['min_puntaje'], 2);
-                $resultado['max_puntaje'] = round($resultado['max_puntaje'], 2);
+            // LOG DEBUG: Ver qué datos realmente se obtienen
+            error_log('=== PROMEDIOS POR INSTITUCION ===');
+            error_log('Total instituciones obtenidas: ' . count($resultados));
+            foreach ($resultados as $idx => $inst) {
+                error_log("[$idx] {$inst['institucion']}: promedio={$inst['promedio']}, calificaciones={$inst['total_calificaciones']}");
             }
+            error_log('SQL ejecutado: ' . $sql);
+            error_log('Params: ' . json_encode($params));
+            error_log('=================================');
             
             return $resultados;
         } catch (Exception $e) {

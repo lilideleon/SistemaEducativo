@@ -233,6 +233,23 @@ class EvaluacionController
                 $nota = 0; // Valor por defecto en caso de error
             }
 
+            // Determinar SIEMPRE la institución del alumno y usarla para guardar la calificación
+            if (!isset($conexionSql)) {
+                $conexion = new ClaseConexion();
+                $conexionSql = $conexion->CrearConexion();
+            }
+            $stmtAlu = $conexionSql->prepare("SELECT institucion_id FROM usuarios WHERE id = :alumno_user_id LIMIT 1");
+            $stmtAlu->bindValue(':alumno_user_id', $alumno_user_id, PDO::PARAM_INT);
+            $stmtAlu->execute();
+            $alumnoRow = $stmtAlu->fetch(PDO::FETCH_ASSOC);
+            $stmtAlu->closeCursor();
+
+            if (!$alumnoRow || empty($alumnoRow['institucion_id'])) {
+                throw new Exception('El alumno no tiene institucion_id asignado.');
+            }
+            // Usar la institución del alumno para el guardado
+            $vigente['institucion_id'] = (int)$alumnoRow['institucion_id'];
+
             // Obtener institucion_id del usuario si no está disponible en $vigente
             if (empty($vigente['institucion_id'])) {
                 try {
