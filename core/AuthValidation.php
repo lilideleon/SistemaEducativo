@@ -128,7 +128,7 @@ function mostrarInfoUsuario() {
 // Función para mostrar botón de logout
 function mostrarBotonLogout() {
     echo '<a href="?c=Login&a=Logout" class="btn btn-outline-light btn-sm" title="Cerrar Sesión">';
-    echo '<i class="bi bi-box-arrow-right"></i> Salir';
+    echo '<i class="bi bi-box-arrow-right"></i> cerrar sesion';
     echo '</a>';
 }
 

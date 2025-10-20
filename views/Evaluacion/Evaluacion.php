@@ -207,7 +207,7 @@
             <i class="bi bi-stopwatch"></i> <span id="qTime">--:--</span>
           </span>
           <a href="?c=Login&a=Logout" class="btn btn-outline-light btn-sm" title="Cerrar Sesión">
-            <i class="bi bi-box-arrow-right"></i> Salir
+            <i class="bi bi-box-arrow-right"></i> cerrar sesion
           </a>
         </div>
 
