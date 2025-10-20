@@ -111,7 +111,7 @@
       margin: -3rem auto 2rem;
       padding: 0 1.5rem;
       position: relative;
-      z-index: 10;
+      /* z-index: 1; Causa problemas con el backdrop del modal de Bootstrap */
     }
 
     /* Stats cards */
@@ -729,16 +729,97 @@
           </span>
         </div>
         <div class="report-actions">
-          <a href="?c=Reportes&a=generarPDFCalificaciones" class="btn-generate" target="_blank">
+          <a id="btnPdfCalificaciones" href="?c=Reportes&a=generarPDFCalificaciones" class="btn-generate" target="_blank">
             <i class="bi bi-file-pdf"></i>
             Descargar PDF
           </a>
-          <a href="?c=Reportes&a=generarExcelCalificaciones" class="btn-excel" target="_blank">
+          <a id="btnExcelCalificaciones" href="?c=Reportes&a=generarExcelCalificaciones" class="btn-excel" target="_blank">
             <i class="bi bi-file-excel"></i>
             Descargar Excel
           </a>
         </div>
       </div>
+
+      <!-- Modal: Elegir curso para calificaciones -->
+      <div class="modal fade" id="modalCursoCalificaciones" tabindex="-1" aria-labelledby="modalCursoCalificacionesLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modalCursoCalificacionesLabel">Elegir curso</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-2">
+                <label for="selectCursoReporte" class="form-label">Curso</label>
+                <select id="selectCursoReporte" class="form-select form-select-sm">
+                  <option value="">Todos</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+              <button type="button" id="btnAplicarCurso" class="btn btn-primary">Aplicar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+        <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            const select = document.getElementById('selectCursoReporte');
+            const btnAplicar = document.getElementById('btnAplicarCurso');
+            const btnPdf = document.getElementById('btnPdfCalificaciones');
+            const btnExcel = document.getElementById('btnExcelCalificaciones');
+            let pendingUrl = null;
+            let pendingTarget = '_blank';
+
+            // Cargar cursos
+            <?php
+              try {
+                require_once 'models/Reportes.php';
+                $repModel = new ReportesModel();
+                $cg = $repModel->obtenerCursosYGrados();
+                $cursos = isset($cg['cursos']) ? $cg['cursos'] : [];
+              } catch (Exception $e) { $cursos = []; }
+            ?>
+            const cursosData = <?= json_encode(isset($cursos) ? $cursos : []) ?>;
+            if (Array.isArray(cursosData)) {
+              cursosData.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.nombre;
+                select.appendChild(opt);
+              });
+            }
+
+            // Interceptar clicks y mostrar modal
+            function handleClick(e) {
+              e.preventDefault();
+              pendingUrl = this.href;
+              pendingTarget = this.target || '_blank';
+              // Usar API nativa Bootstrap con data-bs-toggle
+              const modal = new bootstrap.Modal(document.getElementById('modalCursoCalificaciones'));
+              modal.show();
+            }
+            
+            if (btnPdf) btnPdf.addEventListener('click', handleClick);
+            if (btnExcel) btnExcel.addEventListener('click', handleClick);
+
+            // Aplicar filtro
+            if (btnAplicar) {
+              btnAplicar.addEventListener('click', function () {
+                const cursoId = select.value;
+                if (pendingUrl) {
+                  const url = new URL(pendingUrl, window.location.origin);
+                  if (cursoId) {
+                    url.searchParams.set('curso_id', cursoId);
+                  }
+                  window.open(url.toString(), pendingTarget);
+                }
+                bootstrap.Modal.getInstance(document.getElementById('modalCursoCalificaciones')).hide();
+              });
+            }
+          });
+        </script>
 
       <!-- Reporte 4: Distritos -->
       <div class="report-card" style="--card-gradient: var(--dark-gradient);">
@@ -832,8 +913,8 @@
         }, 100 * index);
       });
 
-      // Handler para botones de generar
-      const generateBtns = document.querySelectorAll('.btn-generate');
+  // Handler para enlaces (anchor) de generar
+  const generateBtns = document.querySelectorAll('a.btn-generate');
       generateBtns.forEach(btn => {
         btn.addEventListener('click', function(e) {
           const href = this.getAttribute('href');
