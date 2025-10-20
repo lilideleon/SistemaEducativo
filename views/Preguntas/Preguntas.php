@@ -1,7 +1,8 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
 require_once 'core/AuthValidation.php';
-validarAdmin();
+// Permitir acceso a ADMIN y DIRECTOR en esta vista
+validarRol(['ADMIN','DIRECTOR']);
 include 'views/Menu/Aside.php';
 ?>
 <!DOCTYPE html>

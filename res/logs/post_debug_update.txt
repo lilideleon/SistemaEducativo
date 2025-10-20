@@ -10,3 +10,4 @@
 2025-10-09T09:07:41-06:00 {"Codigo":"65654","nombres":"Barbara","apellidos":"Juarez","Rol":"ALUMNO","Contraseña":"43543","GradoId":"2","InstitucionId":"5","Seccion":"1","IdUsuario":"38"}
 2025-10-09T11:59:01-06:00 {"Codigo":"1010","nombres":"Alma Consuelo","apellidos":"Reyes Maldonado","Rol":"DIRECTOR","Contraseña":"1010","GradoId":"2","InstitucionId":"9","Seccion":"","IdUsuario":"15"}
 2025-10-20T11:35:56-06:00 {"Codigo":"1010","nombres":"Analía Rosybell","apellidos":"Carrillo Gómez","Rol":"ALUMNO","Contraseña":"1010","GradoId":"1","InstitucionId":"12","Seccion":"1","IdUsuario":"3"}
+2025-10-20T11:43:47-06:00 {"Codigo":"2222","nombres":"Alma Consuelo","apellidos":"Reyes Maldonado","Rol":"DIRECTOR","Contraseña":"2222","GradoId":"4","InstitucionId":"12","Seccion":"","IdUsuario":"2"}

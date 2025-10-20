@@ -363,6 +363,10 @@
           <i class="bi bi-people-fill me-2"></i>
           <span class="sidebar-text">Usuarios</span>
         </a>
+        <a href="?c=Preguntas" class="btn btn-glow text-decoration-none">
+          <i class="bi bi-question-circle me-2"></i>
+          <span class="sidebar-text">Preguntas</span>
+        </a>
         <a href="?c=Reportes" class="btn btn-glow text-decoration-none">
           <i class="bi bi-bar-chart-fill me-2"></i>
           <span class="sidebar-text">Reportes</span>

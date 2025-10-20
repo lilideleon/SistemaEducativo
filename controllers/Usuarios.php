@@ -13,13 +13,8 @@ class UsuariosController
 
     public function index()
     {
-        $u = function_exists('obtenerUsuarioActual') ? obtenerUsuarioActual() : null;
-        $rol = $u && isset($u['rol']) ? strtoupper($u['rol']) : null;
-        if ($rol === 'DIRECTOR') {
-            require_once "views/Usuarios/UsuariosDirector.php";
-        } else {
-            require_once "views/Usuarios/Usuarios.php";
-        }
+        // Usar la misma vista para ADMIN y DIRECTOR para mantener diseño consistente
+        require_once "views/Usuarios/Usuarios.php";
     }
 
     

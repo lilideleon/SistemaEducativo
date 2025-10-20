@@ -16,12 +16,9 @@
     html,body{height:100%;margin:0}
     body{background-color:var(--bg-teal);display:flex;flex-direction:column}
     .app-wrapper{display:flex;flex:1;height:100vh}
-    .sidebar{width:260px;height:100vh;position:fixed;left:0;top:0;overflow-y:auto;background:#50938a;padding:1rem;box-shadow:2px 0 5px rgba(0,0,0,.1);z-index:1000}
-    .sidebar-box{background:rgba(255,255,255,.1);border-radius:.5rem;padding:.75rem}
-    .sidebar-header{background:var(--sidebar-header);color:#1f2937;font-weight:600;padding:.5rem .75rem;border-radius:.35rem;margin-bottom:.75rem}
-
+    /* No sobreescribir estilos del sidebar global */
     /* contenido */
-    section.main-content{margin-left:260px;width:calc(100% - 260px);padding:2rem;min-height:100vh;display:flex;flex-direction:column}
+    section.main-content{margin-left:var(--sidebar-width, 190px);width:calc(100% - var(--sidebar-width, 190px));padding:2rem;min-height:100vh;display:flex;flex-direction:column}
     .content-panel{flex:1;background:#fff;border-radius:.5rem;padding:1.5rem;box-shadow:0 .125rem .25rem rgba(0,0,0,.075)}
     .form-title{font-weight:700;margin-bottom:.75rem}
 
@@ -72,7 +69,7 @@
   </div>
 
   <main class="app-wrapper">
-    <div data-include="sidebar.html"></div>
+    <!-- Sidebar ya está incluido por PHP en Aside.php -->
 
     <section class="col-12 main-content">
       <header class="d-flex align-items-center justify-content-between mb-3">
@@ -149,9 +146,7 @@
                     <th>Código</th>
                     <th>Instituto</th>
                     <th>Nombres</th>
-                    <th>Apellidos</th>
-                    <th>Grado</th>
-                    <th>Rol</th>
+                      /* No sobrescribir estilos del sidebar global */
                     <th style="width:90px">Modificar</th>
                     <th style="width:90px">Eliminar</th>
                   </tr>
