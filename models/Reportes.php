@@ -435,7 +435,7 @@ class ReportesModel {
 
             $sql .= " GROUP BY cal.alumno_user_id, cal.curso_id, cal.grado_id, 
                              u.nombres, u.apellidos, c.nombre, g.nombre, i.nombre
-                    HAVING COUNT(cal.id) >= 2
+                    HAVING COUNT(cal.id) >= 1
                     ORDER BY promedio DESC, total_calificaciones DESC
                     LIMIT 20";
 
@@ -454,26 +454,10 @@ class ReportesModel {
             error_log("Resultados obtenerMejoresAlumnos: " . json_encode($resultados));
             error_log("Total registros encontrados: " . count($resultados));
             
-            // Si no hay datos reales, usar datos de ejemplo
+            // Si no hay datos reales, devolver array vacío
             if (empty($resultados)) {
-                error_log("No se encontraron datos reales, usando datos de ejemplo");
-                return [
-                    [
-                        'alumno' => 'María González', 'curso' => 'Matemáticas', 'grado' => '3er Grado',
-                        'promedio' => 95.5, 'total_calificaciones' => 8, 'institucion' => 'Instituto Nacional',
-                        'curso_id' => 1, 'grado_id' => 3, 'nombres' => 'María', 'apellidos' => 'González'
-                    ],
-                    [
-                        'alumno' => 'Carlos Rodríguez', 'curso' => 'Ciencias', 'grado' => '4to Grado', 
-                        'promedio' => 94.2, 'total_calificaciones' => 6, 'institucion' => 'Colegio San José',
-                        'curso_id' => 2, 'grado_id' => 4, 'nombres' => 'Carlos', 'apellidos' => 'Rodríguez'
-                    ],
-                    [
-                        'alumno' => 'Ana Martínez', 'curso' => 'Lenguaje', 'grado' => '5to Grado',
-                        'promedio' => 93.8, 'total_calificaciones' => 7, 'institucion' => 'Escuela Central',
-                        'curso_id' => 3, 'grado_id' => 5, 'nombres' => 'Ana', 'apellidos' => 'Martínez'
-                    ]
-                ];
+                error_log("No se encontraron alumnos con calificaciones");
+                return [];
             }
             
             // Formatear los datos
