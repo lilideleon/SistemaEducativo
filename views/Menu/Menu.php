@@ -77,7 +77,7 @@
           <p class="hint mb-0">Selecciona una opción del menú para comenzar</p>
         </div>
         <a href="?c=Login&a=Logout" class="btn btn-outline-light btn-sm" title="Cerrar Sesión">
-          <i class="bi bi-box-arrow-right"></i> Salir
+          <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
         </a>
       </header>
 
