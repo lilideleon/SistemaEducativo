@@ -19,3 +19,6 @@
 2025-10-20T13:58:53-06:00 {"Codigo":"ABD0904","nombres":"Karla Daniela","apellidos":"Abac Vicente","Rol":"ALUMNO","Contraseña":"","GradoId":"1","InstitucionId":"5","Seccion":"1","IdUsuario":"4"}
 2025-10-20T14:03:26-06:00 {"Codigo":"3131","nombres":"Cesar","apellidos":"De Leon","Rol":"ALUMNO","Contraseña":"31107449+Eli","GradoId":"2","InstitucionId":"7","Seccion":"2","IdUsuario":"7"}
 2025-10-20T15:41:12-06:00 {"Codigo":"2020","nombres":"Ana","apellidos":"Carla","Rol":"ALUMNO","Contraseña":"31107449+Eli","GradoId":"2","InstitucionId":"2","Seccion":"2","IdUsuario":"8"}
+2025-10-25T08:46:57-06:00 {"Codigo":"1010","nombres":"Analía Rosybell","apellidos":"Carrillo Gómez","Rol":"ALUMNO","Contraseña":"31107449+Eli","GradoId":"1","InstitucionId":"12","Seccion":"1","IdUsuario":"3"}
+2025-10-25T08:54:00-06:00 {"Codigo":"1010","nombres":"Analía Rosybell","apellidos":"Carrillo Gómez","Rol":"ALUMNO","Contraseña":"31107449-Eli","GradoId":"1","InstitucionId":"12","Seccion":"1","IdUsuario":"3"}
+2025-10-25T08:55:27-06:00 {"Codigo":"1111","nombres":"Test","apellidos":"Test3","Rol":"ALUMNO","Contraseña":"12345678-ekuA","GradoId":"1","InstitucionId":"12","Seccion":"1","IdUsuario":"6"}
