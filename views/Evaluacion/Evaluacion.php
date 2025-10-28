@@ -126,8 +126,117 @@
     @media (max-width: 767.98px){
       .sidebar{display:none}
       section.main-content{margin-left:0 !important;width:100% !important;padding:1rem !important}
-      .gform-card{margin:.5rem auto}
+      .gform-card{margin:.5rem auto; padding:1rem}
+      
+      /* Header responsivo */
+      header{flex-direction:column !important; gap:.75rem; align-items:stretch !important}
+      header .page-title{text-align:center; font-size:1.25rem}
+      header > div{flex-wrap:wrap; justify-content:center !important}
+      
+      /* Timers más pequeños en móvil */
+      .timer-badge{font-size:0.9rem; padding:.4rem .6rem}
+      
+      /* Toolbar responsivo */
+      .gform-toolbar{flex-direction:column; align-items:stretch !important}
+      .gform-toolbar .form-select{max-width:100%}
+      
+      /* Grid de preguntas en móvil */
+      .gq{grid-template-columns:35px 1fr; gap:.75rem; padding:.75rem .25rem}
+      .gq-number{width:35px; height:35px; font-size:0.9rem}
+      .gq-statement{font-size:0.95rem}
+      
+      /* Opciones más espaciadas */
+      .gq .form-check{padding:.5rem .35rem}
+      .gq .form-check-label{font-size:0.9rem}
+      
+      /* Botón siguiente */
+      .link-next{width:100%; text-align:center; padding:.65rem 1rem}
+      .gform-footer{margin-top:1rem}
+      
+      /* Modal responsivo */
+      #resultadoModal .modal-dialog{margin:.5rem}
+      #resultadoModal .table{font-size:0.85rem}
+      #resultadoModal .table th, #resultadoModal .table td{padding:.5rem .35rem}
+      
+      /* Mejor experiencia de scroll en modal */
+      #resultadoModal .modal-body{
+        max-height:calc(100vh - 200px);
+        overflow-y:auto;
+      }
+      
+      /* Tabla de resultados más compacta */
+      #resultadoModal .table th:first-child,
+      #resultadoModal .table td:first-child{
+        width:30px;
+      }
     }
+
+    /* Tablets (768px - 991px) */
+    @media (min-width: 768px) and (max-width: 991.98px){
+      section.main-content{padding:1.5rem}
+      .gform-card{max-width:680px; padding:1.25rem}
+      .timer-badge{font-size:1.1rem}
+      .gq{gap:.85rem}
+    }
+
+    /* Pantallas muy pequeñas (menos de 375px) */
+    @media (max-width: 374.98px){
+      section.main-content{padding:.75rem !important}
+      .gform-wrap{padding:.75rem .5rem 0}
+      .gform-card{padding:.75rem}
+      .gform-title{font-size:1.1rem}
+      .timer-badge{font-size:0.8rem; padding:.35rem .5rem}
+      .gq{grid-template-columns:30px 1fr; gap:.5rem}
+      .gq-number{width:30px; height:30px; font-size:0.85rem}
+    }
+
+    /* Mejoras táctiles para móviles */
+    @media (max-width: 767.98px){
+      /* Áreas táctiles más grandes para botones radio/checkbox */
+      .gq .form-check-input{
+        width:1.3em;
+        height:1.3em;
+        margin-top:.2em;
+      }
+      
+      /* Mejor espaciado para tocar */
+      .gq .form-check{
+        padding:.6rem .5rem;
+        margin-bottom:.25rem;
+      }
+      
+      /* Botón cerrar sesión más visible */
+      header .btn-outline-light{
+        padding:.5rem .75rem;
+        font-size:0.9rem;
+      }
+      
+      /* Select más grande y fácil de tocar */
+      .gform-toolbar .form-select{
+        padding:.6rem .75rem;
+        font-size:1rem;
+      }
+      
+      /* Textarea y inputs numéricos más grandes */
+      .gq textarea.form-control{
+        min-height:100px;
+        font-size:1rem;
+      }
+      
+      .gq input[type="number"].form-control{
+        font-size:1rem;
+        padding:.6rem;
+      }
+    }
+
+    /* Optimización para landscape en móviles */
+    @media (max-width: 767.98px) and (orientation: landscape){
+      .timer-badge{font-size:0.85rem; padding:.35rem .55rem}
+      .page-title{font-size:1.1rem}
+      .gq{padding:.6rem .25rem}
+    }
+
+
 
     /* ================= UI enhancements for encuestas (scoped) ================= */
     /* Toolbar select */
@@ -197,9 +306,9 @@
 
     <!-- Contenido -->
     <section class="main-content">
-      <header class="d-flex align-items-center justify-content-between mb-3">
-        <h1 class="page-title">Sistema Educativo</h1>
-        <div class="d-flex align-items-center gap-2">
+      <header class="d-flex flex-column flex-md-row align-items-md-center justify-content-md-between mb-3 gap-2">
+        <h1 class="page-title mb-2 mb-md-0">Sistema Educativo</h1>
+        <div class="d-flex flex-wrap align-items-center gap-2 justify-content-center justify-content-md-end">
           <span class="badge text-bg-dark timer-badge" title="Tiempo total restante">
             <i class="bi bi-clock-history"></i> <span id="totalTime">--:--:--</span>
           </span>
