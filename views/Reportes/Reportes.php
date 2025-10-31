@@ -135,7 +135,7 @@
         <h1 class="page-title">Sistema Educativo</h1>
         <div>
           
-          <a href="?c=Login&a=Logout" class="btn btn-outline-light btn-sm" title="Cerrar Sesión">
+          <a href="?c=Inicio&a=Logout" class="btn btn-outline-light btn-sm" title="Cerrar Sesión">
             <i class="bi bi-box-arrow-right"></i> cerrar sesion
           </a>
         </div>
