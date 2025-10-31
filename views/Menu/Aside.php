@@ -333,10 +333,12 @@
           <i class="bi bi-folder2-open me-2"></i>
           <span class="sidebar-text">Material</span>
         </a>
+        <?php /* Menú Contenido oculto
         <a href="?c=Contenido" class="btn btn-glow text-decoration-none">
           <i class="bi bi-book me-2"></i>
           <span class="sidebar-text">Contenido</span>
         </a>
+        */ ?>
         <a href="?c=Preguntas" class="btn btn-glow text-decoration-none">
           <i class="bi bi-question-circle me-2"></i>
           <span class="sidebar-text">Preguntas</span>
