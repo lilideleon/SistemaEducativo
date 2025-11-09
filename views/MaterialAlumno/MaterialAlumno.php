@@ -57,6 +57,176 @@
     /* Acciones de archivos */
     .action-icon{ display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:8px; color:#1f3554; text-decoration:none; transition:background-color .12s ease }
     .action-icon:hover{ background:#eef5fb }
+
+    /* ===== RESPONSIVE DESIGN ===== */
+    
+    /* Tablets y dispositivos medianos (hasta 991px) */
+    @media (max-width: 991px) {
+      .sidebar {
+        width: 220px;
+      }
+      section.main-content {
+        margin-left: 220px;
+        width: calc(100% - 220px);
+        padding: 1.5rem;
+      }
+    }
+
+    /* Dispositivos móviles (hasta 767px) */
+    @media (max-width: 767px) {
+      /* Ocultar sidebar fijo en móviles */
+      .sidebar {
+        display: none;
+      }
+
+      /* Contenido ocupa todo el ancho */
+      section.main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 1rem;
+      }
+
+      /* Header responsive */
+      header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.75rem;
+      }
+
+      header .page-title {
+        font-size: 1.25rem !important;
+      }
+
+      header .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      /* Panel de contenido con menos padding */
+      .content-panel {
+        padding: 1rem;
+      }
+
+      /* Filtros apilados verticalmente */
+      .d-flex.gap-2 {
+        flex-direction: column !important;
+        width: 100%;
+      }
+
+      .d-flex.align-items-center.justify-content-between {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.75rem;
+      }
+
+      #cursoFiltro {
+        width: 100% !important;
+        min-width: 100% !important;
+      }
+
+      #btnFiltrar {
+        width: 100%;
+      }
+
+      /* Tabla responsiva con scroll horizontal */
+      .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      #tblPubAlu {
+        min-width: 800px; /* Ancho mínimo para mantener legibilidad */
+        font-size: 0.875rem;
+      }
+
+      #tblPubAlu thead th {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.35rem;
+      }
+
+      #tblPubAlu tbody td {
+        padding: 0.5rem 0.35rem;
+      }
+
+      /* Iconos de acción más grandes para touch */
+      .action-icon {
+        width: 36px;
+        height: 36px;
+        margin: 0.1rem;
+      }
+
+      .action-icon i {
+        font-size: 1.1rem;
+      }
+
+      /* DataTables responsive controls */
+      .dataTables_wrapper .dataTables_length,
+      .dataTables_wrapper .dataTables_filter,
+      .dataTables_wrapper .dataTables_info,
+      .dataTables_wrapper .dataTables_paginate {
+        margin-bottom: 0.75rem;
+      }
+
+      .dataTables_wrapper .dataTables_length select,
+      .dataTables_wrapper .dataTables_filter input {
+        padding: 0.375rem 0.75rem;
+      }
+    }
+
+    /* Pantallas muy pequeñas (hasta 375px) */
+    @media (max-width: 375px) {
+      section.main-content {
+        padding: 0.75rem;
+      }
+
+      .content-panel {
+        padding: 0.75rem;
+      }
+
+      header .page-title {
+        font-size: 1.1rem !important;
+      }
+
+      #tblPubAlu {
+        font-size: 0.8rem;
+      }
+
+      .badge-soft {
+        font-size: 0.7rem;
+        padding: 0.15rem 0.35rem;
+      }
+    }
+
+    /* Orientación horizontal en móviles */
+    @media (max-width: 767px) and (orientation: landscape) {
+      section.main-content {
+        padding: 0.75rem;
+      }
+
+      .content-panel {
+        padding: 1rem;
+      }
+
+      header {
+        flex-direction: row !important;
+        justify-content: space-between !important;
+      }
+
+      header .btn {
+        width: auto;
+      }
+    }
+
+    /* Mejoras para tablets en portrait */
+    @media (min-width: 768px) and (max-width: 991px) {
+      .d-flex.gap-2 {
+        flex-wrap: wrap;
+      }
+
+      #cursoFiltro {
+        min-width: 200px !important;
+      }
+    }
   </style>
 </head>
 <body>

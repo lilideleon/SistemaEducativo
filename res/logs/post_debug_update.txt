@@ -22,3 +22,4 @@
 2025-10-25T08:46:57-06:00 {"Codigo":"1010","nombres":"Analía Rosybell","apellidos":"Carrillo Gómez","Rol":"ALUMNO","Contraseña":"31107449+Eli","GradoId":"1","InstitucionId":"12","Seccion":"1","IdUsuario":"3"}
 2025-10-25T08:54:00-06:00 {"Codigo":"1010","nombres":"Analía Rosybell","apellidos":"Carrillo Gómez","Rol":"ALUMNO","Contraseña":"31107449-Eli","GradoId":"1","InstitucionId":"12","Seccion":"1","IdUsuario":"3"}
 2025-10-25T08:55:27-06:00 {"Codigo":"1111","nombres":"Test","apellidos":"Test3","Rol":"ALUMNO","Contraseña":"12345678-ekuA","GradoId":"1","InstitucionId":"12","Seccion":"1","IdUsuario":"6"}
+2025-11-09T11:32:41-06:00 {"Codigo":"1010","nombres":"Analía Rosybell","apellidos":"Carrillo Gómez","Rol":"ALUMNO","Contraseña":"31107449-Eli","GradoId":"1","InstitucionId":"12","Seccion":"1","IdUsuario":"3"}
