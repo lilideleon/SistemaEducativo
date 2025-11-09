@@ -88,14 +88,45 @@
     .sidebar-box { background:rgba(255,255,255,.1); border-radius:.5rem; padding:.75rem; }
     .sidebar-header { background:var(--sidebar-header); color:#1f2937; font-weight:600; padding:.5rem .75rem; border-radius:.35rem; margin-bottom:.75rem; }
     section.main-content { margin-left:260px; width:calc(100% - 260px); padding:2rem; min-height:100vh; display:flex; flex-direction:column; }
-    .content-panel { flex:1; display:flex; flex-direction:column; min-height:0; background:#fff; border-radius:.5rem; padding:1.5rem; box-shadow:0 .125rem .25rem rgba(0,0,0,.075); }
+    .content-panel { 
+      flex:1; 
+      display:flex; 
+      flex-direction:column; 
+      min-height: calc(100vh - 180px); /* Altura mínima para evitar distorsión */
+      max-height: calc(100vh - 120px); /* Altura máxima */
+      overflow-y: auto; /* Scroll vertical cuando sea necesario */
+      background:#fff; 
+      border-radius:.5rem; 
+      padding:1.5rem; 
+      box-shadow:0 .125rem .25rem rgba(0,0,0,.075); 
+    }
   /* Hacer el encabezado visualmente igual (fondo verde visible) */
   section.main-content > header{ background: transparent; }
   /* Título con chip blanco como en otras pantallas (Reportes/Preguntas) */
   .page-title { background:#fff; color:#235c9c; font-weight:700; border-radius:.25rem; display:inline-block; padding:.35rem 1.25rem; box-shadow:0 2px 0 rgba(0,0,0,.25) inset; }
+  
+  /* Contenedor de tabla con altura controlada */
+  .table-responsive {
+    max-height: calc(100vh - 400px); /* Altura máxima para la tabla */
+    overflow-y: auto;
+    overflow-x: auto;
+  }
+  
+  /* Formulario no debe crecer demasiado */
+  .form-block {
+    flex-shrink: 0;
+  }
+  
     @media (max-width: 767.98px) {
       .sidebar { display:none; }
       section.main-content { margin-left:0 !important; width:100% !important; padding:1rem !important; min-height:calc(100vh - 56px); }
+      .content-panel {
+        min-height: calc(100vh - 200px);
+        max-height: none;
+      }
+      .table-responsive {
+        max-height: calc(100vh - 350px);
+      }
     }
     body.no-sidebar section.main-content{margin-left:0;width:100%}
   </style>
