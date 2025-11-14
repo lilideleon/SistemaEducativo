@@ -390,24 +390,28 @@ class ReportesModel {
             $this->ConexionSql = $this->Conexion->CrearConexion();
             error_log("Conexión a base de datos establecida");
             
+            // Subconsulta para obtener información del alumno (tomamos el primer curso/grado/institución)
             $sql = "SELECT 
                         CONCAT(u.nombres, ' ', u.apellidos) as alumno,
                         u.nombres,
                         u.apellidos,
-                        c.nombre as curso,
-                        g.nombre as grado,
-                        i.nombre as institucion,
+                        GROUP_CONCAT(DISTINCT c.nombre ORDER BY c.nombre SEPARATOR ', ') as curso,
+                        (SELECT g2.nombre FROM calificaciones cal2 
+                         INNER JOIN grados g2 ON cal2.grado_id = g2.id 
+                         WHERE cal2.alumno_user_id = u.id AND cal2.activo = 1 
+                         LIMIT 1) as grado,
+                        (SELECT i2.nombre FROM calificaciones cal2 
+                         INNER JOIN instituciones i2 ON cal2.institucion_id = i2.id 
+                         WHERE cal2.alumno_user_id = u.id AND cal2.activo = 1 
+                         LIMIT 1) as institucion,
                         AVG(cal.puntaje) as promedio,
                         COUNT(cal.id) as total_calificaciones,
                         MAX(cal.puntaje) as mejor_nota,
                         MIN(cal.puntaje) as menor_nota,
-                        cal.curso_id,
-                        cal.grado_id
+                        u.id as alumno_id
                     FROM calificaciones cal
                     INNER JOIN usuarios u ON cal.alumno_user_id = u.id
                     INNER JOIN cursos c ON cal.curso_id = c.id
-                    INNER JOIN grados g ON cal.grado_id = g.id
-                    INNER JOIN instituciones i ON cal.institucion_id = i.id
                     WHERE cal.activo = 1 AND u.rol = 'ALUMNO'";
 
             $params = [];
@@ -433,8 +437,8 @@ class ReportesModel {
                 $params[] = $filtros['periodo'];
             }
 
-            $sql .= " GROUP BY cal.alumno_user_id, cal.curso_id, cal.grado_id, 
-                             u.nombres, u.apellidos, c.nombre, g.nombre, i.nombre
+            // Agrupar solo por alumno para obtener promedio general
+            $sql .= " GROUP BY cal.alumno_user_id, u.nombres, u.apellidos, u.id
                     HAVING COUNT(cal.id) >= 1
                     ORDER BY promedio DESC, total_calificaciones DESC
                     LIMIT 20";
@@ -470,6 +474,76 @@ class ReportesModel {
             return $resultados;
         } catch (Exception $e) {
             error_log('ERROR obtenerMejoresAlumnos: ' . $e->getMessage());
+            return [];
+        } finally {
+            $this->Conexion->CerrarConexion();
+        }
+    }
+
+    // Nuevo método para obtener mejores alumnos por curso específico
+    public function obtenerMejoresAlumnosPorCurso($cursoIdOrNombre, $limite = 5) {
+        error_log("=== DEBUGGING: obtenerMejoresAlumnosPorCurso($cursoIdOrNombre) iniciado ===");
+        try {
+            $this->ConexionSql = $this->Conexion->CrearConexion();
+            
+            // Determinar si es ID numérico o nombre
+            $esId = is_numeric($cursoIdOrNombre);
+            $condicionCurso = $esId ? "c.id = ?" : "c.nombre = ?";
+            
+            // Asegurar que limite sea un entero
+            $limite = (int)$limite;
+            
+            $sql = "SELECT 
+                        CONCAT(u.nombres, ' ', u.apellidos) as alumno,
+                        u.nombres,
+                        u.apellidos,
+                        c.nombre as curso,
+                        c.id as curso_id,
+                        g.nombre as grado,
+                        g.id as grado_id,
+                        i.nombre as institucion,
+                        i.id as institucion_id,
+                        AVG(cal.puntaje) as promedio,
+                        COUNT(cal.id) as total_calificaciones,
+                        MAX(cal.puntaje) as mejor_nota,
+                        MIN(cal.puntaje) as menor_nota
+                    FROM calificaciones cal
+                    INNER JOIN usuarios u ON cal.alumno_user_id = u.id
+                    INNER JOIN cursos c ON cal.curso_id = c.id
+                    INNER JOIN grados g ON cal.grado_id = g.id
+                    INNER JOIN instituciones i ON cal.institucion_id = i.id
+                    WHERE cal.activo = 1 
+                      AND u.rol = 'ALUMNO'
+                      AND $condicionCurso
+                    GROUP BY cal.alumno_user_id, c.id, g.id, i.id,
+                             u.nombres, u.apellidos, c.nombre, g.nombre, i.nombre
+                    HAVING COUNT(cal.id) >= 1
+                    ORDER BY promedio DESC, total_calificaciones DESC
+                    LIMIT $limite";
+
+            $stmt = $this->ConexionSql->prepare($sql);
+            $stmt->execute([$cursoIdOrNombre]);
+
+            $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            error_log("SQL ejecutado: $sql");
+            error_log("Parámetros: cursoIdOrNombre=$cursoIdOrNombre, limite=$limite");
+            error_log("Resultados obtenerMejoresAlumnosPorCurso($cursoIdOrNombre): " . count($resultados) . " registros");
+            
+            if (count($resultados) > 0) {
+                error_log("Primer resultado: " . json_encode($resultados[0]));
+            }
+            
+            // Formatear los datos
+            foreach ($resultados as &$resultado) {
+                $resultado['promedio'] = round($resultado['promedio'], 2);
+                $resultado['mejor_nota'] = round($resultado['mejor_nota'], 2);
+                $resultado['menor_nota'] = round($resultado['menor_nota'], 2);
+            }
+            
+            return $resultados;
+        } catch (Exception $e) {
+            error_log('ERROR obtenerMejoresAlumnosPorCurso: ' . $e->getMessage());
             return [];
         } finally {
             $this->Conexion->CerrarConexion();

@@ -18,7 +18,7 @@
 		{
 		    $this->Usuario = 'system';
 			$this->Contraseña = '31107449';
-			$this->DataBase = 'dbname=educativo';
+			$this->DataBase = 'dbname=dbsupervision';
 			$this->Servidor = 'mysql:host=localhost;';
 			// Usar utf8mb4 para manejar correctamente tildes y caracteres multibyte
 			$this->JuegoCaracteres = 'charset=utf8mb4';

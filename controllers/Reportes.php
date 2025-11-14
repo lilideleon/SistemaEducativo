@@ -208,10 +208,13 @@ class ReportesController {
             error_log("=== CONTROLADOR: Dashboard iniciado ===");
             $cursosGrados = $this->modelo->obtenerCursosYGrados();
             
-            // Obtener mejoresAlumnos con debugging
-            error_log("CONTROLADOR: Obteniendo mejores alumnos...");
-            $mejoresAlumnos = $this->modelo->obtenerMejoresAlumnos();
-            error_log("CONTROLADOR: Mejores alumnos obtenidos: " . json_encode($mejoresAlumnos));
+            // Obtener mejores alumnos por curso específico usando IDs
+            error_log("CONTROLADOR: Obteniendo mejores alumnos por curso...");
+            $mejoresAlumnosMatematicas = $this->modelo->obtenerMejoresAlumnosPorCurso(1, 5); // ID 1 = Matemáticas
+            $mejoresAlumnosTecnologia = $this->modelo->obtenerMejoresAlumnosPorCurso(2, 5);  // ID 2 = Tecnología
+            error_log("CONTROLADOR: Mejores alumnos Matemáticas: " . count($mejoresAlumnosMatematicas));
+            error_log("CONTROLADOR: Mejores alumnos Tecnología: " . count($mejoresAlumnosTecnologia));
+            
             // Obtener top preguntas con más errores
             $topErrores = $this->modelo->obtenerPreguntasConMasErrores([], 10);
 
@@ -225,7 +228,8 @@ class ReportesController {
                 'encuestasPorEstado' => $this->modelo->obtenerEncuestasPorEstado(),
                 'promedioCalificaciones' => $this->modelo->obtenerPromedioCalificaciones(),
                 'promediosPorInstitucion' => $this->modelo->obtenerPromediosPorInstitucion(),
-                'mejoresAlumnos' => $mejoresAlumnos,
+                'mejoresAlumnosMatematicas' => $mejoresAlumnosMatematicas,
+                'mejoresAlumnosTecnologia' => $mejoresAlumnosTecnologia,
                 'cursos' => $cursosGrados['cursos'],
                 'grados' => $cursosGrados['grados'],
                 'actividadReciente' => $this->modelo->obtenerActividadReciente(),
@@ -403,12 +407,21 @@ class ReportesController {
 
     public function generarPDFCalificaciones() {
         try {
-            $filtros = [
-                'institucion_id' => isset($_GET['institucion_id']) ? $_GET['institucion_id'] : '',
-                'curso_id' => isset($_GET['curso_id']) ? $_GET['curso_id'] : '',
-                'grado_id' => isset($_GET['grado_id']) ? $_GET['grado_id'] : '',
-                'periodo' => isset($_GET['periodo']) ? $_GET['periodo'] : ''
-            ];
+            // Construir filtros solo con valores no vacíos
+            $filtros = [];
+            
+            if (isset($_GET['institucion_id']) && $_GET['institucion_id'] !== '') {
+                $filtros['institucion_id'] = (int)$_GET['institucion_id'];
+            }
+            if (isset($_GET['curso_id']) && $_GET['curso_id'] !== '') {
+                $filtros['curso_id'] = (int)$_GET['curso_id'];
+            }
+            if (isset($_GET['grado_id']) && $_GET['grado_id'] !== '') {
+                $filtros['grado_id'] = (int)$_GET['grado_id'];
+            }
+            if (isset($_GET['periodo']) && $_GET['periodo'] !== '') {
+                $filtros['periodo'] = $_GET['periodo'];
+            }
 
             $calificaciones = $this->modelo->obtenerCalificaciones($filtros);
 
@@ -779,11 +792,21 @@ class ReportesController {
 
     public function generarExcelCalificaciones() {
         try {
-            $filtros = [
-                'institucion_id' => isset($_GET['institucion_id']) ? $_GET['institucion_id'] : '',
-                'curso_id' => isset($_GET['curso_id']) ? $_GET['curso_id'] : '',
-                'grado_id' => isset($_GET['grado_id']) ? $_GET['grado_id'] : ''
-            ];
+            // Construir filtros solo con valores no vacíos
+            $filtros = [];
+            
+            if (isset($_GET['institucion_id']) && $_GET['institucion_id'] !== '') {
+                $filtros['institucion_id'] = (int)$_GET['institucion_id'];
+            }
+            if (isset($_GET['curso_id']) && $_GET['curso_id'] !== '') {
+                $filtros['curso_id'] = (int)$_GET['curso_id'];
+            }
+            if (isset($_GET['grado_id']) && $_GET['grado_id'] !== '') {
+                $filtros['grado_id'] = (int)$_GET['grado_id'];
+            }
+            if (isset($_GET['periodo']) && $_GET['periodo'] !== '') {
+                $filtros['periodo'] = $_GET['periodo'];
+            }
 
             $calificaciones = $this->modelo->obtenerCalificaciones($filtros);
 

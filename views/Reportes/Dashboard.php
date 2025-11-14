@@ -455,11 +455,11 @@
     /* LAYOUT PRINCIPAL DASHBOARD: Distribución compacta sin scroll */
     .dashboard-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr; /* COLUMNAS: 3 columnas */
-      grid-template-rows: auto auto;
-      gap: 6px; /* SEPARACIÓN GRÁFICAS: Espaciado mínimo para evitar scroll */
-      margin-bottom: 8px;
-      padding: 8px;
+      grid-template-columns: 1fr 1fr; /* 2 columnas para mejor uso del espacio */
+      grid-template-rows: auto auto auto;
+      gap: 12px; /* Más espacio entre gráficas */
+      margin-bottom: 12px;
+      padding: 12px;
     }
 
     .chart-compact {
@@ -467,11 +467,11 @@
     }
 
     .chart-wide {
-      grid-column: span 2; /* Ahora ocupa 2 de 4 columnas en lugar de 2 de 3 */
+      grid-column: span 1; /* Cada gráfica ocupa 1 columna completa */
     }
 
     .chart-full {
-      grid-column: span 4; /* Ahora ocupa todas las 4 columnas */
+      grid-column: span 2; /* Ocupa ambas columnas */
     }
 
     /* Hacer gráficos ultra compactos para evitar scroll */
@@ -698,6 +698,28 @@
       justify-content: space-between;
       align-items: center;
       min-height: 28px;
+    }
+
+    .chart-filter {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chart-filter select {
+      font-size: 11px;
+      padding: 4px 8px;
+      border: 1px solid var(--powerbi-border);
+      border-radius: 4px;
+      background: white;
+      color: var(--powerbi-text);
+      cursor: pointer;
+    }
+
+    .chart-filter select:focus {
+      outline: none;
+      border-color: var(--powerbi-primary);
+      box-shadow: 0 0 0 2px rgba(17, 141, 255, 0.1);
     }
 
     .chart-title {
@@ -1249,17 +1271,63 @@
     <!-- Dashboard compacto estilo Power BI -->
     <div class="dashboard-grid">
 
-      <!-- Gráfico de mejores alumnos -->
-      <div class="chart-card chart-compact">
+      <!-- Gráfico de mejores alumnos - Matemáticas -->
+      <div class="chart-card chart-wide">
         <div class="chart-header">
           <h2 class="chart-title">
-            Top Alumnos <span id="alumnosCounter" class="badge bg-secondary ms-2">0</span>
+            Top Alumnos Matemáticas <span id="alumnosMatematicasCounter" class="badge bg-primary ms-2">0</span>
           </h2>
+          <div class="chart-filter">
+            <select id="gradoFilterMatematicas" class="form-select form-select-sm" style="width: 180px;">
+              <option value="">Todos los grados</option>
+              <?php if (isset($grados) && is_array($grados)): ?>
+                <?php foreach ($grados as $grado): ?>
+                  <option value="<?= htmlspecialchars($grado['id']) ?>">
+                    <?= htmlspecialchars($grado['nombre']) ?>
+                  </option>
+                <?php endforeach; ?>
+              <?php endif; ?>
+            </select>
+          </div>
         </div>
         <div class="chart-body">
           <div class="chart-container position-relative">
-            <canvas id="alumnosChart"></canvas>
-            <div id="alumnosChartLoader" class="chart-loader d-none">
+            <canvas id="alumnosMatematicasChart"></canvas>
+            <div id="alumnosMatematicasChartLoader" class="chart-loader d-none">
+              <div class="loading-spinner">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="mt-2 text-muted">Filtrando datos...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráfico de mejores alumnos - Tecnología -->
+      <div class="chart-card chart-wide">
+        <div class="chart-header">
+          <h2 class="chart-title">
+            Top Alumnos Tecnología <span id="alumnosTecnologiaCounter" class="badge bg-success ms-2">0</span>
+          </h2>
+          <div class="chart-filter">
+            <select id="gradoFilterTecnologia" class="form-select form-select-sm" style="width: 180px;">
+              <option value="">Todos los grados</option>
+              <?php if (isset($grados) && is_array($grados)): ?>
+                <?php foreach ($grados as $grado): ?>
+                  <option value="<?= htmlspecialchars($grado['id']) ?>">
+                    <?= htmlspecialchars($grado['nombre']) ?>
+                  </option>
+                <?php endforeach; ?>
+              <?php endif; ?>
+            </select>
+          </div>
+        </div>
+        <div class="chart-body">
+          <div class="chart-container position-relative">
+            <canvas id="alumnosTecnologiaChart"></canvas>
+            <div id="alumnosTecnologiaChartLoader" class="chart-loader d-none">
               <div class="loading-spinner">
                 <div class="spinner-border text-primary" role="status">
                   <span class="visually-hidden">Cargando...</span>
@@ -1272,7 +1340,7 @@
       </div>
 
       <!-- Gráfico de promedios por institución (2 columnas) -->
-      <div class="chart-card chart-wide">
+      <div class="chart-card chart-full">
         <div class="chart-header">
           <h2 class="chart-title">
             Ranking Instituciones por Promedio
@@ -1286,7 +1354,7 @@
       </div>
 
       <!-- Gráfico: Preguntas con más errores -->
-      <div class="chart-card chart-wide">
+      <div class="chart-card chart-full">
         <div class="chart-header">
           <h2 class="chart-title">Preguntas con más errores</h2>
         </div>
@@ -1478,12 +1546,19 @@
       var rolesData = <?= isset($usuariosPorRol) ? json_encode($usuariosPorRol) : json_encode([]) ?>;
       var distritosData = <?= isset($institucionesPorDistrito) ? json_encode($institucionesPorDistrito) : json_encode([]) ?>;
       var promediosData = <?= isset($promediosPorInstitucion) ? json_encode($promediosPorInstitucion) : json_encode([]) ?>;
-      var alumnosData = <?= isset($mejoresAlumnos) ? json_encode($mejoresAlumnos) : json_encode([]) ?>;
+      var alumnosMatematicasData = <?= isset($mejoresAlumnosMatematicas) ? json_encode($mejoresAlumnosMatematicas) : json_encode([]) ?>;
+      var alumnosTecnologiaData = <?= isset($mejoresAlumnosTecnologia) ? json_encode($mejoresAlumnosTecnologia) : json_encode([]) ?>;
       var preguntasErroresData = <?= isset($preguntasConMasErrores) ? json_encode($preguntasConMasErrores) : json_encode([]) ?>;
 
     // Chart instances (declaradas aquí para evitar usar var antes de definir)
-      var alumnosChart, rolesChart, distritosChart, promediosChart, preguntasErroresChart;
+      var alumnosMatematicasChart, alumnosTecnologiaChart, rolesChart, distritosChart, promediosChart, preguntasErroresChart;
       var powerBIColors = ['#118DFF', '#E66C37', '#6B007B', '#12239E', '#E044A7'];
+      
+      console.log('✅ Datos cargados correctamente');
+      console.log('🔍 DEBUG - alumnosMatematicasData:', alumnosMatematicasData);
+      console.log('🔍 DEBUG - alumnosMatematicasData length:', alumnosMatematicasData ? alumnosMatematicasData.length : 'undefined');
+      console.log('🔍 DEBUG - alumnosTecnologiaData:', alumnosTecnologiaData);
+      console.log('🔍 DEBUG - alumnosTecnologiaData length:', alumnosTecnologiaData ? alumnosTecnologiaData.length : 'undefined');
       
       console.log('✅ Datos cargados correctamente');
       console.log('🔍 DEBUG - promediosData:', promediosData);
@@ -1582,30 +1657,238 @@
       
       // (El gráfico de promedios se crea en el bloque avanzado más abajo)
       
-      // GRÁFICO 4: ALUMNOS
-      console.log('📊 Creando gráfico de alumnos...');
-      const alumnosElement = document.getElementById('alumnosChart');
-      if (alumnosElement) {
-        new Chart(alumnosElement.getContext('2d'), {
+      // GRÁFICO 4: ALUMNOS MATEMÁTICAS (TOP 5)
+      console.log('📊 Creando gráfico de alumnos Matemáticas...');
+      const alumnosMatematicasElement = document.getElementById('alumnosMatematicasChart');
+      if (alumnosMatematicasElement) {
+        const top5AlumnosMatematicas = alumnosMatematicasData.slice(0, 5);
+        
+        // Colores azules para Matemáticas
+        const coloresMatematicas = ['#0066CC', '#0080FF', '#3399FF', '#66B2FF', '#99CCFF'];
+        
+        alumnosMatematicasChart = new Chart(alumnosMatematicasElement.getContext('2d'), {
           type: 'bar',
           data: {
-            labels: alumnosData.map(item => item.alumno.split(' ')[0]),
+            labels: top5AlumnosMatematicas.map(item => item.alumno),
             datasets: [{
-              data: alumnosData.map(item => item.promedio),
-              backgroundColor: ['#FFD700', '#C0C0C0', '#CD7F32']
+              label: 'Promedio',
+              data: top5AlumnosMatematicas.map(item => parseFloat(item.promedio)),
+              backgroundColor: coloresMatematicas,
+              borderRadius: 4,
+              maxBarThickness: 35
             }]
           },
           options: { 
             indexAxis: 'y',
             responsive: true, 
-            maintainAspectRatio: false 
+            maintainAspectRatio: false,
+            layout: {
+              padding: {
+                left: 0,
+                right: 10
+              }
+            },
+            plugins: {
+              legend: {
+                display: false
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const item = top5AlumnosMatematicas[context.dataIndex];
+                    return [
+                      `Promedio: ${item.promedio}%`,
+                      `Grado: ${item.grado}`,
+                      `Institución: ${item.institucion}`,
+                      `Total calificaciones: ${item.total_calificaciones}`
+                    ];
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                max: 100,
+                grid: {
+                  color: '#f0f0f0',
+                  lineWidth: 1
+                },
+                ticks: {
+                  stepSize: 10,
+                  font: {
+                    size: 10
+                  },
+                  callback: function(value) {
+                    return value + '%';
+                  }
+                }
+              },
+              y: {
+                grid: {
+                  display: false
+                },
+                ticks: {
+                  font: {
+                    size: 10
+                  },
+                  autoSkip: false
+                }
+              }
+            }
           }
         });
-        console.log('✅ Gráfico de alumnos creado');
+        console.log('✅ Gráfico de alumnos Matemáticas creado');
         
         // Actualizar contador
-        const counter = document.getElementById('alumnosCounter');
-        if (counter) counter.textContent = alumnosData.length;
+        const counterMat = document.getElementById('alumnosMatematicasCounter');
+        if (counterMat) counterMat.textContent = Math.min(alumnosMatematicasData.length, 5);
+      }
+
+      // GRÁFICO 5: ALUMNOS TECNOLOGÍA (TOP 5)
+      console.log('📊 Creando gráfico de alumnos Tecnología...');
+      const alumnosTecnologiaElement = document.getElementById('alumnosTecnologiaChart');
+      if (alumnosTecnologiaElement) {
+        const top5AlumnosTecnologia = alumnosTecnologiaData.slice(0, 5);
+        
+        // Colores verdes para Tecnología
+        const coloresTecnologia = ['#00CC66', '#00E673', '#33FF99', '#66FFAD', '#99FFC2'];
+        
+        alumnosTecnologiaChart = new Chart(alumnosTecnologiaElement.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: top5AlumnosTecnologia.map(item => item.alumno),
+            datasets: [{
+              label: 'Promedio',
+              data: top5AlumnosTecnologia.map(item => parseFloat(item.promedio)),
+              backgroundColor: coloresTecnologia,
+              borderRadius: 4,
+              maxBarThickness: 35
+            }]
+          },
+          options: { 
+            indexAxis: 'y',
+            responsive: true, 
+            maintainAspectRatio: false,
+            layout: {
+              padding: {
+                left: 0,
+                right: 10
+              }
+            },
+            plugins: {
+              legend: {
+                display: false
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const item = top5AlumnosTecnologia[context.dataIndex];
+                    return [
+                      `Promedio: ${item.promedio}%`,
+                      `Grado: ${item.grado}`,
+                      `Institución: ${item.institucion}`,
+                      `Total calificaciones: ${item.total_calificaciones}`
+                    ];
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                max: 100,
+                grid: {
+                  color: '#f0f0f0',
+                  lineWidth: 1
+                },
+                ticks: {
+                  stepSize: 10,
+                  font: {
+                    size: 10
+                  },
+                  callback: function(value) {
+                    return value + '%';
+                  }
+                }
+              },
+              y: {
+                grid: {
+                  display: false
+                },
+                ticks: {
+                  font: {
+                    size: 10
+                  },
+                  autoSkip: false
+                }
+              }
+            }
+          }
+        });
+        console.log('✅ Gráfico de alumnos Tecnología creado');
+        
+        // Actualizar contador
+        const counterTec = document.getElementById('alumnosTecnologiaCounter');
+        if (counterTec) counterTec.textContent = Math.min(alumnosTecnologiaData.length, 5);
+      }
+
+      // FILTROS DE GRADO PARA TOP ALUMNOS
+      // Función para actualizar gráfica de Matemáticas según grado
+      function actualizarGraficaMatematicas(gradoId) {
+        if (!alumnosMatematicasChart) return;
+        
+        let datosFiltrados = alumnosMatematicasData;
+        if (gradoId && gradoId !== '') {
+          datosFiltrados = alumnosMatematicasData.filter(item => item.grado_id == gradoId);
+        }
+        
+        const top5 = datosFiltrados.slice(0, 5);
+        const coloresMatematicas = ['#0066CC', '#0080FF', '#3399FF', '#66B2FF', '#99CCFF'];
+        
+        alumnosMatematicasChart.data.labels = top5.map(item => item.alumno);
+        alumnosMatematicasChart.data.datasets[0].data = top5.map(item => parseFloat(item.promedio));
+        alumnosMatematicasChart.data.datasets[0].backgroundColor = coloresMatematicas.slice(0, top5.length);
+        alumnosMatematicasChart.update();
+        
+        const counterMat = document.getElementById('alumnosMatematicasCounter');
+        if (counterMat) counterMat.textContent = Math.min(datosFiltrados.length, 5);
+      }
+      
+      // Función para actualizar gráfica de Tecnología según grado
+      function actualizarGraficaTecnologia(gradoId) {
+        if (!alumnosTecnologiaChart) return;
+        
+        let datosFiltrados = alumnosTecnologiaData;
+        if (gradoId && gradoId !== '') {
+          datosFiltrados = alumnosTecnologiaData.filter(item => item.grado_id == gradoId);
+        }
+        
+        const top5 = datosFiltrados.slice(0, 5);
+        const coloresTecnologia = ['#00CC66', '#00E673', '#33FF99', '#66FFAD', '#99FFC2'];
+        
+        alumnosTecnologiaChart.data.labels = top5.map(item => item.alumno);
+        alumnosTecnologiaChart.data.datasets[0].data = top5.map(item => parseFloat(item.promedio));
+        alumnosTecnologiaChart.data.datasets[0].backgroundColor = coloresTecnologia.slice(0, top5.length);
+        alumnosTecnologiaChart.update();
+        
+        const counterTec = document.getElementById('alumnosTecnologiaCounter');
+        if (counterTec) counterTec.textContent = Math.min(datosFiltrados.length, 5);
+      }
+      
+      // Event listeners para los selectores de grado
+      const gradoFilterMat = document.getElementById('gradoFilterMatematicas');
+      if (gradoFilterMat) {
+        gradoFilterMat.addEventListener('change', function() {
+          actualizarGraficaMatematicas(this.value);
+        });
+      }
+      
+      const gradoFilterTec = document.getElementById('gradoFilterTecnologia');
+      if (gradoFilterTec) {
+        gradoFilterTec.addEventListener('change', function() {
+          actualizarGraficaTecnologia(this.value);
+        });
       }
       
       console.log('🎉 Dashboard cargado exitosamente');
@@ -1826,7 +2109,7 @@
         labels: todasLasInstituciones.map(item => {
           // Truncar nombres largos
           const nombre = item.institucion || 'Sin nombre';
-          const nombreCorto = nombre.length > 30 ? nombre.substring(0, 30) + '...' : nombre;
+          const nombreCorto = nombre.length > 35 ? nombre.substring(0, 35) + '...' : nombre;
           // Agregar indicador si no tiene datos
           return parseFloat(item.promedio) === 0 ? nombreCorto + ' (Sin datos)' : nombreCorto;
         }),
@@ -1860,13 +2143,21 @@
           },
           borderRadius: 4,
           borderSkipped: false,
-          maxBarThickness: 40
+          maxBarThickness: 35
         }]
       },
       options: {
         indexAxis: 'y', // Barras horizontales
         responsive: true,
         maintainAspectRatio: false,
+        layout: {
+          padding: {
+            left: 0,
+            right: 10,
+            top: 5,
+            bottom: 5
+          }
+        },
         scales: {
           x: {
             beginAtZero: true,
@@ -1876,10 +2167,11 @@
               lineWidth: 1
             },
             ticks: {
+              stepSize: 10,
               color: '#605e5c',
               font: {
                 family: 'Segoe UI',
-                size: 11
+                size: 10
               },
               callback: function(value) {
                 return value + '%';
@@ -1894,8 +2186,12 @@
               color: '#605e5c',
               font: {
                 family: 'Segoe UI',
-                size: 11
-              }
+                size: 10
+              },
+              autoSkip: false,
+              maxRotation: 0,
+              minRotation: 0,
+              padding: 8
             }
           }
         },
@@ -1914,14 +2210,18 @@
             callbacks: {
               title: function(context) {
                 // Mostrar nombre completo en tooltip
-                return promediosConDatos[context[0].dataIndex].institucion;
+                return todasLasInstituciones[context[0].dataIndex].institucion;
               },
               label: function(context) {
-                const data = promediosConDatos[context.dataIndex];
+                const data = todasLasInstituciones[context.dataIndex];
+                if (parseFloat(data.promedio) === 0) {
+                  return 'Sin calificaciones registradas';
+                }
+                const posicionRanking = promediosConDatos.findIndex(p => p.institucion === data.institucion) + 1;
                 return [
                   `Promedio: ${data.promedio}%`,
                   `Total calificaciones: ${data.total_calificaciones || 0}`,
-                  `Ranking: #${context.dataIndex + 1}`
+                  `Ranking: #${posicionRanking}`
                 ];
               }
             }
@@ -1941,63 +2241,12 @@
       console.error('No se encontró el elemento promediosChart');
     }
 
-  // Variables globales para los gráficos
-      var filteredAlumnosData = [...alumnosData];
+  // Variables globales para los gráficos (ya no se usan para filtrado de alumnos)
+      // Los gráficos de alumnos ahora son específicos por curso
 
-    // Función para filtrar datos de alumnos con animación
-    function filterAlumnosData(showLoader = false) {
-      console.log('=== INICIO filterAlumnosData ===');
-      console.log('showLoader:', showLoader);
-      console.log('alumnosData:', alumnosData);
-      console.log('alumnosData es array:', Array.isArray(alumnosData));
-      console.log('alumnosData length:', alumnosData ? alumnosData.length : 'null/undefined');
-      
-      // Mostrar loader si es necesario
-      if (showLoader) {
-        showChartLoader();
-      }
-      
-      if (!alumnosData || alumnosData.length === 0) {
-        console.warn('No hay datos de alumnos disponibles - usando datos vacíos');
-        filteredAlumnosData = [];
-        if (showLoader) {
-          setTimeout(() => {
-            hideChartLoader();
-            updateAlumnosChart();
-          }, 800); // Simular carga
-        } else {
-          updateAlumnosChart();
-        }
-        return;
-      }
-      
-      const cursoId = document.getElementById('cursoFilter')?.value;
-      const gradoId = document.getElementById('gradoFilter')?.value;
-      
-      console.log('Filtros aplicados - Curso ID:', cursoId, 'Grado ID:', gradoId);
-      
-      filteredAlumnosData = alumnosData.filter(item => {
-        const matchCurso = !cursoId || item.curso_id == cursoId;
-        const matchGrado = !gradoId || item.grado_id == gradoId;
-        return matchCurso && matchGrado;
-      });
-      
-      console.log('Datos filtrados (antes de limitar):', filteredAlumnosData.length, 'elementos');
-      console.log('Datos filtrados:', filteredAlumnosData);
-      
-      // Limitar a top 8 para mejor visualización compacta
-      filteredAlumnosData = filteredAlumnosData.slice(0, 8);
-      
-      if (showLoader) {
-        // Simular tiempo de procesamiento para mejor UX
-        setTimeout(() => {
-          hideChartLoader();
-          updateAlumnosChart();
-        }, 600 + Math.random() * 400); // Entre 600ms y 1s
-      } else {
-        updateAlumnosChart();
-      }
-    }
+    // NOTA: Las funciones filterAlumnosData y updateAlumnosChart ya no se usan
+    // Los gráficos de alumnos ahora son específicos por curso (Matemáticas y Tecnología)
+    // y no requieren filtrado dinámico
 
     // Funciones para mostrar/ocultar loader con transiciones suaves
     function showChartLoader() {
@@ -2021,84 +2270,20 @@
       }
     }
 
+    /* FUNCIONES OBSOLETAS - Ya no se usan con las gráficas separadas por curso
+    
     // Función para actualizar el gráfico de alumnos
     function updateAlumnosChart() {
-      console.log('=== INICIO updateAlumnosChart ===');
-      console.log('alumnosChart existe:', !!alumnosChart);
-      console.log('filteredAlumnosData:', filteredAlumnosData);
-      console.log('filteredAlumnosData es array:', Array.isArray(filteredAlumnosData));
-      console.log('filteredAlumnosData length:', filteredAlumnosData ? filteredAlumnosData.length : 'null/undefined');
-      
-      if (!alumnosChart) {
-        console.error('ERROR CRÍTICO: El gráfico alumnosChart no está inicializado');
-        return;
-      }
-
-      if (!filteredAlumnosData || filteredAlumnosData.length === 0) {
-        console.warn('ADVERTENCIA: No hay datos filtrados para mostrar');
-        
-        const emptyMessage = 'Sin datos disponibles';
-        
-        alumnosChart.data.labels = [emptyMessage];
-        alumnosChart.data.datasets[0].data = [0];
-        alumnosChart.data.datasets[0].backgroundColor = ['#e9ecef'];
-        
-        // Animación más suave para estados vacíos
-        alumnosChart.update({
-          duration: 800,
-          easing: 'easeOutQuart'
-        });
-        
-        console.log('Gráfico actualizado con mensaje:', emptyMessage);
-        
-        // Actualizar contador
-        updateAlumnosCounter(0);
-        return;
-      }
-      
-      alumnosChart.data.labels = filteredAlumnosData.map(item => {
-        // Mostrar nombre del alumno con curso y grado
-        if (!item.alumno) return 'Sin nombre';
-        const nombre = item.alumno.length > 15 ? item.alumno.substring(0, 15) + '...' : item.alumno;
-        return `${nombre}\\n${item.curso || 'Sin curso'} - ${item.grado || 'Sin grado'}`;
-      });
-      
-      alumnosChart.data.datasets[0].data = filteredAlumnosData.map(item => 
-        parseFloat(item.promedio) || 0
-      );
-      
-      // Actualizar colores basados en posición
-      alumnosChart.data.datasets[0].backgroundColor = filteredAlumnosData.map((item, index) => {
-        const colors = ['#FFD700', '#C0C0C0', '#CD7F32', '#118DFF', '#0078d4', '#005a9e', '#106ebe', '#0084F4', '#40E0D0', '#9370DB'];
-        return colors[index] || '#118DFF';
-      });
-      
-      console.log('ÉXITO: Labels configurados:', alumnosChart.data.labels);
-      console.log('ÉXITO: Data configurada:', alumnosChart.data.datasets[0].data);
-      console.log('ÉXITO: Colores configurados:', alumnosChart.data.datasets[0].backgroundColor);
-      console.log('ÉXITO: Actualizando gráfico con', filteredAlumnosData.length, 'elementos');
-      
-      // Actualizar contador
-      updateAlumnosCounter(filteredAlumnosData.length);
-      
-      // Animación suave y elegante para la actualización
-      alumnosChart.update({
-        duration: 1200,
-        easing: 'easeInOutCubic'
-      });
-      
-      console.log('=== FIN updateAlumnosChart ===');
+      // Esta función ya no se usa porque ahora hay dos gráficas separadas:
+      // alumnosMatematicasChart y alumnosTecnologiaChart
     }
 
     // Función para actualizar el contador de alumnos
     function updateAlumnosCounter(count) {
-      const counter = document.getElementById('alumnosCounter');
-      if (counter) {
-        counter.textContent = count;
-        counter.className = `badge ms-2 ${count > 0 ? 'bg-success' : 'bg-secondary'}`;
-        console.log('Contador actualizado:', count);
-      }
+      // Esta función ya no se usa
     }
+    
+    FIN DE FUNCIONES OBSOLETAS */
 
     // Actualizar gráfico de promedios si existe
     function updatePromediosChart() {
